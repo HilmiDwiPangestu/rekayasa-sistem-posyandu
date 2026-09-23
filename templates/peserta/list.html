@@ -1,0 +1,2469 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load paginations_tags %}
+
+{% block extra_css %}
+<style>
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-slideUp {
+        animation: slideUp 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+
+{% block subtitle %}
+Data {{ status_peserta }}
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                overflow-hidden
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+                sm:p-6
+            "
+        >
+
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-20
+                    h-56
+                    w-56
+                    rounded-full
+                    bg-primary-dark/30
+                    blur-3xl
+                "
+            ></div>
+
+
+            <div
+                class="
+                    relative
+                    flex
+                    flex-col
+                    gap-4
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <!-- LEFT -->
+                <div class="flex items-start gap-4">
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-white/10
+                            text-white
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+
+                            {% if status_peserta == "balita" %}
+                                child_care
+                            {% else %}
+                                pregnant_woman
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Data Peserta
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                capitalize
+                                tracking-tight
+                                sm:text-3xl
+                            "
+                        >
+                            Data {{ status_peserta }}
+                        </h1>
+
+
+                        <p
+                            class="
+                                mt-2
+                                max-w-2xl
+                                text-sm
+                                leading-6
+                                text-slate-300
+                            "
+                        >
+                            Kelola dan lihat seluruh data
+                            {{ status_peserta }}
+                            yang terdaftar di sistem.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ADD -->
+                <a
+                    href="{% url 'peserta:create' status_peserta %}"
+
+                    class="
+                        inline-flex
+                        h-10
+                        w-full
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-lg
+                        bg-primary-dark
+                        px-4
+                        text-xs
+                        font-bold
+                        text-white
+                        shadow-sm
+                        transition
+                        hover:bg-white
+                        hover:text-primary-dark
+                        sm:w-auto
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        add
+                    </span>
+
+                    Tambah Data
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             MAIN CARD
+        ====================================================== -->
+        <div
+            class="
+                overflow-hidden
+                rounded-xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
+                dark:border-white/10
+                dark:bg-primary
+            "
+        >
+
+            <!-- =================================================
+                 TOOLBAR
+            ================================================== -->
+            <div
+                class="
+                    border-b
+                    border-slate-200
+                    px-4 py-4
+                    dark:border-white/10
+                    sm:px-5
+                "
+            >
+
+                <form
+                    id="filterForm"
+                    method="GET"
+                    action="{% url 'peserta:list' status_peserta %}"
+
+                    class="
+                        flex
+                        flex-col
+                        gap-3
+                        xl:flex-row
+                        xl:items-center
+                        xl:justify-between
+                    "
+                >
+
+                    <!-- SEARCH -->
+                    <div
+                        class="
+                            relative
+                            w-full
+                            xl:max-w-md
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                absolute
+                                left-3.5
+                                top-1/2
+                                -translate-y-1/2
+                                text-[20px]
+                                text-slate-400
+                            "
+                        >
+                            search
+                        </span>
+
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            name="search"
+                            value="{{ request.GET.search|default:'' }}"
+
+                            {% if status_peserta == "balita" %}
+                                placeholder="Cari nama balita, ibu, ayah, NIK..."
+                            {% else %}
+                                placeholder="Cari nama ibu hamil, NIK, nomor HP..."
+                            {% endif %}
+
+                            class="
+                                h-11
+                                w-full
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                pl-11 pr-4
+                                text-sm
+                                text-slate-800
+                                outline-none
+                                transition
+                                placeholder:text-slate-400
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-white
+                                dark:placeholder:text-slate-500
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                    </div>
+
+
+                    <!-- FILTER + EXPORT -->
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            gap-3
+                            sm:flex-row
+                            sm:items-center
+                            sm:justify-between
+                            xl:justify-end
+                        "
+                    >
+
+                        <!-- =================================================
+                             FILTER BALITA
+                        ================================================== -->
+                        {% if status_peserta == "balita" %}
+
+                        <div
+                            class="
+                                grid
+                                grid-cols-1
+                                gap-2
+                                sm:grid-cols-2
+                            "
+                        >
+
+                            <!-- GENDER -->
+                            <div class="relative">
+
+                                <select
+                                    name="gender"
+                                    id="filterGender"
+                                    onchange="this.form.submit()"
+
+                                    class="
+                                        h-11
+                                        w-full
+                                        min-w-[160px]
+                                        appearance-none
+                                        rounded-lg
+                                        border
+                                        border-slate-200
+                                        bg-slate-50
+                                        pl-4 pr-10
+                                        text-sm
+                                        font-medium
+                                        text-slate-700
+                                        outline-none
+                                        transition
+
+                                        focus:border-primary-dark
+                                        focus:bg-white
+                                        focus:ring-2
+                                        focus:ring-primary-dark/10
+
+                                        dark:border-white/10
+                                        dark:bg-background-dark/50
+                                        dark:text-slate-200
+                                        dark:focus:bg-background-dark
+                                    "
+                                >
+
+                                    <option value="">
+                                        Semua Gender
+                                    </option>
+
+                                    <option
+                                        value="L"
+                                        {% if request.GET.gender == "L" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Laki-laki
+                                    </option>
+
+                                    <option
+                                        value="P"
+                                        {% if request.GET.gender == "P" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        Perempuan
+                                    </option>
+
+                                </select>
+
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        pointer-events-none
+                                        absolute
+                                        right-3
+                                        top-1/2
+                                        -translate-y-1/2
+                                        text-[18px]
+                                        text-slate-400
+                                    "
+                                >
+                                    expand_more
+                                </span>
+
+                            </div>
+
+
+                            <!-- USIA BALITA -->
+                            <div class="relative">
+
+                                <select
+                                    name="age"
+                                    id="filterAge"
+                                    onchange="this.form.submit()"
+
+                                    class="
+                                        h-11
+                                        w-full
+                                        min-w-[160px]
+                                        appearance-none
+                                        rounded-lg
+                                        border
+                                        border-slate-200
+                                        bg-slate-50
+                                        pl-4 pr-10
+                                        text-sm
+                                        font-medium
+                                        text-slate-700
+                                        outline-none
+                                        transition
+
+                                        focus:border-primary-dark
+                                        focus:bg-white
+                                        focus:ring-2
+                                        focus:ring-primary-dark/10
+
+                                        dark:border-white/10
+                                        dark:bg-background-dark/50
+                                        dark:text-slate-200
+                                        dark:focus:bg-background-dark
+                                    "
+                                >
+
+                                    <option value="">
+                                        Semua Usia
+                                    </option>
+
+                                    <option
+                                        value="0-1"
+                                        {% if request.GET.age == "0-1" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        0 - &lt; 1 Tahun
+                                    </option>
+
+                                    <option
+                                        value="1-3"
+                                        {% if request.GET.age == "1-3" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        1 - &lt; 3 Tahun
+                                    </option>
+
+                                    <option
+                                        value="3-5"
+                                        {% if request.GET.age == "3-5" %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        3 - 5 Tahun
+                                    </option>
+
+                                </select>
+
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        pointer-events-none
+                                        absolute
+                                        right-3
+                                        top-1/2
+                                        -translate-y-1/2
+                                        text-[18px]
+                                        text-slate-400
+                                    "
+                                >
+                                    expand_more
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             FILTER IBU HAMIL
+                        ================================================== -->
+                        {% else %}
+
+                        <div class="relative">
+
+                            <select
+                                name="age"
+                                id="filterAge"
+                                onchange="this.form.submit()"
+
+                                class="
+                                    h-11
+                                    w-full
+                                    min-w-[180px]
+                                    appearance-none
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    pl-4 pr-10
+                                    text-sm
+                                    font-medium
+                                    text-slate-700
+                                    outline-none
+                                    transition
+
+                                    focus:border-primary-dark
+                                    focus:bg-white
+                                    focus:ring-2
+                                    focus:ring-primary-dark/10
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                    dark:text-slate-200
+                                    dark:focus:bg-background-dark
+                                "
+                            >
+
+                                <option value="">
+                                    Semua Usia
+                                </option>
+
+                                <option
+                                    value="under-20"
+                                    {% if request.GET.age == "under-20" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    &lt; 20 Tahun
+                                </option>
+
+                                <option
+                                    value="20-35"
+                                    {% if request.GET.age == "20-35" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    20 - 35 Tahun
+                                </option>
+
+                                <option
+                                    value="over-35"
+                                    {% if request.GET.age == "over-35" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    &gt; 35 Tahun
+                                </option>
+
+                            </select>
+
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    pointer-events-none
+                                    absolute
+                                    right-3
+                                    top-1/2
+                                    -translate-y-1/2
+                                    text-[18px]
+                                    text-slate-400
+                                "
+                            >
+                                expand_more
+                            </span>
+
+                        </div>
+
+                        {% endif %}
+
+
+                        <!-- RESET FILTER -->
+                        {% if request.GET.search or request.GET.gender or request.GET.age %}
+
+                        <a
+                            href="{% url 'peserta:list' status_peserta %}"
+                            title="Reset Filter"
+
+                            class="
+                                flex
+                                h-11
+                                items-center
+                                justify-center
+                                gap-2
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                px-3
+                                text-xs
+                                font-bold
+                                text-slate-500
+                                transition
+
+                                hover:border-rose-200
+                                hover:bg-rose-50
+                                hover:text-rose-600
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-slate-300
+                                dark:hover:bg-rose-500/10
+                                dark:hover:text-rose-400
+
+                                sm:w-11
+                                sm:px-0
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[19px]">
+                                filter_alt_off
+                            </span>
+
+                            <span class="sm:hidden">
+                                Reset
+                            </span>
+
+                        </a>
+
+                        {% endif %}
+
+
+                        <!-- EXPORT -->
+                        <div
+                            class="
+                                grid
+                                grid-cols-2
+                                gap-2
+                                sm:inline-flex
+                                sm:flex-nowrap
+                                sm:items-center
+                            "
+                        >
+
+                            <!-- PDF -->
+                            <a
+                                href="{% url 'peserta:cetak_pdf' status_peserta %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                                target="_blank"
+                                title="Cetak PDF"
+
+                                class="
+                                    flex
+                                    h-11
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    px-3
+                                    text-xs
+                                    font-bold
+                                    text-slate-600
+                                    transition
+
+                                    hover:border-primary-dark/30
+                                    hover:bg-primary-dark/5
+                                    hover:text-primary-dark
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                    dark:text-slate-300
+                                    dark:hover:bg-primary-dark/10
+                                    dark:hover:text-blue-300
+
+                                    sm:w-11
+                                    sm:px-0
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[19px]">
+                                    picture_as_pdf
+                                </span>
+
+                                <span class="sm:hidden">
+                                    PDF
+                                </span>
+
+                            </a>
+
+
+                            <!-- EXCEL -->
+                            <a
+                                href="{% url 'peserta:export_excel' status_peserta %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+                                title="Export Excel"
+
+                                class="
+                                    flex
+                                    h-11
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    px-3
+                                    text-xs
+                                    font-bold
+                                    text-slate-600
+                                    transition
+
+                                    hover:border-primary-dark/30
+                                    hover:bg-primary-dark/5
+                                    hover:text-primary-dark
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                    dark:text-slate-300
+                                    dark:hover:bg-primary-dark/10
+                                    dark:hover:text-blue-300
+
+                                    sm:w-11
+                                    sm:px-0
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[19px]">
+                                    table_view
+                                </span>
+
+                                <span class="sm:hidden">
+                                    Excel
+                                </span>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MOBILE
+            ================================================== -->
+            <div
+                class="
+                    space-y-3
+                    bg-slate-50/70
+                    p-3
+                    dark:bg-background-dark/30
+                    md:hidden
+                "
+            >
+
+                {% for peserta in page_obj %}
+
+                <div
+                    class="
+                        relative
+                        rounded-xl
+                        border
+                        border-slate-200
+                        bg-white
+                        p-4
+                        shadow-sm
+
+                        dark:border-white/10
+                        dark:bg-primary
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            items-start
+                            justify-between
+                            gap-3
+                        "
+                    >
+
+                        <!-- LEFT -->
+                        <div
+                            class="
+                                flex
+                                min-w-0
+                                items-start
+                                gap-3
+                            "
+                        >
+
+                            <!-- ICON -->
+                            <div
+                                class="
+                                    flex
+                                    h-11 w-11
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[21px]">
+
+                                    {% if status_peserta == "balita" %}
+                                        child_care
+                                    {% else %}
+                                        pregnant_woman
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- INFO -->
+                            <div class="min-w-0 flex-1">
+
+                                <h3
+                                    class="
+                                        truncate
+                                        text-[13px]
+                                        font-semibold
+                                        leading-5
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    {{ peserta.nama_peserta }}
+                                </h3>
+
+
+                                <!-- GENDER -->
+                                <div class="mt-1.5">
+
+                                    {% if peserta.jenis_kelamin == "Laki-Laki" or peserta.jenis_kelamin == "Laki-laki" or peserta.jenis_kelamin == "L" %}
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            items-center
+                                            gap-1
+                                            rounded-full
+                                            bg-blue-100
+                                            px-2 py-1
+                                            text-[10px]
+                                            font-bold
+                                            text-blue-700
+
+                                            dark:bg-blue-500/10
+                                            dark:text-blue-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[12px]">
+                                            male
+                                        </span>
+
+                                        Laki-laki
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            items-center
+                                            gap-1
+                                            rounded-full
+                                            bg-pink-100
+                                            px-2 py-1
+                                            text-[10px]
+                                            font-bold
+                                            text-pink-700
+
+                                            dark:bg-pink-500/10
+                                            dark:text-pink-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[12px]">
+                                            female
+                                        </span>
+
+                                        Perempuan
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- INFO ORANG TUA -->
+                                <div
+                                    class="
+                                        mt-3
+                                        space-y-1.5
+                                        text-xs
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    "
+                                >
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span class="material-symbols-outlined text-[15px] text-slate-400">
+                                            woman
+                                        </span>
+
+                                        <span class="truncate">
+                                            Ibu: {{ peserta.nama_ibu }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span class="material-symbols-outlined text-[15px] text-slate-400">
+                                            man
+                                        </span>
+
+                                        <span class="truncate">
+                                            Ayah: {{ peserta.nama_ayah }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span class="material-symbols-outlined text-[15px] text-slate-400">
+                                            family_restroom
+                                        </span>
+
+                                        <span>
+                                            Anak Ke: {{ peserta.anak_ke }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span
+                                            class="
+                                                material-symbols-outlined
+                                                text-[15px]
+                                                text-primary-dark
+                                                dark:text-blue-300
+                                            "
+                                        >
+                                            cake
+                                        </span>
+
+                                        <span>
+                                            {{ peserta.usia }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT ACTION -->
+                        <div
+                            class="
+                                flex
+                                shrink-0
+                                flex-col
+                                items-center
+                                gap-2
+                            "
+                        >
+
+                            <button
+                                type="button"
+                                data-edit-url="{% url 'peserta:edit' status_peserta peserta.id %}"
+                                data-delete-url="{% url 'peserta:delete' status_peserta peserta.id %}"
+                                onclick="openActionModal(this)"
+
+                                class="
+                                    flex
+                                    h-8 w-8
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    text-slate-400
+                                    transition
+
+                                    hover:bg-primary-dark/5
+                                    hover:text-primary-dark
+
+                                    dark:hover:bg-primary-dark/10
+                                    dark:hover:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[19px]">
+                                    more_vert
+                                </span>
+
+                            </button>
+
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {% empty %}
+
+                <div
+                    class="
+                        flex
+                        flex-col
+                        items-center
+                        justify-center
+                        rounded-xl
+                        border
+                        border-dashed
+                        border-slate-300
+                        bg-white
+                        px-6 py-12
+                        text-center
+
+                        dark:border-white/10
+                        dark:bg-primary
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-slate-100
+                            text-slate-400
+                            dark:bg-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            inbox
+                        </span>
+
+                    </div>
+
+
+                    <h3
+                        class="
+                            mt-3
+                            text-sm
+                            font-bold
+                            text-slate-600
+                            dark:text-slate-300
+                        "
+                    >
+                        Tidak ada data peserta
+                    </h3>
+
+
+                    <p
+                        class="
+                            mt-1
+                            text-xs
+                            text-slate-400
+                        "
+                    >
+                        {% if is_kader and scope_posyandu %}
+                            Belum ada data {{ status_peserta }} yang terdaftar pada
+                            {% for pos in scope_posyandu %}{{ pos.nama }}{% if not forloop.last %}, {% endif %}{% endfor %}.
+                        {% elif is_kader %}
+                            Akun Kader belum memiliki penugasan Posyandu saat ini. Hubungi Admin Kelurahan.
+                        {% else %}
+                            Belum ada data {{ status_peserta }} tersedia.
+                        {% endif %}
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div
+                class="
+                    hidden
+                    overflow-x-auto
+                    md:block
+                "
+            >
+
+                <table class="min-w-full">
+
+                    <!-- HEADER -->
+                    <thead
+                        class="
+                            bg-slate-50
+                            dark:bg-background-dark/50
+                        "
+                    >
+
+                        <tr
+                            class="
+                                border-b
+                                border-slate-200
+                                dark:border-white/10
+                            "
+                        >
+
+                            <th class="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                No
+                            </th>
+
+                            <th class="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Nama {{ status_peserta }}
+                            </th>
+
+                            <th class="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Gender
+                            </th>
+
+                            <th class="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Nama Ibu
+                            </th>
+
+                            <th class="px-4 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Nama Ayah
+                            </th>
+
+                            <th class="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Anak Ke
+                            </th>
+
+                            <th class="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Usia
+                            </th>
+
+                            <th class="px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <!-- BODY -->
+                    <tbody
+                        class="
+                            divide-y
+                            divide-slate-100
+                            dark:divide-white/10
+                        "
+                    >
+
+                        {% for peserta in page_obj %}
+
+                        <tr
+                            class="
+                                transition
+                                hover:bg-primary-dark/[0.035]
+                                dark:hover:bg-white/[0.03]
+                            "
+                        >
+
+                            <!-- NO -->
+                            <td class="px-4 py-4 text-center">
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        h-8 w-8
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-slate-100
+                                        text-xs
+                                        font-black
+                                        text-slate-600
+
+                                        dark:bg-white/10
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ page_obj.start_index|add:forloop.counter0 }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- NAMA -->
+                            <td class="px-4 py-4">
+
+                                <div
+                                    class="
+                                        flex
+                                        items-center
+                                        gap-3
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            flex
+                                            h-9 w-9
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-lg
+                                            bg-primary-dark/10
+                                            text-primary-dark
+
+                                            dark:bg-primary-dark/20
+                                            dark:text-blue-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[18px]">
+
+                                            {% if status_peserta == "balita" %}
+                                                child_care
+                                            {% else %}
+                                                pregnant_woman
+                                            {% endif %}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <span
+                                        class="
+                                            text-[13px]
+                                            font-semibold
+                                            leading-5
+                                            text-slate-700
+                                            dark:text-slate-200
+                                        "
+                                    >
+                                        {{ peserta.nama_peserta }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- GENDER -->
+                            <td class="px-4 py-4 text-center">
+
+                                {% if peserta.jenis_kelamin == "Laki-Laki" or peserta.jenis_kelamin == "Laki-laki" or peserta.jenis_kelamin == "L" %}
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        items-center
+                                        gap-1
+                                        rounded-full
+                                        bg-blue-100
+                                        px-2.5 py-1
+                                        text-[10px]
+                                        font-bold
+                                        text-blue-700
+
+                                        dark:bg-blue-500/10
+                                        dark:text-blue-300
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[12px]">
+                                        male
+                                    </span>
+
+                                    Laki-laki
+
+                                </span>
+
+                                {% else %}
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        items-center
+                                        gap-1
+                                        rounded-full
+                                        bg-pink-100
+                                        px-2.5 py-1
+                                        text-[10px]
+                                        font-bold
+                                        text-pink-700
+
+                                        dark:bg-pink-500/10
+                                        dark:text-pink-300
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[12px]">
+                                        female
+                                    </span>
+
+                                    Perempuan
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- IBU -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-xs
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                {{ peserta.nama_ibu }}
+                            </td>
+
+
+                            <!-- AYAH -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-xs
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                {{ peserta.nama_ayah }}
+                            </td>
+
+
+                            <!-- ANAK KE -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-center
+                                    text-xs
+                                    font-semibold
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                {{ peserta.anak_ke }}
+                            </td>
+
+
+                            <!-- USIA -->
+                            <td
+                                class="
+                                    whitespace-nowrap
+                                    px-4 py-4
+                                    text-center
+                                    text-xs
+                                    font-semibold
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                {{ peserta.usia }}
+                            </td>
+
+
+                            <!-- ACTION -->
+                            <td class="px-4 py-4 text-center">
+
+                                <div
+                                    class="
+                                        flex
+                                        items-center
+                                        justify-center
+                                        gap-1
+                                    "
+                                >
+
+
+
+                                    <!-- EDIT -->
+                                    <a
+                                        href="{% url 'peserta:edit' status_peserta peserta.id %}"
+                                        title="Edit Data"
+
+                                        class="
+                                            flex
+                                            h-9 w-9
+                                            items-center
+                                            justify-center
+                                            rounded-lg
+                                            text-primary-dark
+                                            transition
+
+                                            hover:bg-primary-dark/10
+
+                                            dark:text-blue-300
+                                            dark:hover:bg-primary-dark/20
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[19px]">
+                                            edit
+                                        </span>
+
+                                    </a>
+
+
+                                    <!-- DELETE -->
+                                    <form
+                                        action="{% url 'peserta:delete' status_peserta peserta.id %}"
+                                        method="post"
+                                        class="inline"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            onclick="return confirm('Yakin hapus data ini?')"
+                                            title="Hapus Data"
+
+                                            class="
+                                                flex
+                                                h-9 w-9
+                                                items-center
+                                                justify-center
+                                                rounded-lg
+                                                text-rose-500
+                                                transition
+
+                                                hover:bg-rose-50
+
+                                                dark:text-rose-400
+                                                dark:hover:bg-rose-500/10
+                                            "
+                                        >
+
+                                            <span class="material-symbols-outlined text-[19px]">
+                                                delete
+                                            </span>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                class="
+                                    px-6 py-16
+                                    text-center
+                                "
+                            >
+
+                                <div class="flex flex-col items-center">
+
+                                    <div
+                                        class="
+                                            flex
+                                            h-12 w-12
+                                            items-center
+                                            justify-center
+                                            rounded-full
+                                            bg-slate-100
+                                            text-slate-400
+                                            dark:bg-white/10
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-2xl">
+                                            inbox
+                                        </span>
+
+                                    </div>
+
+
+                                    <h3
+                                        class="
+                                            mt-3
+                                            text-sm
+                                            font-bold
+                                            text-slate-600
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        Tidak ada data peserta
+                                    </h3>
+
+
+                                    <p
+                                        class="
+                                            mt-1
+                                            text-xs
+                                            text-slate-400
+                                        "
+                                    >
+                                        Belum ada data
+                                        {{ status_peserta }}
+                                        tersedia.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 PAGINATION
+            ================================================== -->
+            <div
+                class="
+                    flex
+                    flex-col
+                    gap-3
+                    border-t
+                    border-slate-200
+                    bg-slate-50
+                    px-4 py-4
+
+                    dark:border-white/10
+                    dark:bg-background-dark/40
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <p
+                    class="
+                        text-center
+                        text-xs
+                        text-slate-500
+                        dark:text-slate-400
+                        sm:text-left
+                    "
+                >
+
+                    Menampilkan
+
+                    <span
+                        class="
+                            font-bold
+                            text-slate-800
+                            dark:text-white
+                        "
+                    >
+                        {{ page_obj.start_index }}
+                        -
+                        {{ page_obj.end_index }}
+                    </span>
+
+                    dari
+
+                    <span
+                        class="
+                            font-bold
+                            text-slate-800
+                            dark:text-white
+                        "
+                    >
+                        {{ page_obj.paginator.count }}
+                    </span>
+
+                    data
+
+                </p>
+
+
+                <div
+                    class="
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                    "
+                >
+
+                    <!-- PREVIOUS -->
+                    {% if page_obj.has_previous %}
+
+                    <a
+                        href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if status_peserta == 'balita' and request.GET.gender %}&gender={{ request.GET.gender|urlencode }}{% endif %}{% if request.GET.age %}&age={{ request.GET.age|urlencode }}{% endif %}"
+
+                        class="
+                            flex
+                            h-9 w-9
+                            items-center
+                            justify-center
+                            rounded-lg
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-500
+                            transition
+
+                            hover:border-primary-dark
+                            hover:bg-primary-dark
+                            hover:text-white
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:text-slate-300
+                            dark:hover:bg-primary-dark
+                            dark:hover:text-white
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[19px]">
+                            chevron_left
+                        </span>
+
+                    </a>
+
+                    {% endif %}
+
+
+                    <!-- CURRENT PAGE -->
+                    <span
+                        class="
+                            flex
+                            h-9
+                            min-w-9
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-primary-dark
+                            px-3
+                            text-xs
+                            font-bold
+                            text-white
+                        "
+                    >
+                        {{ page_obj.number }}
+                    </span>
+
+
+                    <span
+                        class="
+                            px-1
+                            text-xs
+                            font-medium
+                            text-slate-400
+                        "
+                    >
+                        dari {{ page_obj.paginator.num_pages }}
+                    </span>
+
+
+                    <!-- NEXT -->
+                    {% if page_obj.has_next %}
+
+                    <a
+                        href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if status_peserta == 'balita' and request.GET.gender %}&gender={{ request.GET.gender|urlencode }}{% endif %}{% if request.GET.age %}&age={{ request.GET.age|urlencode }}{% endif %}"
+
+                        class="
+                            flex
+                            h-9 w-9
+                            items-center
+                            justify-center
+                            rounded-lg
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-500
+                            transition
+
+                            hover:border-primary-dark
+                            hover:bg-primary-dark
+                            hover:text-white
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:text-slate-300
+                            dark:hover:bg-primary-dark
+                            dark:hover:text-white
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[19px]">
+                            chevron_right
+                        </span>
+
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             BACK
+        ====================================================== -->
+        <div class="flex justify-end">
+
+            <a
+                href="javascript:history.back()"
+
+                class="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    text-xs
+                    font-bold
+                    text-slate-600
+                    shadow-sm
+                    transition
+
+                    hover:border-primary-dark/30
+                    hover:bg-primary-dark/5
+                    hover:text-primary-dark
+
+                    dark:border-white/10
+                    dark:bg-primary
+                    dark:text-slate-300
+                    dark:hover:bg-primary-dark/10
+                    dark:hover:text-blue-300
+                "
+            >
+
+                <span class="material-symbols-outlined text-[17px]">
+                    arrow_back
+                </span>
+
+                Kembali
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL AKSI MOBILE
+========================================================= -->
+<div
+    id="actionModal"
+
+    class="
+        fixed
+        inset-0
+        z-[100]
+        hidden
+        items-center
+        justify-center
+        bg-black/60
+        px-4
+        backdrop-blur-[2px]
+    "
+>
+
+    <div
+        id="modalBox"
+
+        style="width:min(22.5rem, calc(100vw - 1.5rem)); max-width:22.5rem;"
+        class="app-action-dialog admin-action-dialog
+            max-w-none
+            scale-95
+            overflow-hidden
+            rounded-xl
+            border
+            border-slate-200
+            bg-white
+            opacity-0
+            shadow-2xl
+            transition-all
+
+            dark:border-white/10
+            dark:bg-primary
+        "
+    >
+
+        <!-- HEADER -->
+        <div
+            class="
+                flex
+                items-center
+                justify-between
+                border-b
+                border-slate-200
+                px-5 py-4
+
+                dark:border-white/10
+            "
+        >
+
+            <div class="flex items-center gap-3">
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        apps
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-800
+                            dark:text-white
+                        "
+                    >
+                        Pilih Tindakan
+                    </h2>
+
+
+                    <p class="mt-0.5 text-[10px] text-slate-400">
+                        Kelola data peserta
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="closeActionModal()"
+
+                class="
+                    flex
+                    h-8 w-8
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-slate-400
+                    transition
+
+                    hover:bg-slate-100
+                    hover:text-slate-700
+
+                    dark:hover:bg-white/10
+                    dark:hover:text-white
+                "
+            >
+
+                <span class="material-symbols-outlined text-[19px]">
+                    close
+                </span>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- BODY -->
+        <div class="space-y-2 p-4">
+
+            <!-- EDIT -->
+            <a
+                id="linkEdit"
+                href="#"
+
+                class="
+                    group
+                    flex
+                    items-center
+                    gap-3
+                    rounded-lg
+                    border
+                    border-slate-200
+                    bg-slate-50
+                    p-3
+                    transition
+
+                    hover:border-primary-dark/20
+                    hover:bg-primary-dark/5
+
+                    dark:border-white/10
+                    dark:bg-background-dark/50
+                    dark:hover:bg-primary-dark/10
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        edit
+                    </span>
+
+                </div>
+
+
+                <div class="min-w-0 flex-1">
+
+                    <p
+                        class="
+                            text-xs
+                            font-bold
+                            text-slate-800
+                            dark:text-white
+                        "
+                    >
+                        Edit Data
+                    </p>
+
+
+                    <p
+                        class="
+                            mt-0.5
+                            text-[10px]
+                            leading-4
+                            text-slate-400
+                        "
+                    >
+                        Ubah data profil peserta atau orang tua.
+                    </p>
+
+                </div>
+
+
+                <span
+                    class="
+                        material-symbols-outlined
+                        text-[17px]
+                        text-slate-300
+                        transition
+                        group-hover:text-primary-dark
+                    "
+                >
+                    chevron_right
+                </span>
+
+            </a>
+
+
+            <!-- DELETE -->
+            <form
+                id="formHapus"
+                method="post"
+                class="block"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    onclick="return confirm('Yakin hapus data ini?')"
+
+                    class="
+                        group
+                        flex
+                        w-full
+                        items-center
+                        gap-3
+                        rounded-lg
+                        border
+                        border-slate-200
+                        bg-slate-50
+                        p-3
+                        text-left
+                        transition
+
+                        hover:border-rose-200
+                        hover:bg-rose-50
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                        dark:hover:border-rose-900/50
+                        dark:hover:bg-rose-950/20
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            h-9 w-9
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-rose-100
+                            text-rose-600
+
+                            dark:bg-rose-500/10
+                            dark:text-rose-400
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[18px]">
+                            delete
+                        </span>
+
+                    </div>
+
+
+                    <div class="min-w-0 flex-1">
+
+                        <p
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            Hapus Data
+                        </p>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Hapus data peserta secara permanen.
+                        </p>
+
+                    </div>
+
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[17px]
+                            text-slate-300
+                            transition
+                            group-hover:text-rose-500
+                        "
+                    >
+                        chevron_right
+                    </span>
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- FOOTER -->
+        <div
+            class="
+                flex
+                justify-end
+                border-t
+                border-slate-200
+                bg-slate-50
+                px-4 py-3
+
+                dark:border-white/10
+                dark:bg-background-dark/40
+            "
+        >
+
+            <button
+                type="button"
+                onclick="closeActionModal()"
+
+                class="
+                    rounded-lg
+                    px-3 py-2
+                    text-xs
+                    font-bold
+                    text-slate-500
+                    transition
+
+                    hover:bg-slate-200/60
+                    hover:text-slate-700
+
+                    dark:text-slate-400
+                    dark:hover:bg-white/10
+                    dark:hover:text-white
+                "
+            >
+                Batal
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+
+    // =========================================================
+    // ELEMENT
+    // =========================================================
+    const modal =
+        document.getElementById('actionModal');
+
+    const box =
+        document.getElementById('modalBox');
+
+    const searchInput =
+        document.getElementById('searchInput');
+
+    const filterForm =
+        document.getElementById('filterForm');
+
+    let searchTimeout;
+
+
+
+    // =========================================================
+    // SEARCH FOCUS
+    // =========================================================
+    window.addEventListener(
+        'DOMContentLoaded',
+        () => {
+
+            if (
+                searchInput &&
+                searchInput.value !== ''
+            ) {
+
+                searchInput.focus();
+
+                const val =
+                    searchInput.value;
+
+                searchInput.value = '';
+
+                searchInput.value = val;
+
+            }
+
+        }
+    );
+
+
+
+    // =========================================================
+    // SEARCH DEBOUNCE
+    // =========================================================
+    if (
+        searchInput &&
+        filterForm
+    ) {
+
+        searchInput.addEventListener(
+            'input',
+            () => {
+
+                clearTimeout(
+                    searchTimeout
+                );
+
+                searchTimeout =
+                    setTimeout(
+                        () => {
+
+                            filterForm.submit();
+
+                        },
+                        500
+                    );
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // OPEN MODAL
+    // =========================================================
+    function openActionModal(element) {
+
+        if (!modal || !box) {
+            return;
+        }
+
+
+        const urlEdit =
+            element.getAttribute(
+                'data-edit-url'
+            );
+
+
+        const urlHapus =
+            element.getAttribute(
+                'data-delete-url'
+            );
+
+
+        const linkEdit =
+            document.getElementById(
+                'linkEdit'
+            );
+
+
+        const formHapus =
+            document.getElementById(
+                'formHapus'
+            );
+
+
+        if (linkEdit) {
+            linkEdit.href = urlEdit;
+        }
+
+
+        if (formHapus) {
+            formHapus.action = urlHapus;
+        }
+
+
+        modal.classList.remove(
+            'hidden'
+        );
+
+
+        modal.classList.add(
+            'flex'
+        );
+
+
+        setTimeout(
+            () => {
+
+                box.classList.remove(
+                    'scale-95',
+                    'opacity-0'
+                );
+
+
+                box.classList.add(
+                    'scale-100',
+                    'opacity-100'
+                );
+
+            },
+            10
+        );
+
+    }
+
+
+
+    // =========================================================
+    // CLOSE MODAL
+    // =========================================================
+    function closeActionModal() {
+
+        if (!modal || !box) {
+            return;
+        }
+
+
+        box.classList.add(
+            'scale-95',
+            'opacity-0'
+        );
+
+
+        box.classList.remove(
+            'scale-100',
+            'opacity-100'
+        );
+
+
+        setTimeout(
+            () => {
+
+                modal.classList.add(
+                    'hidden'
+                );
+
+
+                modal.classList.remove(
+                    'flex'
+                );
+
+            },
+            200
+        );
+
+    }
+
+
+
+    // =========================================================
+    // CLICK OUTSIDE
+    // =========================================================
+    if (modal) {
+
+        modal.addEventListener(
+            'click',
+            function(event) {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    closeActionModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    // =========================================================
+    // ESCAPE
+    // =========================================================
+    document.addEventListener(
+        'keydown',
+        function(event) {
+
+            if (
+                event.key === 'Escape' &&
+                modal &&
+                !modal.classList.contains(
+                    'hidden'
+                )
+            ) {
+
+                closeActionModal();
+
+            }
+
+        }
+    );
+
+</script>
+
+{% endblock %}

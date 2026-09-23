@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Imunisasi - Posyandu</title>
+    <style>
+
+        @page {
+            size: A4 landscape; margin: 10mm 8mm; 
+        }
+
+        * {
+            box-sizing: border-box; 
+        }
+
+        body {
+            font-family: 'Helvetica', 'Arial', 
+            sans-serif; color: #111111; 
+            font-size: 8.5pt; 
+            line-height: 1.2; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        .title {
+            font-size: 14pt; 
+            font-weight: bold; 
+            text-align: center; 
+            margin-bottom: 15px; 
+            letter-spacing: 0.5px; 
+            text-transform: uppercase; 
+        }
+
+        .meta-table {
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 9pt; 
+            margin-bottom: 10px; 
+        }
+
+        .meta-table td { 
+            padding: 2px 0; 
+            vertical-align: top; 
+        }
+        
+        .meta-label { width: 100px; }
+        .meta-colon { width: 15px; text-align: center; }
+        .meta-value { font-weight: bold; border-bottom: 1px dotted #666; width: 200px; display: inline-block; }
+        .main-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 8pt; }
+        .main-table th, .main-table td { border: 1px solid #111111; padding: 5px 4px; text-align: center; vertical-align: middle; }
+        .main-table th { background-color: #f3f4f6; font-weight: bold; }
+        .text-left { text-align: left !important; padding-left: 5px !important; }
+        .badge { background-color: #e0f2fe; color: #0369a1; padding: 2px 5px; border-radius: 3px; font-size: 7.5pt; font-weight: bold; display: inline-block; margin: 1px; border: 1px solid #bae6fd; }
+        .footer { margin-top: 15px; font-size: 8pt; color: #555555; width: 100%; display: table; }
+        .footer-left { display: table-cell; text-align: left; }
+        .footer-right { display: table-cell; text-align: right; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="title">
+        REKAPITULASI PELAYANAN IMUNISASI SASARAN {% if status_peserta == 'bumil' %}IBU HAMIL{% else %}BALITA{% endif %}
+    </div>
+
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Kecamatan</td>
+            <td class="meta-colon">:</td>
+            <td><span class="meta-value">Indramayu</span></td>
+            <td class="meta-label" style="padding-left: 35px;">Desa</td>
+            <td class="meta-colon">:</td>
+            <td><span class="meta-value">Kel. Lemahmekar</span></td>
+        </tr>
+        
+        <tr>
+            <td class="meta-label">Puskesmas</td>
+            <td class="meta-colon">:</td>
+            <td><span class="meta-value">Indramayu</span></td>
+            <td class="meta-label" style="padding-left:35px;">Posyandu</td>
+            <td class="meta-colon">:</td>
+            <td><span class="meta-value">{{ posyandu_nama|default:"-" }}</span></td>
+        </tr>
+        <tr>
+            <td class="meta-label">Periode</td>
+            <td class="meta-colon">:</td>
+            <td><span class="meta-value">{{ periode_label|default:"-" }}</span></td>
+            <td></td><td></td><td></td>
+        </tr>
+    </table>
+
+    <table class="main-table">
+        <thead>
+            <tr>
+                {% comment %} <th style="width: 5%;">DESA</th>
+                <th style="width: 7%;">POSY</th> {% endcomment %}
+                <th style="width: 3%;">No</th>
+                
+                <th>
+                    {% if status_peserta == 'bumil' %}
+                        Nama Ibu Hamil
+                    {% else %}
+                        Nama Balita
+                    {% endif %}
+                </th>
+                
+                <th style="width: 10%;">NIK</th>
+                <th style="width: 7%;">
+                    {% if status_peserta == 'bumil' %}
+                        Usia Vaksin
+                    {% else %}
+                        Usia Vaksin
+                    {% endif %}
+                </th>
+                <th style="width: 4%;">{% if status_peserta == 'bumil' %}Gol D{% else %}JK{% endif %}</th>
+                <th style="width: 9%;">{% if status_peserta == 'bumil' %}HPHT{% else %}Tgl Lahir{% endif %}</th>
+                <th style="width: 11%;">{% if status_peserta == 'bumil' %}NIK SUAMI{% else %}NIK IBU{% endif %}</th>
+                <th>{% if status_peserta == 'bumil' %}NAMA SUAMI{% else %}NAMA ORANG TUA{% endif %}</th>
+                <th style="width: 9%;">Status</th>
+                <th style="width: 22%;">Vaksin Yang Diberikan Hari Ini</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for peserta in data_peserta %}
+            <tr>
+                {% comment %} <td>{{ peserta.posko.desa|default:"-" }}</td>
+                <td>{{ peserta.posko.nama_posyandu|default:"-" }}</td> {% endcomment %}
+                <td>{{ forloop.counter }}</td>
+                <td class="text-left">{{ peserta.nama_peserta }}</td>
+                <td>{{ peserta.no_nik|default:"-" }}</td>
+                
+                <td>
+                    {% if peserta.hadir %}
+                        {{ peserta.usia_saat_vaksin|default:"-" }} 
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if status_peserta == 'bumil' %}
+                        {{ peserta.golongan_darah|default:"-" }}
+                    {% else %}
+                        {% if peserta.jenis_kelamin == 'Laki-Laki' %}L{% elif peserta.jenis_kelamin == 'Perempuan' %}P{% else %}-{% endif %}
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if status_peserta == 'bumil' %}
+                        {{ peserta.hpht|date:"d/m/Y"|default:"-" }}
+                    {% else %}
+                        {{ peserta.tgl_lahir|date:"d/m/Y" }}
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if status_peserta == 'bumil' %}
+                        {{ peserta.no_nik|default:"-" }}
+                    {% else %}
+                        {{ peserta.nik_ibu|default:"-" }}
+                    {% endif %}
+                </td>
+
+                <td class="text-left">
+                    {% if status_peserta == 'bumil' %}
+                        {{ peserta.nama_ayah|default:"-" }}
+                    {% else %}
+                        {{ peserta.nama_ibu|default:"-" }}
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if peserta.hadir %}
+                        <span style="color: green; font-weight: bold;">Hadir</span>
+                    {% else %}
+                        <span style="color: red; font-style: italic;">Absen</span>
+                    {% endif %}
+                </td>
+
+                <td class="text-left">
+                    {% if peserta.hadir %}
+                        {% for vaksin in peserta.vaksin_list %}
+                            <span class="badge">{{ vaksin }}</span>
+                        {% empty %}
+                            <span style="color: #777; font-size: 7.5pt;">Hadir, tanpa vaksin</span>
+                        {% endfor %}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" style="padding: 15px; color: gray;">Tidak ada data sasaran imunisasi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div class="footer-left">Sistem Informasi Manajemen Posyandu (Log Imunisasi)</div>
+        <div class="footer-right">Dicetak otomatis pada: {% now "d F Y H:i" %} WIB</div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Laporan Data Peserta</title>
+<style>
+@page { size: A4 landscape; margin: 12mm 10mm; }
+body { font-family: Helvetica, Arial, sans-serif; font-size: 8pt; color: #111; }
+h1 { text-align:center; font-size:14pt; margin:0 0 4px; }
+.meta { text-align:center; color:#555; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #333; padding:4px 3px; vertical-align:middle; }
+th { background:#f1f5f9; text-align:center; font-weight:bold; }
+.center { text-align:center; } .left { text-align:left; }
+.footer { margin-top:10px; font-size:7pt; color:#666; }
+</style>
+</head>
+<body>
+<h1>LAPORAN DATA {% if status_peserta == 'balita' %}BALITA{% else %}IBU HAMIL{% endif %}</h1>
+<div class="meta">Data mengikuti filter pada halaman peserta. Total: {{ data|length }} peserta.</div>
+<table>
+<thead><tr>
+<th>No</th><th>Nama</th><th>NIK</th>
+{% if status_peserta == 'balita' %}<th>JK</th>{% endif %}
+<th>Tanggal Lahir</th><th>Usia</th>
+{% if status_peserta == 'balita' %}<th>Nama Ibu</th><th>NIK Ibu</th><th>Nama Ayah</th>{% endif %}
+<th>No. HP</th><th>Posyandu</th><th>Alamat</th>
+</tr></thead>
+<tbody>
+{% for p in data %}<tr>
+<td class="center">{{ forloop.counter }}</td><td class="left">{{ p.nama_peserta }}</td><td class="center">{{ p.no_nik|default:'-' }}</td>
+{% if status_peserta == 'balita' %}<td class="center">{{ p.jenis_kelamin|default:'-' }}</td>{% endif %}
+<td class="center">{{ p.tgl_lahir|date:'d-m-Y' }}</td><td class="center">{% if status_peserta == 'balita' %}{{ p.usia }}{% else %}{{ p.usia_tahun }} tahun{% endif %}</td>
+{% if status_peserta == 'balita' %}<td class="left">{{ p.nama_ibu|default:'-' }}</td><td class="center">{{ p.nik_ibu|default:'-' }}</td><td class="left">{{ p.nama_ayah|default:'-' }}</td>{% endif %}
+<td class="center">{{ p.no_hp|default:'-' }}</td><td class="left">{% if p.posko %}{{ p.posko.nama }}{% else %}-{% endif %}</td><td class="left">{{ p.alamat|default:'-' }}</td>
+</tr>{% empty %}<tr><td colspan="12" class="center">Tidak ada data sesuai filter.</td></tr>{% endfor %}
+</tbody></table>
+<div class="footer">Dicetak otomatis pada {% now "d-m-Y H:i" %} WIB.</div>
+</body></html>

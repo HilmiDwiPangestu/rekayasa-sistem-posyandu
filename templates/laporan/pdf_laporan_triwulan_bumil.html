@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Laporan Triwulan Balita - Posyandu</title>
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 10mm 8mm;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        color: #111111;
+        font-size: 8.5pt;
+        line-height: 1.2;
+        margin: 0;
+        padding: 0;
+    }
+    .title {
+        font-size: 14pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        color: #111111;
+        text-transform: uppercase;
+    }
+    .subtitle {
+        text-align: center;
+        font-size: 9pt;
+        color: #555555;
+        margin-bottom: 12px;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* Header meta info: Kecamatan / Desa / Puskesmas / Posyandu */
+    .header-container {
+        width: 100%;
+        margin-bottom: 10px;
+        display: table;
+    }
+    .header-left {
+        display: table-cell;
+        width: 100%;
+        vertical-align: middle;
+    }
+    .meta-spacer {
+        width: 550px;
+    }
+    .meta-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+    }
+    .meta-table td {
+        padding: 2px 0;
+        vertical-align: top;
+    }
+    .meta-label {
+        width: 100px;
+    }
+    .meta-colon {
+        width: 15px;
+        text-align: center;
+    }
+    .meta-value {
+        font-weight: bold;
+        border-bottom: 1px dotted #666;
+        width: 200px;
+        display: inline-block;
+    }
+
+    /* Ringkasan singkat (total pemeriksaan, dll) */
+    .ringkasan {
+        width: 100%;
+        margin-bottom: 10px;
+        font-size: 9pt;
+    }
+    .ringkasan td {
+        border: none;
+        padding: 2px 12px 2px 0;
+        text-align: left;
+    }
+
+    /* Tabel data utama */
+    .main-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-size: 7.5pt;
+    }
+    .main-table th, .main-table td {
+        border: 1px solid #111111;
+        padding: 2px 1px;
+        text-align: center;
+        vertical-align: middle;
+        word-wrap: break-word;
+        font-size: 8px;
+    }
+
+    .main-table th {
+        background-color: #f3f4f6;
+        font-weight: bold;
+        font-size: 7.5pt;
+    }
+    .text-left {
+        text-align: left !important;
+        padding-left: 4px !important;
+    }
+    .empty-note {
+        text-align: center;
+        color: #94a3b8;
+        font-style: italic;
+        padding: 14px;
+    }
+
+    .footer {
+        margin-top: 15px;
+        padding-top: 8px;
+        border-top: 1px solid #999999;
+        width: 100%;
+        font-size: 8pt;
+        color: #555555;
+    }
+    .footer-table {
+        width: 100%;
+        border-collapse: none;
+    }
+    .footer-table td {
+        border: none;
+        padding: 0;
+    }
+    .footer-left {
+        text-align: left;
+    }
+    .footer-right {
+        text-align: right;
+        font-style: italic;
+    }
+
+
+    /* ================= TANDA TANGAN ================= */
+
+    .ttd {
+        width: 100%;
+        margin-top: 30px;
+        border-collapse: collapse;
+        font-size: 9pt;
+        padding-left: 80px;
+    }
+
+    .ttd td {
+        border: none;
+        text-align: center;
+        vertical-align: top;
+        width: 50%;
+    }
+
+    .ttd-kota {
+        padding-bottom: 5px;
+    }
+
+    .ttd-jabatan {
+        padding-bottom: 55px;   /* ruang untuk tanda tangan */
+    }
+
+    .ttd-nama {
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .ttd-nip {
+        padding-top: 3px;
+    }
+</style>
+</head>
+<body>
+
+    <div class="title">Laporan Triwulan Ibu Hamil</div>
+    <div class="subtitle">
+        {{ triwulan_label }} {{ tahun }} &nbsp;|&nbsp;
+        Periode: {{ tanggal_mulai|date:"d F Y" }} &ndash; {{ tanggal_selesai|date:"d F Y" }}
+    </div>
+
+    <!-- ================= HEADER META (Kecamatan/Desa/Puskesmas/Posyandu) ================= -->
+    <div class="header-container">
+        <div class="header-left">
+            <table class="meta-table">
+                <tr>
+                    <td class="meta-label">Kecamatan</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">{{ kecamatan|default:"-" }}</span></td>
+
+                    <td class="meta-spacer"></td>
+
+                    <td class="meta-label">Desa</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">{{ desa_nama|default:"-" }}</span></td>
+                </tr>
+                <tr>
+                    <td class="meta-label">Puskesmas</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">{{ puskesmas_nama|default:"-" }}</span></td>
+
+                    <td class="meta-spacer"></td>
+
+                    <td class="meta-label">Posyandu</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">{{ posyandu_nama|default:"-" }}</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= RINGKASAN ================= -->
+    {% comment %} <table class="ringkasan">
+        <tr>
+            <td><b>Balita Diperiksa:</b> {{ balita_diperiksa }}</td>
+            <td><b>Total Pemeriksaan:</b> {{ total_pemeriksaan_balita }}</td>
+        </tr>
+    </table> {% endcomment %}
+
+    <!-- ================= TABEL DATA (pivot 3 bulan) ================= -->
+    <table class="main-table" repeat="1">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width:2%;">No</th>
+                <th rowspan="2" style="width:10%;">Nama Peserta</th>
+                <th rowspan="2" style="width:3%;">Usia</th>
+                {% comment %} <th rowspan="2" style="width:3.5%;">Anak<br>Ke-</th> {% endcomment %}
+                {% comment %} <th rowspan="2" style="width:2.5%;">JK</th> {% endcomment %}
+                <th rowspan="2" style="width:6%;">Tgl<br>Lahir</th>
+                {% comment %} <th rowspan="2" style="width:3.5%;">BB<br>(kg)</th> {% endcomment %}
+                {% comment %} <th rowspan="2" style="width:3.5%;">TB<br>(cm)</th> {% endcomment %}
+                <th rowspan="2" style="width:9%;">NIK</th>
+                <th rowspan="2" style="width:10%;">Nama Suami</th>
+
+                {% for b in daftar_bulan %}
+                <th colspan="9">{{ b.nama }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for b in daftar_bulan %}
+                <th style="width:3%;">UK<br>(bln)</th>
+                <th style="width:3%;">BB<br>(kg)</th>
+                <th style="width:3%;">Lila<br>(cm)</th>
+                <th style="width:3%;">TB<br>(cm)</th>
+                <th style="width:3%;">TD</th>
+                <th style="width:3%;">TF<br>(cm)</th>
+                <th style="width:3%;">DJJ<br>(cm)</th>
+                <th style="width:3%;">HG<br>(cm)</th>
+                <th style="width:3.5%;">Status<br>(cm)</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data_bumil %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-left">{{ row.peserta.nama_peserta }}</td>
+                <td>{{ row.peserta.usia_tahun|default:"-" }}</td>
+                <td>{{ row.peserta.tgl_lahir|date:"d/m/Y" }}</td>
+                <td>{{ row.peserta.no_nik|default:"-" }}</td>
+                <td class="text-left">{{ row.peserta.nama_ayah|default:"-" }}</td>
+
+                {% comment %} <td>{{ row.peserta.berat_badan|default:"-" }}</td> {% endcomment %}
+                {% comment %} <td>{{ row.peserta.anak_ke|default:"-" }}</td> {% endcomment %}
+                {% comment %} <td>{% if row.peserta.jenis_kelamin == 'Laki-Laki' %}L{% else %}P{% endif %}</td> {% endcomment %}
+                {% comment %} <td>{{ row.peserta.tb_lahir|default:"-" }}</td> {% endcomment %}
+
+                {% if not row.bulan %}
+                <td colspan="9" style="font-weight:bold;">Tidak Hadir</td>
+                {% else %}
+                {% for p in row.bulan %}
+                    {% if p %}
+                    <td>{{ p.usia_kehamilan|default:"-" }} bln</td>
+                    <td>{{ p.berat_badan|default:"-" }}</td>
+                    <td>{{ p.lila_bumil|default:"-" }}</td>
+                    <td>{{ p.tinggi_badan|default:"-" }}</td>
+                    <td>{{ p.tekanan_darah|default:"-" }}</td>
+                    <td>{{ p.tinggi_fundus|default:"-" }}</td>
+                    <td>{{ p.denyut_jantung_janin|default:"-" }}</td>
+                    <td>{{ p.hemoglobin|default:"-" }}</td>
+                    <td>{{ p.status_kehamilan|default:"-" }}</td>
+                    {% else %}
+                    <td colspan="9" style="font-weight:bold;">Tidak Hadir</td>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ colspan_total }}" class="empty-note">Belum ada data pemeriksaan Ibu Hamil pada periode ini</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ================= TANDA TANGAN ================= -->
+
+    <table class="ttd">
+        <tr>
+            <td width="70%"></td>
+            <td width="30%" class="ttd-kota">
+                Indramayu, {% now "d F Y" %}
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td class="ttd-jabatan">
+                Mengetahui,<br>
+                Ketua Posyandu
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td class="ttd-nama">
+                {{ nama_ketua|default:"................................" }}
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td class="ttd-nip">
+                NIP. {{ nip_ketua|default:"-" }}
+            </td>
+        </tr>
+    </table>
+
+
+    <div class="footer">
+        <table class="footer-table">
+            <tr>
+                <td class="footer-left">
+                    Sistem Informasi Manajemen Pelayanan Kesehatan Komunitas (Posyandu)
+                </td>
+                <td class="footer-right">
+                    Dicetak otomatis pada: {% now "d F Y H:i" %} WIB
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

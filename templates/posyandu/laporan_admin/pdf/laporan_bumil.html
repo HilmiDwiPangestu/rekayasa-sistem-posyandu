@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0.8cm;
+        }
+
+        body {
+            font-family: Helvetica;
+            font-size: 8pt;
+            color: #111;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 8.5pt;
+        }
+
+        .meta-table td {
+            padding: 2px 4px;
+        }
+
+        .meta-label {
+            width: 70px;
+            font-weight: bold;
+        }
+
+        .meta-colon {
+            width: 10px;
+        }
+
+        .meta-spacer {
+            width: 40%;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 7.8pt;
+        }
+
+        .main-table th,
+        .main-table td {
+            border: 1px solid #000;
+            padding: 3px;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        .main-table th {
+            background: #d9d9d9;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Lebar kolom */
+        .col-no {
+            width: 3%;
+        }
+
+        .col-nama {
+            width: 12%;
+        }
+
+        .col-nik {
+            width: 9%;
+        }
+
+        .col-suami {
+            width: 12%;
+        }
+
+        .col-usia {
+            width: 4%;
+        }
+
+        .col-status {
+            width: 6%;
+        }
+
+        .col-rujukan {
+            width: 5%;
+        }
+
+        .col-tujuan {
+            width: 12%;
+        }
+
+        .col-parameter {
+            width: 4.6%;
+        }
+
+        .rekap-table {
+            width: 40%;
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 5px;
+        }
+
+        .rekap-table td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+
+        .rekap-title {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="title">
+        LAPORAN PEMERIKSAAN IBU HAMIL
+        {% comment %} {% if status_peserta == 'bumil' %}
+        {% else %}
+            LAPORAN PEMERIKSAAN BALITA
+        {% endif %} {% endcomment %}
+    </div>
+
+    {% comment %} <p style="text-align:center;">
+        Tanggal Pemeriksaan :
+        {{ tanggal_pemeriksaan|date:"d F Y" }}
+    </p> {% endcomment %}
+
+    <br>
+
+    <div class="header-container">
+
+        <table class="meta-table">
+            <tr>
+                <td class="meta-label">Kecamatan</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-value">Indramayu</td>
+
+                <td class="meta-spacer"></td>
+
+                <td class="meta-label">Desa</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-value">Kel. Lemahmekar</td>
+            </tr>
+
+            <tr>
+                <td class="meta-label">Puskesmas</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-value">Indramayu</td>
+
+                <td class="meta-spacer"></td>
+
+                <td class="meta-label">Posyandu</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-value">
+                    {% if jadwal %}
+                        {{ jadwal.posyandu.nama }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+        <table class="main-table">
+
+            <thead>
+                <tr>
+                    <th rowspan="2" class="col-no">No</th>
+                    <th rowspan="2" class="col-nama">Nama</th>
+                    <th rowspan="2" class="col-nik">NIK</th>
+                    <th rowspan="2" class="col-nama">Nama Suami</th>
+                    <th rowspan="2" class="col-usia">Usia</th>
+                    <th rowspan="2" class="col-status">Status</th>
+                    <th rowspan="2" class="col-rujukan">Rujukan</th>
+                    <th rowspan="2" class="col-tujuan">Tujuan Rujukan</th>
+                    
+                    <th colspan="8" width="42%">
+                        {{ tanggal_pemeriksaan|date:"d F Y" }}
+                    </th>
+
+                </tr>
+
+                <tr>
+                    <th class="col-parameter">Usia K<br>(Mgg)</th>
+                    <th class="col-parameter">BB<br>(Kg)</th>
+                    <th class="col-parameter">TB<br>(Cm)</th>
+                    <th class="col-parameter">LILA<br>(Cm)</th>
+                    <th class="col-parameter">TD</th>
+                    <th class="col-parameter">TFU<br>(Cm)</th>
+                    <th class="col-parameter">DJJ</th>
+                    <th class="col-parameter">Hb</th>
+                </tr>
+
+                {% comment %} <tr>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(Mgg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(Kg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(Cm)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(Cm)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(Cm)</th>
+                </tr>     {% endcomment %}
+            </thead>
+
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td class="text-left">
+                        {{ item.peserta.nama_peserta }}
+                    </td>
+
+                    <td class="text-left">
+                        {{ item.peserta.no_nik }}
+                    </td>
+
+                    <td class="text-left">
+                        {{ item.peserta.nama_ayah }}
+                    </td>
+
+                    <td class="text-left">
+                        {{ item.peserta.usia_tahun }}
+                    </td>
+
+                    <td>
+                        {{ item.get_status_kehamilan_display }}
+                    </td>
+
+                    <td>
+                        {% if item.perlu_rujukan %}
+                            Ya
+                        {% else %}
+                            Tidak
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ item.tujuan_rujukan|default:"-" }}
+                    </td>
+                    
+
+                    <td class="text-center">{{ item.usia_kehamilan }}</td>
+                    <td class="text-center">{{ item.berat_badan|floatformat:1|default:"-" }}</td>
+                    <td class="text-center">{{ item.tinggi_badan|floatformat:1|default:"-" }}</td>
+                    <td class="text-center">{{ item.lila_bumil|floatformat:1|default:"-" }}</td>
+                    <td class="text-center">{{ item.tekanan_darah|default:"-" }}</td>
+                    <td class="text-center">{{ item.tinggi_fundus|floatformat:1|default:"-" }}</td>
+                    <td class="text-center">{{ item.denyut_jantung_janin|floatformat:1|default:"-" }}</td>
+                    <td class="text-center">{{ item.hemoglobin|floatformat:1|default:"-" }}</td>
+
+                    
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="16">
+                        Tidak ada data pemeriksaan ibu hamil.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+
+{% comment %} <h4 class="rekap-title">
+    Rekapitulasi Hasil Pemeriksaan
+</h4>
+
+<table style="rekap-table">
+    <tr>
+        <td>Total Pemeriksaan</td>
+        <td>: {{ data|length }}</td>
+    </tr>
+    <tr>
+        <td>Normal</td>
+        <td>: {{ total_normal }}</td>
+    </tr>
+    <tr>
+        <td>Resiko Tinggi</td>
+        <td>: {{ total_resiko }}</td>
+    </tr>
+    <tr>
+        <td>Anemia</td>
+        <td>: {{ total_anemia }}</td>
+    </tr>
+    <tr>
+        <td>KEK</td>
+        <td>: {{ total_kek }}</td>
+    </tr>
+</table> {% endcomment %}
+
+    </div>
+
+</body>
+</html>

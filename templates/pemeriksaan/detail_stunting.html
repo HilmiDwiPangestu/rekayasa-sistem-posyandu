@@ -1,0 +1,1921 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block subtitle %}
+Detail Hasil Deteksi Stunting
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print,
+        aside,
+        nav,
+        header,
+        #sidebar,
+        #topbar {
+            display: none !important;
+        }
+
+        body,
+        main {
+            background: #ffffff !important;
+        }
+
+        .print-card {
+            break-inside: avoid;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+{% with prediksi=detail_data.hasil_prediksi|default:"Belum tersedia"|lower %}
+
+<div class="mx-auto w-full max-w-6xl space-y-6">
+
+
+    <!-- ===================================================== -->
+    <!-- HEADER                                                -->
+    <!-- ===================================================== -->
+
+    <div class="no-print flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+        <div>
+
+            <div class="mb-2 flex items-center gap-2 text-xs font-semibold text-gray-400">
+
+                <a
+                    href="javascript:history.back()"
+                    class="transition hover:text-green-600"
+                >
+                    Data Balita
+                </a>
+
+                <span class="material-symbols-outlined text-[15px]">
+                    chevron_right
+                </span>
+
+                <span>
+                    Detail Deteksi Stunting
+                </span>
+
+            </div>
+
+
+            <h1 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                Detail Hasil Deteksi Stunting
+            </h1>
+
+
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Hasil klasifikasi Random Forest dan referensi antropometri
+                pemeriksaan balita.
+            </p>
+
+        </div>
+
+
+        <div class="flex flex-wrap gap-2">
+
+            <a
+                href="{{ detail_data.kms_url }}"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-dark px-4 text-sm font-bold text-white transition hover:bg-primary"
+            >
+                <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                Lihat KMS
+            </a>
+
+            <button
+                type="button"
+                onclick="window.print()"
+                class="
+                    inline-flex h-11 items-center justify-center gap-2
+                    rounded-xl border border-gray-200
+                    bg-white px-4
+                    text-sm font-bold text-gray-700
+                    shadow-sm transition
+                    hover:bg-gray-50
+                    dark:border-gray-700
+                    dark:bg-gray-800
+                    dark:text-gray-200
+                    dark:hover:bg-gray-700
+                "
+            >
+
+                <span class="material-symbols-outlined text-[18px]">
+                    print
+                </span>
+
+                Cetak
+
+            </button>
+
+
+            <a
+                href="javascript:history.back()"
+                class="
+                    inline-flex h-11 items-center justify-center gap-2
+                    rounded-xl bg-gray-900 px-4
+                    text-sm font-bold text-white
+                    transition hover:bg-gray-800
+                    dark:bg-white dark:text-gray-900
+                "
+            >
+
+                <span class="material-symbols-outlined text-[18px]">
+                    arrow_back
+                </span>
+
+                Kembali
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- PERINGATAN DATA LAMA TIDAK VALID                      -->
+    <!-- ===================================================== -->
+
+    {% if not detail_data.z_score_valid %}
+
+    <section
+        class="
+            print-card
+            rounded-2xl
+            border border-red-200
+            bg-red-50
+            p-5
+            dark:border-red-900
+            dark:bg-red-900/20
+        "
+    >
+
+        <div class="flex items-start gap-3">
+
+            <div
+                class="
+                    flex h-11 w-11 shrink-0
+                    items-center justify-center
+                    rounded-xl bg-red-100
+                    dark:bg-red-900/40
+                "
+            >
+
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400">
+                    warning
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <h2 class="font-black text-red-800 dark:text-red-300">
+                    Data Antropometri Perlu Diperiksa
+                </h2>
+
+
+                <p class="mt-1 text-sm leading-6 text-red-700 dark:text-red-300">
+
+                    Nilai Z-score berada di luar rentang valid untuk analisis
+                    antropometri. Data ini kemungkinan berasal dari pemeriksaan
+                    lama sebelum validasi input diterapkan.
+
+                </p>
+
+
+                <p class="mt-2 text-xs font-semibold text-red-600 dark:text-red-400">
+
+                    Pemeriksaan ini tidak digunakan untuk menilai kesesuaian
+                    Random Forest dengan referensi antropometri.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- HASIL RANDOM FOREST                                   -->
+    <!-- ===================================================== -->
+
+    <section
+        class="
+            print-card overflow-hidden
+            rounded-3xl
+            border border-gray-200
+            bg-white shadow-sm
+            dark:border-gray-800
+            dark:bg-[#111827]
+        "
+    >
+
+
+        <!-- GARIS STATUS -->
+
+        {% if "stunting" in prediksi and "tidak" not in prediksi and "not" not in prediksi %}
+
+            <div class="h-2 bg-orange-500"></div>
+
+        {% elif "tidak stunting" in prediksi or "normal" in prediksi or "not stunted" in prediksi %}
+
+            <div class="h-2 bg-green-500"></div>
+
+        {% else %}
+
+            <div class="h-2 bg-gray-400"></div>
+
+        {% endif %}
+
+
+
+        <div class="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1fr_320px] lg:items-center">
+
+
+            <!-- ================================================= -->
+            <!-- HASIL KLASIFIKASI                                 -->
+            <!-- ================================================= -->
+
+            <div class="flex items-start gap-4">
+
+
+                <!-- ICON -->
+
+                {% if "stunting" in prediksi and "tidak" not in prediksi and "not" not in prediksi %}
+
+                    <div
+                        class="
+                            flex h-16 w-16 shrink-0
+                            items-center justify-center
+                            rounded-2xl bg-orange-100
+                            dark:bg-orange-900/30
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-3xl text-orange-700 dark:text-orange-400">
+                            warning
+                        </span>
+
+                    </div>
+
+
+                {% elif "tidak stunting" in prediksi or "normal" in prediksi or "not stunted" in prediksi %}
+
+                    <div
+                        class="
+                            flex h-16 w-16 shrink-0
+                            items-center justify-center
+                            rounded-2xl bg-green-100
+                            dark:bg-green-900/30
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-3xl text-green-700 dark:text-green-400">
+                            verified
+                        </span>
+
+                    </div>
+
+
+                {% else %}
+
+                    <div
+                        class="
+                            flex h-16 w-16 shrink-0
+                            items-center justify-center
+                            rounded-2xl bg-gray-100
+                            dark:bg-gray-800
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-3xl text-gray-500">
+                            psychology
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+
+                <div class="min-w-0">
+
+
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">
+                        Hasil Prediksi Random Forest
+                    </p>
+
+
+                    <div class="mt-1 flex flex-wrap items-center gap-2">
+
+
+                        <!-- LABEL UTAMA -->
+
+                        <h2 class="text-2xl font-black text-gray-900 dark:text-white">
+
+                            {% if "stunting" in prediksi and "tidak" not in prediksi and "not" not in prediksi %}
+
+                                Stunting
+
+                            {% elif "tidak stunting" in prediksi or "normal" in prediksi or "not stunted" in prediksi %}
+
+                                Tidak Stunting
+
+                            {% else %}
+
+                                Belum Tersedia
+
+                            {% endif %}
+
+                        </h2>
+
+
+
+                        <!-- BADGE -->
+
+                        {% if "stunting" in prediksi and "tidak" not in prediksi and "not" not in prediksi %}
+
+                            <span
+                                class="
+                                    inline-flex items-center
+                                    rounded-full
+                                    bg-orange-100
+                                    px-3 py-1
+                                    text-xs font-bold
+                                    text-orange-700
+                                    dark:bg-orange-900/30
+                                    dark:text-orange-300
+                                "
+                            >
+                                Terdeteksi stunting
+                            </span>
+
+
+                        {% elif "tidak stunting" in prediksi or "normal" in prediksi or "not stunted" in prediksi %}
+
+                            <span
+                                class="
+                                    inline-flex items-center
+                                    rounded-full
+                                    bg-green-100
+                                    px-3 py-1
+                                    text-xs font-bold
+                                    text-green-700
+                                    dark:bg-green-900/30
+                                    dark:text-green-300
+                                "
+                            >
+                                Tidak terdeteksi stunting
+                            </span>
+
+
+                        {% else %}
+
+                            <span
+                                class="
+                                    inline-flex items-center
+                                    rounded-full bg-gray-100
+                                    px-3 py-1
+                                    text-xs font-bold
+                                    text-gray-600
+                                    dark:bg-gray-800
+                                    dark:text-gray-300
+                                "
+                            >
+                                Hasil belum tersedia
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-600 dark:text-gray-300">
+
+                        Prediksi dihasilkan oleh model Random Forest berdasarkan
+                        fitur jenis kelamin, usia dalam bulan, berat badan,
+                        serta panjang atau tinggi badan balita.
+
+                    </p>
+
+
+
+                    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+
+
+                        <span
+                            class="
+                                inline-flex items-center gap-1.5
+                                rounded-full
+                                border border-gray-200
+                                px-3 py-1.5
+                                text-gray-500
+                                dark:border-gray-700
+                                dark:text-gray-400
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[15px]">
+                                calendar_month
+                            </span>
+
+                            {{ detail_data.tanggal_pemeriksaan|default:"-" }}
+
+                        </span>
+
+
+
+                        <span
+                            class="
+                                inline-flex items-center gap-1.5
+                                rounded-full
+                                border border-gray-200
+                                px-3 py-1.5
+                                text-gray-500
+                                dark:border-gray-700
+                                dark:text-gray-400
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[15px]">
+                                badge
+                            </span>
+
+                            {{ detail_data.petugas|default:"-" }}
+
+                        </span>
+
+
+
+                        <span
+                            class="
+                                inline-flex items-center gap-1.5
+                                rounded-full
+                                border border-gray-200
+                                px-3 py-1.5
+                                text-gray-500
+                                dark:border-gray-700
+                                dark:text-gray-400
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[15px]">
+                                schedule
+                            </span>
+
+                            {{ detail_data.usia|default:"-" }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- PROBABILITAS STUNTING                             -->
+            <!-- ================================================= -->
+
+            <div class="rounded-2xl bg-gray-50 p-5 dark:bg-gray-800/70">
+
+
+                <div class="flex items-center justify-between">
+
+
+                    <div>
+
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            Probabilitas Stunting
+                        </p>
+
+
+                        <p class="mt-1 text-3xl font-black text-gray-900 dark:text-white">
+
+                            {% if detail_data.probabilitas is not None %}
+
+                                {{ detail_data.probabilitas|floatformat:2 }}%
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            flex h-12 w-12
+                            items-center justify-center
+                            rounded-xl bg-white
+                            shadow-sm
+                            dark:bg-gray-900
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl text-purple-600 dark:text-purple-400">
+                            percent
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="mt-4 h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+
+                    {% if detail_data.probabilitas is not None %}
+
+                        <div
+                            class="
+                                h-full rounded-full
+                                {% if detail_data.probabilitas >= 50 %}
+                                    bg-orange-500
+                                {% else %}
+                                    bg-green-500
+                                {% endif %}
+                            "
+                            style="width: {{ detail_data.probabilitas }}%;"
+                        >
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <p class="mt-2 text-[11px] leading-4 text-gray-400">
+
+                    Nilai menunjukkan probabilitas keluaran model untuk
+                    kelas stunting. Nilai ini bukan probabilitas risiko klinis.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- IDENTITAS + ANTROPOMETRI                              -->
+    <!-- ===================================================== -->
+
+    <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+
+
+        <!-- ================================================= -->
+        <!-- IDENTITAS BALITA                                  -->
+        <!-- ================================================= -->
+
+        <section
+            class="
+                print-card
+                rounded-3xl
+                border border-gray-200
+                bg-white p-5 shadow-sm
+                dark:border-gray-800
+                dark:bg-[#111827]
+                sm:p-6
+            "
+        >
+
+            <div class="mb-5 flex items-center gap-3">
+
+                <div
+                    class="
+                        flex h-10 w-10
+                        items-center justify-center
+                        rounded-xl bg-green-100
+                        dark:bg-green-900/30
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-green-700 dark:text-green-400">
+                        child_care
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="font-black text-gray-900 dark:text-white">
+                        Identitas Balita
+                    </h2>
+
+                    <p class="text-xs text-gray-500">
+                        Informasi peserta pemeriksaan
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-800/70">
+
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                    {{ detail_data.nama|default:"-" }}
+                </h3>
+
+
+                <p class="mt-1 text-sm text-gray-500">
+
+                    {{ detail_data.gender|default:"-" }}
+
+                    ·
+
+                    {{ detail_data.usia|default:"-" }}
+
+                </p>
+
+            </div>
+
+
+
+            <dl class="mt-5 divide-y divide-gray-100 text-sm dark:divide-gray-800">
+
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        Tanggal lahir
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.tanggal_lahir|default:"-" }}
+                    </dd>
+
+                </div>
+
+
+
+                {% if detail_data.nik %}
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        NIK
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.nik }}
+                    </dd>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        Nama ibu
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.nama_ibu|default:"-" }}
+                    </dd>
+
+                </div>
+
+
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        Nama ayah
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.nama_ayah|default:"-" }}
+                    </dd>
+
+                </div>
+
+
+
+                {% if detail_data.anak_ke %}
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        Anak ke
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.anak_ke }}
+                    </dd>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <div class="grid grid-cols-[120px_1fr] gap-3 py-3">
+
+                    <dt class="text-gray-400">
+                        Jadwal
+                    </dt>
+
+                    <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                        {{ detail_data.jadwal|default:"-" }}
+                    </dd>
+
+                </div>
+
+            </dl>
+
+        </section>
+
+
+
+        <!-- ================================================= -->
+        <!-- DATA ANTROPOMETRI                                 -->
+        <!-- ================================================= -->
+
+        <section
+            class="
+                print-card
+                rounded-3xl
+                border border-gray-200
+                bg-white p-5 shadow-sm
+                dark:border-gray-800
+                dark:bg-[#111827]
+                sm:p-6
+            "
+        >
+
+            <div class="mb-5 flex items-center gap-3">
+
+                <div
+                    class="
+                        flex h-10 w-10
+                        items-center justify-center
+                        rounded-xl bg-blue-100
+                        dark:bg-blue-900/30
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-blue-700 dark:text-blue-400">
+                        monitor_weight
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="font-black text-gray-900 dark:text-white">
+                        Data Antropometri
+                    </h2>
+
+                    <p class="text-xs text-gray-500">
+                        Nilai pengukuran pada pemeriksaan
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+
+
+                <!-- BERAT -->
+                <article class="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+
+                    <span class="material-symbols-outlined text-xl text-blue-500">
+                        scale
+                    </span>
+
+                    <p class="mt-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Berat badan
+                    </p>
+
+                    <p class="mt-1 text-xl font-black text-gray-900 dark:text-white">
+
+                        {{ detail_data.berat|default_if_none:"-" }}
+
+                        {% if detail_data.berat is not None %}
+                            <span class="text-xs font-medium text-gray-400">
+                                kg
+                            </span>
+                        {% endif %}
+
+                    </p>
+
+                </article>
+
+
+
+                <!-- PB/TB -->
+                <article class="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+
+                    <span class="material-symbols-outlined text-xl text-green-500">
+                        height
+                    </span>
+
+                    <p class="mt-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Panjang / Tinggi
+                    </p>
+
+                    <p class="mt-1 text-xl font-black text-gray-900 dark:text-white">
+
+                        {{ detail_data.tinggi|default_if_none:"-" }}
+
+                        {% if detail_data.tinggi is not None %}
+                            <span class="text-xs font-medium text-gray-400">
+                                cm
+                            </span>
+                        {% endif %}
+
+                    </p>
+
+                </article>
+
+
+
+                <!-- LILA -->
+                <article class="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+
+                    <span class="material-symbols-outlined text-xl text-purple-500">
+                        straighten
+                    </span>
+
+                    <p class="mt-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        LILA
+                    </p>
+
+                    <p class="mt-1 text-xl font-black text-gray-900 dark:text-white">
+
+                        {{ detail_data.lila|default_if_none:"-" }}
+
+                        {% if detail_data.lila is not None %}
+                            <span class="text-xs font-medium text-gray-400">
+                                cm
+                            </span>
+                        {% endif %}
+
+                    </p>
+
+                </article>
+
+
+
+                <!-- LK -->
+                <article class="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+
+                    <span class="material-symbols-outlined text-xl text-orange-500">
+                        radio_button_checked
+                    </span>
+
+                    <p class="mt-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Lingkar kepala
+                    </p>
+
+                    <p class="mt-1 text-xl font-black text-gray-900 dark:text-white">
+
+                        {{ detail_data.lingkar_kepala|default_if_none:"-" }}
+
+                        {% if detail_data.lingkar_kepala is not None %}
+                            <span class="text-xs font-medium text-gray-400">
+                                cm
+                            </span>
+                        {% endif %}
+
+                    </p>
+
+                </article>
+
+            </div>
+
+
+
+            <!-- FITUR RF -->
+
+            <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20">
+
+                <div class="flex items-start gap-3">
+
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">
+                        data_object
+                    </span>
+
+
+                    <div>
+
+                        <p class="text-sm font-bold text-blue-800 dark:text-blue-300">
+                            Fitur yang digunakan Random Forest
+                        </p>
+
+
+                        <p class="mt-1 text-xs leading-5 text-blue-700 dark:text-blue-300">
+
+                            Jenis kelamin,
+                            usia {{ detail_data.usia_bulan|default_if_none:"-" }} bulan,
+                            berat badan {{ detail_data.berat|default_if_none:"-" }} kg,
+                            dan panjang/tinggi badan
+                            {{ detail_data.tinggi|default_if_none:"-" }} cm.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- REFERENSI ANTROPOMETRI                                -->
+    <!-- ===================================================== -->
+
+    <section
+        class="
+            print-card rounded-3xl
+            border border-gray-200
+            bg-white p-5 shadow-sm
+            dark:border-gray-800
+            dark:bg-[#111827]
+            sm:p-6
+        "
+    >
+
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+
+            <div class="flex items-center gap-3">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900/30">
+
+                    <span class="material-symbols-outlined text-cyan-700 dark:text-cyan-400">
+                        fact_check
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="font-black text-gray-900 dark:text-white">
+                        Referensi Antropometri WHO
+                    </h2>
+
+                    <p class="text-xs text-gray-500">
+                        Pembanding PB/U atau TB/U menggunakan WHO LFA expanded harian
+                        {% if detail_data.usia_hari is not None %}(usia {{ detail_data.usia_hari }} hari){% endif %}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <span class="w-fit rounded-full bg-gray-100 px-3 py-1 text-[11px] font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                Terpisah dari Random Forest
+            </span>
+
+        </div>
+
+
+
+        <div class="grid gap-4 md:grid-cols-3">
+
+
+            <!-- ================================================= -->
+            <!-- Z-SCORE                                           -->
+            <!-- ================================================= -->
+
+            <article
+                class="
+                    rounded-2xl border p-5
+
+                    {% if detail_data.z_score_valid %}
+                        border-gray-200
+                        dark:border-gray-700
+                    {% else %}
+                        border-red-200
+                        bg-red-50
+                        dark:border-red-900
+                        dark:bg-red-900/10
+                    {% endif %}
+                "
+            >
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            Z-score PB/U / TB/U
+                        </p>
+
+
+                        <p
+                            class="
+                                mt-2 text-3xl font-black
+
+                                {% if detail_data.z_score_valid %}
+                                    text-gray-900 dark:text-white
+                                {% else %}
+                                    text-red-700 dark:text-red-400
+                                {% endif %}
+                            "
+                        >
+
+                            {{ detail_data.z_score|default_if_none:"-" }}
+
+                        </p>
+
+                    </div>
+
+
+                    {% if detail_data.z_score_valid %}
+
+                        <span class="material-symbols-outlined text-4xl text-gray-200 dark:text-gray-700">
+                            analytics
+                        </span>
+
+                    {% else %}
+
+                        <span class="material-symbols-outlined text-4xl text-red-300 dark:text-red-700">
+                            warning
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                {% if detail_data.z_score_valid %}
+
+                    <p class="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
+
+                        Nilai Z-score berada dalam rentang yang dapat
+                        digunakan untuk analisis antropometri.
+
+                    </p>
+
+                {% else %}
+
+                    <p class="mt-3 text-xs font-semibold leading-5 text-red-600 dark:text-red-400">
+
+                        Nilai Z-score berada di luar rentang valid.
+                        Periksa kembali usia dan hasil pengukuran.
+
+                    </p>
+
+                {% endif %}
+
+            </article>
+
+
+
+            <!-- ================================================= -->
+            <!-- STATUS ANTROPOMETRI                               -->
+            <!-- ================================================= -->
+
+            <article class="rounded-2xl border border-gray-200 p-5 dark:border-gray-700">
+
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                    Status Antropometri
+                </p>
+
+
+                {% if not detail_data.z_score_valid %}
+
+                    <div class="mt-3">
+
+                        <p class="text-2xl font-black text-red-700 dark:text-red-400">
+                            Data Tidak Wajar
+                        </p>
+
+
+                        <span
+                            class="
+                                mt-2 inline-flex
+                                rounded-full
+                                bg-red-100
+                                px-3 py-1
+                                text-xs font-bold
+                                text-red-700
+                                dark:bg-red-900/30
+                                dark:text-red-300
+                            "
+                        >
+                            Periksa kembali data
+                        </span>
+
+                    </div>
+
+
+                    <p class="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
+
+                        Status antropometri tidak digunakan karena nilai
+                        Z-score berada di luar rentang valid.
+
+                    </p>
+
+
+                {% else %}
+
+
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+
+
+                        <p class="text-2xl font-black text-gray-900 dark:text-white">
+                            {{ detail_data.status_gizi_display|default:"-" }}
+                        </p>
+
+
+                        {% if detail_data.status_gizi == "stunting_berat" %}
+                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-900/30 dark:text-red-300">Sangat Pendek</span>
+                        {% elif detail_data.status_gizi == "stunting" %}
+                            <span class="inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">Pendek</span>
+                        {% elif detail_data.status_gizi == "tinggi" %}
+                            <span class="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">Tinggi</span>
+                        {% else %}
+                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">Normal</span>
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <p class="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
+
+                        Status antropometri ini ditentukan dari Z-score PB/U atau TB/U
+                        berdasarkan referensi pertumbuhan WHO yang digunakan sistem.
+
+                    </p>
+
+                {% endif %}
+
+            </article>
+
+
+
+            <!-- ================================================= -->
+            <!-- KESESUAIAN                                        -->
+            <!-- ================================================= -->
+
+            <article class="rounded-2xl border border-gray-200 p-5 dark:border-gray-700">
+
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                    Kesesuaian Hasil
+                </p>
+
+
+
+                {% if detail_data.kesesuaian == "Sesuai" %}
+
+                    <div class="mt-3 flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/30">
+
+                            <span class="material-symbols-outlined text-green-600 dark:text-green-400">
+                                check_circle
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="font-black text-green-700 dark:text-green-400">
+                                Sesuai
+                            </p>
+
+                            <p class="text-xs text-gray-500">
+                                RF sesuai dengan pembanding antropometri.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                {% elif detail_data.kesesuaian == "Tidak Sesuai" %}
+
+                    <div class="mt-3 flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30">
+
+                            <span class="material-symbols-outlined text-red-600 dark:text-red-400">
+                                error
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="font-black text-red-700 dark:text-red-400">
+                                Tidak Sesuai
+                            </p>
+
+                            <p class="text-xs text-gray-500">
+                                Hasil RF berbeda dengan pembanding antropometri.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                {% elif detail_data.kesesuaian == "Tidak Dapat Dinilai" %}
+
+                    <div class="mt-3 flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
+
+                            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">
+                                help
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="font-black text-amber-700 dark:text-amber-400">
+                                Tidak Dapat Dinilai
+                            </p>
+
+                            <p class="text-xs text-gray-500">
+                                Data antropometri tidak valid untuk dibandingkan.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                {% else %}
+
+                    <p class="mt-3 text-xl font-black text-gray-500">
+                        -
+                    </p>
+
+                {% endif %}
+
+
+
+                <p class="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
+
+                    Perbandingan ini hanya digunakan untuk evaluasi dan
+                    tidak mengubah hasil klasifikasi Random Forest.
+
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- INFORMASI MODEL                                       -->
+    <!-- ===================================================== -->
+
+    <section
+        class="
+            print-card rounded-3xl
+            border border-gray-200
+            bg-white p-5 shadow-sm
+            dark:border-gray-800
+            dark:bg-[#111827]
+            sm:p-6
+        "
+    >
+
+
+        <div class="mb-5 flex items-center gap-3">
+
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
+
+                <span class="material-symbols-outlined text-purple-700 dark:text-purple-400">
+                    psychology
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <h2 class="font-black text-gray-900 dark:text-white">
+                    Informasi Model
+                </h2>
+
+                <p class="text-xs text-gray-500">
+                    Informasi algoritma yang digunakan untuk deteksi
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <dl class="divide-y divide-gray-100 text-sm dark:divide-gray-800">
+
+
+            <div class="flex items-center justify-between gap-4 py-3">
+
+                <dt class="text-gray-400">
+                    Algoritma
+                </dt>
+
+                <dd class="font-semibold text-gray-700 dark:text-gray-300">
+                    {{ detail_data.nama_model|default:"Random Forest" }}
+                </dd>
+
+            </div>
+
+
+
+            <div class="flex items-center justify-between gap-4 py-3">
+
+                <dt class="text-gray-400">
+                    Fitur masukan
+                </dt>
+
+                <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Jenis kelamin, usia, berat badan, panjang/tinggi badan
+                </dd>
+
+            </div>
+
+
+
+            <div class="flex items-center justify-between gap-4 py-3">
+
+                <dt class="text-gray-400">
+                    Hasil klasifikasi
+                </dt>
+
+
+                <dd class="font-semibold text-gray-700 dark:text-gray-300">
+
+                    {% if "stunting" in prediksi and "tidak" not in prediksi and "not" not in prediksi %}
+
+                        Stunting
+
+                    {% elif "normal" in prediksi or "tidak stunting" in prediksi or "not stunted" in prediksi %}
+
+                        Tidak Stunting
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </dd>
+
+            </div>
+
+
+
+            <div class="flex items-center justify-between gap-4 py-3">
+
+                <dt class="text-gray-400">
+                    Probabilitas stunting
+                </dt>
+
+
+                <dd class="font-semibold text-gray-700 dark:text-gray-300">
+
+                    {% if detail_data.probabilitas is not None %}
+
+                        {{ detail_data.probabilitas|floatformat:2 }}%
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </dd>
+
+            </div>
+
+
+
+            <div class="flex items-center justify-between gap-4 py-3">
+
+                <dt class="text-gray-400">
+                    Referensi pembanding
+                </dt>
+
+                <dd class="text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Z-score PB/U atau TB/U
+                </dd>
+
+            </div>
+
+        </dl>
+
+
+
+        <div class="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-900/20">
+
+            <div class="flex items-start gap-2">
+
+                <span class="material-symbols-outlined mt-0.5 text-[17px] text-blue-600 dark:text-blue-400">
+                    info
+                </span>
+
+
+                <p class="text-xs leading-5 text-blue-700 dark:text-blue-300">
+
+                    Random Forest menghasilkan klasifikasi
+                    Stunting atau Tidak Stunting. Probabilitas yang
+                    ditampilkan merupakan probabilitas keluaran model
+                    terhadap kelas stunting dan bukan probabilitas
+                    risiko klinis.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- CATATAN                                                -->
+    <!-- ===================================================== -->
+
+    {% if detail_data.catatan %}
+
+    <section
+        class="
+            print-card rounded-3xl
+            border border-amber-200
+            bg-amber-50 p-5
+            dark:border-amber-900
+            dark:bg-amber-900/20
+            sm:p-6
+        "
+    >
+
+        <div class="flex items-start gap-3">
+
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">
+                edit_note
+            </span>
+
+
+            <div>
+
+                <h2 class="font-black text-amber-800 dark:text-amber-300">
+                    Catatan Pemeriksaan
+                </h2>
+
+
+                <p class="mt-1 text-sm leading-6 text-amber-700 dark:text-amber-300">
+                    {{ detail_data.catatan }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- RIWAYAT DETEKSI                                       -->
+    <!-- ===================================================== -->
+
+    {% if detail_data.riwayat_pemeriksaan %}
+
+    <section
+        class="
+            print-card overflow-hidden
+            rounded-3xl
+            border border-gray-200
+            bg-white shadow-sm
+            dark:border-gray-800
+            dark:bg-[#111827]
+        "
+    >
+
+
+        <div class="border-b border-gray-200 p-5 dark:border-gray-800 sm:p-6">
+
+            <div class="flex items-center gap-3">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900/30">
+
+                    <span class="material-symbols-outlined text-indigo-700 dark:text-indigo-400">
+                        history
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="font-black text-gray-900 dark:text-white">
+                        Riwayat Deteksi
+                    </h2>
+
+                    <p class="text-xs text-gray-500">
+                        Riwayat pemeriksaan balita yang sama
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full min-w-[980px] text-sm">
+
+
+                <thead>
+
+                    <tr
+                        class="
+                            bg-gray-50
+                            text-left
+                            text-[11px]
+                            font-black uppercase
+                            tracking-wider
+                            text-gray-400
+                            dark:bg-gray-900/60
+                        "
+                    >
+
+                        <th class="px-5 py-4">Tanggal</th>
+                        <th class="px-5 py-4">Usia</th>
+                        <th class="px-5 py-4">BB</th>
+                        <th class="px-5 py-4">PB/TB</th>
+                        <th class="px-5 py-4">Z-score</th>
+                        <th class="px-5 py-4">Status Antropometri</th>
+                        <th class="px-5 py-4">Prediksi RF</th>
+                        <th class="px-5 py-4">Prob. Stunting</th>
+                        <th class="px-5 py-4">Kesesuaian</th>
+
+                    </tr>
+
+                </thead>
+
+
+
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+
+
+                    {% for item in detail_data.riwayat_pemeriksaan %}
+
+                    <tr class="bg-white dark:bg-[#111827]">
+
+
+                        <!-- TANGGAL -->
+                        <td class="px-5 py-4 font-semibold text-gray-700 dark:text-gray-300">
+                            {{ item.tanggal|default:"-" }}
+                        </td>
+
+
+
+                        <!-- USIA -->
+                        <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+                            {{ item.usia|default:"-" }}
+                        </td>
+
+
+
+                        <!-- BB -->
+                        <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+
+                            {% if item.berat is not None %}
+                                {{ item.berat }} kg
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- TB -->
+                        <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+
+                            {% if item.tinggi is not None %}
+                                {{ item.tinggi }} cm
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- Z-SCORE -->
+                        <td class="px-5 py-4 font-bold">
+
+                            {% if item.z_score_valid %}
+
+                                <span class="text-gray-700 dark:text-gray-300">
+                                    {{ item.z_score|default_if_none:"-" }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        warning
+                                    </span>
+
+                                    {{ item.z_score|default_if_none:"-" }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- STATUS WHO -->
+                        <td class="px-5 py-4">
+
+                            {% if not item.z_score_valid %}
+
+                                <span
+                                    class="
+                                        inline-flex rounded-full
+                                        bg-red-100 px-2.5 py-1
+                                        text-xs font-bold
+                                        text-red-700
+                                        dark:bg-red-900/30
+                                        dark:text-red-300
+                                    "
+                                >
+                                    Data Tidak Wajar
+                                </span>
+
+
+                            {% elif item.status_gizi == "stunting_berat" %}
+
+                                <span class="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">Sangat Pendek</span>
+
+                            {% elif item.status_gizi == "stunting" %}
+
+                                <span class="inline-flex rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-700">Pendek</span>
+
+                            {% elif item.status_gizi == "tinggi" %}
+
+                                <span class="inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-700">Tinggi</span>
+
+                            {% else %}
+
+                                <span
+                                    class="
+                                        inline-flex rounded-full
+                                        bg-green-100 px-2.5 py-1
+                                        text-xs font-bold
+                                        text-green-700
+                                    "
+                                >
+                                    Normal
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- RF -->
+                        <td class="px-5 py-4 font-semibold">
+
+                            {% with item_pred=item.hasil_prediksi|default:""|lower %}
+
+                                {% if "stunting" in item_pred and "tidak" not in item_pred and "not" not in item_pred %}
+
+                                    <span class="text-orange-600">
+                                        Stunting
+                                    </span>
+
+                                {% elif item.hasil_prediksi %}
+
+                                    <span class="text-green-600">
+                                        Tidak Stunting
+                                    </span>
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        </td>
+
+
+
+                        <!-- PROBABILITAS -->
+                        <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+
+                            {% if item.probabilitas is not None %}
+
+                                {{ item.probabilitas|floatformat:2 }}%
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- KESESUAIAN -->
+                        <td class="px-5 py-4">
+
+
+                            {% if item.kesesuaian == "Sesuai" %}
+
+                                <span
+                                    class="
+                                        inline-flex items-center gap-1
+                                        rounded-full
+                                        bg-green-100
+                                        px-2.5 py-1
+                                        text-xs font-bold
+                                        text-green-700
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        check
+                                    </span>
+
+                                    Sesuai
+
+                                </span>
+
+
+
+                            {% elif item.kesesuaian == "Tidak Sesuai" %}
+
+                                <span
+                                    class="
+                                        inline-flex items-center gap-1
+                                        rounded-full
+                                        bg-red-100
+                                        px-2.5 py-1
+                                        text-xs font-bold
+                                        text-red-700
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        close
+                                    </span>
+
+                                    Tidak Sesuai
+
+                                </span>
+
+
+
+                            {% elif item.kesesuaian == "Tidak Dapat Dinilai" %}
+
+                                <span
+                                    class="
+                                        inline-flex items-center gap-1
+                                        rounded-full
+                                        bg-amber-100
+                                        px-2.5 py-1
+                                        text-xs font-bold
+                                        text-amber-700
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        help
+                                    </span>
+
+                                    Tidak Dapat Dinilai
+
+                                </span>
+
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+
+                    <tr>
+
+                        <td colspan="9" class="px-5 py-8 text-center text-gray-400">
+                            Belum terdapat riwayat pemeriksaan.
+                        </td>
+
+                    </tr>
+
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+
+    <!-- ===================================================== -->
+    <!-- FOOTER                                                 -->
+    <!-- ===================================================== -->
+
+    <div class="pb-4 text-center text-[11px] leading-5 text-gray-400">
+
+        <p>
+            Status antropometri PB/U atau TB/U mengacu pada hasil pengukuran
+            dan referensi pertumbuhan WHO yang digunakan oleh sistem.
+        </p>
+
+        <p>
+            Klasifikasi Random Forest ditampilkan sebagai hasil model penelitian
+            untuk mendukung analisis dan tidak menggantikan penilaian tenaga kesehatan.
+        </p>
+
+    </div>
+
+
+</div>
+
+{% endwith %}
+
+{% endblock %}

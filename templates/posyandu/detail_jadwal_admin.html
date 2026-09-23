@@ -1,0 +1,1341 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Jadwal Posyandu{% endblock %}
+{% block subtitle %}Detail Jadwal Posyandu{% endblock %}
+
+{% block content %}
+
+<div class="space-y-5">
+
+    <div class="w-full space-y-5">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <section class="relative overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+            <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+
+            <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex min-w-0 items-start gap-4">
+                    <a href="{% url 'posyandu:jadwal_posyandu_admin' %}"
+                       class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10 transition hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/10"
+                       aria-label="Kembali ke daftar jadwal">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white ring-1 ring-inset ring-white/10">
+                                Detail Jadwal
+                            </span>
+                            <span class="text-xs font-semibold text-slate-300">
+                                ID Jadwal #{{ jadwal.id_jadwal }}
+                            </span>
+                        </div>
+
+                        <h1 class="mt-2 break-words text-2xl font-black tracking-tight text-white sm:text-3xl">
+                            {{ jadwal.jns_kegiatan }}
+                        </h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+                            Informasi jadwal, pelaksanaan kegiatan, statistik, dan kehadiran peserta
+                            {{ jadwal.posyandu.nama|default:"Posyandu" }}.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="shrink-0">
+                    {% if status_jadwal == "mendatang" %}
+                        <span class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3.5 py-2.5 text-sm font-bold text-white">
+                            <span class="material-symbols-outlined text-[19px] text-amber-400">event_upcoming</span>
+                            {{ status_label }}
+                        </span>
+                    {% elif status_jadwal == "berlangsung" %}
+                        <span class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3.5 py-2.5 text-sm font-bold text-white">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-dark opacity-75"></span>
+                                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary-dark"></span>
+                            </span>
+                            {{ status_label }}
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3.5 py-2.5 text-sm font-bold text-white">
+                            <span class="material-symbols-outlined text-[19px] text-emerald-400">task_alt</span>
+                            {{ status_label }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =====================================================
+             RINGKASAN JADWAL
+        ====================================================== -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            <!-- POSYANDU -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                        <span class="material-symbols-outlined">
+                            health_and_safety
+                        </span>
+
+                    </div>
+
+                    <div class="min-w-0">
+
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            Posko / Posyandu
+                        </p>
+
+                        <p class="mt-1 truncate font-bold text-slate-800 dark:text-white">
+                            {{ jadwal.posyandu.nama|default:"-" }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- JENIS KEGIATAN -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                        <span class="material-symbols-outlined">
+                            assignment
+                        </span>
+
+                    </div>
+
+                    <div class="min-w-0">
+
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            Jenis Kegiatan
+                        </p>
+
+                        <p class="mt-1 truncate font-bold text-slate-800 dark:text-white">
+                            {{ jadwal.jns_kegiatan }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TANGGAL -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                        <span class="material-symbols-outlined">
+                            calendar_month
+                        </span>
+
+                    </div>
+
+                    <div>
+
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            Tanggal Kegiatan
+                        </p>
+
+                        <p class="mt-1 font-bold text-slate-800 dark:text-white">
+                            {{ jadwal.tgl_kegiatan|date:"d M Y" }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- WAKTU -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                        <span class="material-symbols-outlined">
+                            schedule
+                        </span>
+
+                    </div>
+
+                    <div>
+
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            Waktu Pelaksanaan
+                        </p>
+
+                        <p class="mt-1 font-bold text-slate-800 dark:text-white">
+
+                            {% if jadwal.jam_mulai %}
+                                {{ jadwal.jam_mulai|time:"H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+
+                            -
+
+                            {% if jadwal.jam_selesai %}
+                                {{ jadwal.jam_selesai|time:"H:i" }} WIB
+                            {% else %}
+                                Selesai
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             INFORMASI KEGIATAN
+        ====================================================== -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            <!-- DETAIL -->
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary lg:col-span-2">
+
+                <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                            <span class="material-symbols-outlined">
+                                event_note
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h2 class="font-bold text-slate-800 dark:text-white">
+                                Informasi Kegiatan
+                            </h2>
+
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Rincian jadwal kegiatan yang dibuat oleh kader.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Nama Posko
+                        </p>
+
+                        <p class="text-sm font-bold text-slate-800 dark:text-white sm:col-span-2">
+                            {{ jadwal.posyandu.nama|default:"-" }}
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Jenis Kegiatan
+                        </p>
+
+                        <p class="text-sm text-slate-700 dark:text-slate-300 sm:col-span-2">
+                            {{ jadwal.jns_kegiatan }}
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Tanggal Pelaksanaan
+                        </p>
+
+                        <p class="text-sm text-slate-700 dark:text-slate-300 sm:col-span-2">
+                            {{ jadwal.tgl_kegiatan|date:"l, d F Y" }}
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Waktu Pelaksanaan
+                        </p>
+
+                        <p class="text-sm text-slate-700 dark:text-slate-300 sm:col-span-2">
+
+                            {% if jadwal.jam_mulai %}
+                                {{ jadwal.jam_mulai|time:"H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+
+                            sampai
+
+                            {% if jadwal.jam_selesai %}
+                                {{ jadwal.jam_selesai|time:"H:i" }} WIB
+                            {% else %}
+                                selesai
+                            {% endif %}
+
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Lokasi
+                        </p>
+
+                        <div class="text-sm leading-6 text-slate-700 dark:text-slate-300 sm:col-span-2">
+
+                            {% if jadwal.lokasi %}
+
+                                {{ jadwal.lokasi }}
+
+                            {% elif jadwal.posyandu.alamat %}
+
+                                {{ jadwal.posyandu.alamat }}
+
+                            {% else %}
+
+                                <span class="italic text-slate-400">
+                                    Lokasi belum dicantumkan.
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2 px-5 py-4 sm:grid-cols-3 sm:px-6">
+
+                        <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                            Keterangan
+                        </p>
+
+                        <div class="text-sm leading-7 text-slate-700 dark:text-slate-300 sm:col-span-2">
+
+                            {% if jadwal.keterangan %}
+
+                                <p class="whitespace-pre-line">
+                                    {{ jadwal.keterangan }}
+                                </p>
+
+                            {% elif jadwal.deskripsi %}
+
+                                <p class="whitespace-pre-line">
+                                    {{ jadwal.deskripsi }}
+                                </p>
+
+                            {% else %}
+
+                                <span class="italic text-slate-400">
+                                    Tidak ada keterangan tambahan.
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SIDEBAR -->
+            <div class="space-y-6">
+
+                <!-- STATUS -->
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+                    <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+
+                        <h2 class="font-bold text-slate-800 dark:text-white">
+                            Status Pelaksanaan
+                        </h2>
+
+                    </div>
+
+                    <div class="p-5">
+
+                        {% if status_jadwal == "mendatang" %}
+
+                            <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+
+                                <div class="flex items-start gap-3">
+
+                                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">
+                                        pending_actions
+                                    </span>
+
+                                    <div>
+
+                                        <p class="font-bold text-amber-700 dark:text-amber-400">
+                                            {{ status_label }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs leading-5 text-amber-700/80 dark:text-amber-400/80">
+                                            {{ status_deskripsi }}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% elif status_jadwal == "berlangsung" %}
+
+                            <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-primary">
+
+                                <div class="flex items-start gap-3">
+
+                                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">
+                                        acute
+                                    </span>
+
+                                    <div>
+
+                                        <p class="font-bold text-blue-700 dark:text-blue-400">
+                                            {{ status_label }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs leading-5 text-blue-700/80 dark:text-blue-400/80">
+                                            {{ status_deskripsi }}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+
+                                <div class="flex items-start gap-3">
+
+                                    <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">
+                                        task_alt
+                                    </span>
+
+                                    <div>
+
+                                        <p class="font-bold text-emerald-700 dark:text-emerald-400">
+                                            {{ status_label }}
+                                        </p>
+
+                                        <p class="mt-1 text-xs leading-5 text-emerald-700/80 dark:text-emerald-400/80">
+                                            {{ status_deskripsi }}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- AKSI -->
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                    <h3 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Aksi
+                    </h3>
+
+                    <div class="space-y-3">
+
+                       
+
+                        <a href="{% url 'posyandu:jadwal_posyandu_admin' %}"
+                           class="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-primary dark:text-slate-300 dark:hover:bg-slate-800">
+
+                            <span class="material-symbols-outlined text-[19px]">
+                                arrow_back
+                            </span>
+
+                            Kembali ke Daftar
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             STATISTIK PESERTA
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                            <span class="material-symbols-outlined">
+                                monitoring
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h2 class="font-bold text-slate-800 dark:text-white">
+                                Statistik Peserta
+                            </h2>
+
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Ringkasan seluruh peserta dalam posko.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="inline-flex w-fit items-center rounded-lg bg-primary-dark/10 px-3 py-1.5 text-xs font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                        {{ persentase_kehadiran }}% Kehadiran
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="p-5 sm:p-6">
+
+                <div class="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+
+                    <!-- TOTAL -->
+                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Total Peserta
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-slate-800 dark:text-white">
+                                {{ total_peserta }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-slate-300 dark:text-slate-600">
+                                groups
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- BALITA -->
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-primary">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Balita
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-slate-900 dark:text-white">
+                                {{ total_balita }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-primary-dark dark:text-blue-300">
+                                child_care
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- IBU HAMIL -->
+                    <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-primary">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Ibu Hamil
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-slate-900 dark:text-white">
+                                {{ total_bumil }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-primary-dark dark:text-blue-300">
+                                pregnant_woman
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- HADIR -->
+                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                            Hadir
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+                                {{ total_hadir }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-emerald-400">
+                                person_check
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- BELUM/TIDAK HADIR -->
+                    <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/40 dark:bg-rose-950/20">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+
+                            {% if status_jadwal == "selesai" %}
+                                Tidak Hadir
+                            {% else %}
+                                Belum Hadir
+                            {% endif %}
+
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-rose-700 dark:text-rose-400">
+                                {{ total_belum_atau_tidak }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-rose-400">
+                                person_off
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- IZIN -->
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                            Izin
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between">
+
+                            <p class="text-2xl font-black text-amber-700 dark:text-amber-400">
+                                {{ total_izin }}
+                            </p>
+
+                            <span class="material-symbols-outlined text-2xl text-amber-400">
+                                event_busy
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PROGRESS -->
+                <div class="mt-6">
+
+                    <div class="mb-2 flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
+
+                        <span class="font-semibold text-slate-500 dark:text-slate-400">
+                            Persentase kehadiran peserta
+                        </span>
+
+                        <span class="font-bold text-slate-700 dark:text-slate-300">
+                            {{ total_hadir }} dari {{ total_peserta }} peserta
+                        </span>
+
+                    </div>
+
+                    <div class="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-background-dark">
+
+                        <div
+                            class="h-full rounded-full bg-primary-dark transition-all duration-500"
+                            style="width: {{ persentase_kehadiran }}%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DAFTAR SEMUA PESERTA
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                            <span class="material-symbols-outlined">
+                                groups
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h2 class="font-bold text-slate-800 dark:text-white">
+                                Daftar Seluruh Peserta
+                            </h2>
+
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Balita, ibu hamil, dan peserta lainnya dalam
+                                {{ jadwal.posyandu.nama|default:"posko ini" }}.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="inline-flex w-fit items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+                        {{ total_peserta }} Peserta
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 MOBILE
+            ================================================== -->
+            <div class="block space-y-3 p-4 md:hidden">
+
+                {% for item in semua_peserta %}
+
+                    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+
+                        <div class="flex items-start justify-between gap-3">
+
+                            <div class="flex min-w-0 items-start gap-3">
+
+                                <!-- AVATAR -->
+                                {% if item.kategori_kode == "balita" %}
+
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                        <span class="material-symbols-outlined">
+                                            child_care
+                                        </span>
+
+                                    </div>
+
+                                {% elif item.kategori_kode == "bumil" %}
+
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                        <span class="material-symbols-outlined">
+                                            pregnant_woman
+                                        </span>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-background-dark dark:text-slate-400">
+
+                                        <span class="material-symbols-outlined">
+                                            person
+                                        </span>
+
+                                    </div>
+
+                                {% endif %}
+
+                                <!-- IDENTITAS -->
+                                <div class="min-w-0">
+
+                                    <p class="truncate font-bold text-slate-800 dark:text-white">
+                                        {{ item.peserta.nama_peserta }}
+                                    </p>
+
+                                    <div class="mt-1">
+
+                                        {% if item.kategori_kode == "balita" %}
+
+                                            <span class="inline-flex items-center rounded-md bg-primary-dark/10 px-2 py-0.5 text-[10px] font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                                {{ item.kategori_label }}
+                                            </span>
+
+                                        {% elif item.kategori_kode == "bumil" %}
+
+                                            <span class="inline-flex items-center rounded-md bg-primary-dark/10 px-2 py-0.5 text-[10px] font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                                {{ item.kategori_label }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+                                                {{ item.kategori_label }}
+                                            </span>
+
+                                        {% endif %}
+
+                                        {% if item.peserta.is_tamu %}
+
+                                            <span class="ml-1 inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+                                                Tamu
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- STATUS -->
+                            {% if item.status_kode == "hadir" %}
+
+                                <span class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        check_circle
+                                    </span>
+
+                                    {{ item.status_label }}
+
+                                </span>
+
+                            {% elif item.status_kode == "izin" %}
+
+                                <span class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        event_busy
+                                    </span>
+
+                                    {{ item.status_label }}
+
+                                </span>
+
+                            {% elif item.status_kode == "tidak" %}
+
+                                <span class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        cancel
+                                    </span>
+
+                                    {{ item.status_label }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        schedule
+                                    </span>
+
+                                    {{ item.status_label }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- DETAIL MOBILE -->
+                        <div class="mt-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 dark:border-white/10">
+
+                            <div>
+
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    NIK
+                                </p>
+
+                                <p class="mt-1 break-all text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                    {{ item.nomor_identitas }}
+                                </p>
+
+                            </div>
+
+                            <div>
+
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    Jenis Kelamin
+                                </p>
+
+                                <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                    {{ item.jenis_kelamin_label }}
+                                </p>
+
+                            </div>
+
+                            <div>
+
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    Tanggal Lahir
+                                </p>
+
+                                <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                    {{ item.peserta.tgl_lahir|date:"d M Y"|default:"-" }}
+                                </p>
+
+                            </div>
+
+                            <div>
+
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    No. HP
+                                </p>
+
+                                <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                    {{ item.peserta.no_hp|default:"-" }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS DATABASE -->
+                        <div class="mt-4 border-t border-slate-100 pt-3 dark:border-white/10">
+
+                            {% if item.data_kehadiran_tersimpan %}
+
+                                <p class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-dark dark:text-blue-300">
+
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        database
+                                    </span>
+
+                                    Kehadiran tercatat di sistem
+
+                                </p>
+
+                            {% else %}
+
+                                <p class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        database_off
+                                    </span>
+
+                                    Belum memiliki catatan kehadiran
+
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="rounded-xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-700">
+
+                        <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">
+                            group_off
+                        </span>
+
+                        <p class="mt-3 font-medium text-slate-500 dark:text-slate-400">
+                            Belum ada peserta yang terdaftar pada posko ini.
+                        </p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- =================================================
+                 DESKTOP
+            ================================================== -->
+            <div class="hidden overflow-x-auto md:block">
+
+                <table class="w-full text-sm">
+
+                    <thead>
+
+                        <tr class="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-background-dark/40 dark:text-slate-400">
+
+                            <th class="whitespace-nowrap px-5 py-4 text-center">
+                                No
+                            </th>
+
+                            <th class="min-w-[220px] px-5 py-4 text-left">
+                                Nama Peserta
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-left">
+                                Kategori
+                            </th>
+
+                            <th class="min-w-[170px] px-5 py-4 text-left">
+                                NIK
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-left">
+                                Jenis Kelamin
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-left">
+                                Tanggal Lahir
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-left">
+                                No. HP
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-center">
+                                Data Kehadiran
+                            </th>
+
+                            <th class="whitespace-nowrap px-5 py-4 text-center">
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+
+                        {% for item in semua_peserta %}
+
+                            <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/30">
+
+                                <!-- NO -->
+                                <td class="px-5 py-4 text-center text-slate-500">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <!-- NAMA -->
+                                <td class="px-5 py-4">
+
+                                    <div class="flex items-center gap-3">
+
+                                        {% if item.kategori_kode == "balita" %}
+
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                                <span class="material-symbols-outlined text-[19px]">
+                                                    child_care
+                                                </span>
+
+                                            </div>
+
+                                        {% elif item.kategori_kode == "bumil" %}
+
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                                <span class="material-symbols-outlined text-[19px]">
+                                                    pregnant_woman
+                                                </span>
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-background-dark dark:text-slate-400">
+
+                                                <span class="material-symbols-outlined text-[19px]">
+                                                    person
+                                                </span>
+
+                                            </div>
+
+                                        {% endif %}
+
+                                        <div>
+
+                                            <p class="font-bold text-slate-800 dark:text-white">
+                                                {{ item.peserta.nama_peserta }}
+                                            </p>
+
+                                            {% if item.peserta.is_tamu %}
+
+                                                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                                    Peserta Tamu
+                                                </p>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- KATEGORI -->
+                                <td class="whitespace-nowrap px-5 py-4">
+
+                                    {% if item.kategori_kode == "balita" %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1 text-xs font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                child_care
+                                            </span>
+
+                                            {{ item.kategori_label }}
+
+                                        </span>
+
+                                    {% elif item.kategori_kode == "bumil" %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1 text-xs font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                pregnant_woman
+                                            </span>
+
+                                            {{ item.kategori_label }}
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+                                            {{ item.kategori_label }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- NIK -->
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 dark:text-slate-400">
+                                    {{ item.nomor_identitas }}
+                                </td>
+
+                                <!-- JK -->
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 dark:text-slate-400">
+                                    {{ item.jenis_kelamin_label }}
+                                </td>
+
+                                <!-- TANGGAL LAHIR -->
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 dark:text-slate-400">
+                                    {{ item.peserta.tgl_lahir|date:"d M Y"|default:"-" }}
+                                </td>
+
+                                <!-- NO HP -->
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 dark:text-slate-400">
+                                    {{ item.peserta.no_hp|default:"-" }}
+                                </td>
+
+                                <!-- DATA KEHADIRAN -->
+                                <td class="whitespace-nowrap px-5 py-4 text-center">
+
+                                    {% if item.data_kehadiran_tersimpan %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1 text-xs font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                database
+                                            </span>
+
+                                            Tercatat
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500 dark:bg-background-dark dark:text-slate-400">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                database_off
+                                            </span>
+
+                                            Belum Tercatat
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- STATUS -->
+                                <td class="whitespace-nowrap px-5 py-4 text-center">
+
+                                    {% if item.status_kode == "hadir" %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                check_circle
+                                            </span>
+
+                                            {{ item.status_label }}
+
+                                        </span>
+
+                                    {% elif item.status_kode == "izin" %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                event_busy
+                                            </span>
+
+                                            {{ item.status_label }}
+
+                                        </span>
+
+                                    {% elif item.status_kode == "tidak" %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 dark:bg-rose-950/40 dark:text-rose-400">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                cancel
+                                            </span>
+
+                                            {{ item.status_label }}
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-background-dark dark:text-slate-300">
+
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                schedule
+                                            </span>
+
+                                            {{ item.status_label }}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="9" class="px-6 py-14 text-center">
+
+                                    <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">
+                                        group_off
+                                    </span>
+
+                                    <p class="mt-3 font-medium text-slate-500 dark:text-slate-400">
+                                        Belum ada peserta yang terdaftar pada posko ini.
+                                    </p>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             INFORMASI
+        ====================================================== -->
+        <div class="rounded-xl border border-primary-dark/20 bg-primary-dark/[0.04] p-5 dark:border-primary-dark/30 dark:bg-primary-dark/20">
+
+            <div class="flex items-start gap-3">
+
+                <span class="material-symbols-outlined text-primary-dark dark:text-blue-300">
+                    info
+                </span>
+
+                <div>
+
+                    <h3 class="font-bold text-slate-900 dark:text-white">
+                        Informasi Kehadiran
+                    </h3>
+
+                    <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                        Daftar ini menampilkan seluruh peserta yang berada pada
+                        posko yang sama dengan jadwal kegiatan, termasuk balita,
+                        ibu hamil, dan peserta lainnya. Peserta yang menerima
+                        pemeriksaan balita, pemeriksaan ibu hamil, atau imunisasi
+                        akan otomatis tercatat hadir melalui tabel kehadiran.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}Laporan Imunisasi{% endblock %}
+
+{% block content %}
+
+    <div class="mb-6 select-none">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+            Laporan Bulanan Imunisasi
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Pantau cakupan imunisasi, status kelengkapan vaksinasi, dan capaian target sasaran per posyandu.
+        </p>
+    </div>
+
+    {# ===== FILTER ===== #}
+    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+        <form method="GET" class="flex flex-wrap items-end gap-4">
+            <div class="flex flex-col gap-1.5 min-w-[200px] flex-1 sm:flex-none">
+                <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pilih Periode Bulan</label>
+                <select name="bulan" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                    {% for b_val, b_name in bulan_choices %}
+                    <option value="{{ b_val }}" {% if b_val == bulan %}selected{% endif %}>{{ b_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5 min-w-[150px] flex-1 sm:flex-none">
+                <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tahun</label>
+                <select name="tahun" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                    {% for t in tahun_choices %}
+                    <option value="{{ t }}" {% if t == tahun %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5 min-w-[180px] flex-1 sm:flex-none">
+                <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Jenis Vaksin</label>
+                <select name="vaksin" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                    <option value="">Semua Vaksin</option>
+                    {% for v_val, v_name in vaksin_choices %}
+                    <option value="{{ v_val }}" {% if v_val == vaksin %}selected{% endif %}>{{ v_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="w-full sm:w-auto px-5 h-10 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">filter_alt</span> Terapkan Filter
+            </button>
+        </form>
+    </div>
+
+    {# ===== KARTU RINGKASAN ===== #}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Sasaran</span>
+                <span class="material-symbols-outlined text-slate-400 dark:text-slate-600 text-[20px]">group</span>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ stats.total_sasaran }}</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Bayi &amp; balita terdaftar</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sudah Imunisasi</span>
+                <span class="material-symbols-outlined text-emerald-500 text-[20px]">vaccines</span>
+            </div>
+            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.sudah_imunisasi }}</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Pernah menerima vaksin</p>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Belum Imunisasi</span>
+                <span class="material-symbols-outlined text-rose-400 text-[20px]">person_cancel</span>
+            </div>
+            <p class="text-2xl font-bold text-rose-500">{{ stats.belum_imunisasi }}</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Belum mendapat vaksin apapun</p>
+        </div>
+        <div class="bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200 dark:border-emerald-900 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">Sesuai Usia</span>
+                <span class="material-symbols-outlined text-emerald-500 text-[20px]">verified</span>
+            </div>
+            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.persen_sesuai_usia }}%</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Vaksin jatuh tempo yang sudah terpenuhi</p>
+        </div>
+    </div>
+
+    {# ===== TABEL REKAP PER JADWAL ===== #}
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100 dark:border-slate-800/70 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-xl">vaccines</span>
+                <h3 class="text-sm font-bold text-slate-800 dark:text-white">Rekap Dosis Imunisasi per Kegiatan — {{ bulan_label }} {{ tahun }}</h3>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-950 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
+                        <th class="px-6 py-3.5">Posyandu / Tanggal</th>
+                        <th class="px-6 py-3.5 text-center">Sasaran</th>
+                        <th class="px-6 py-3.5 text-center">HB-0</th>
+                        <th class="px-6 py-3.5 text-center">BCG</th>
+                        <th class="px-6 py-3.5 text-center">DPT-HB-Hib</th>
+                        <th class="px-6 py-3.5 text-center">Polio</th>
+                        <th class="px-6 py-3.5 text-center">MR</th>
+                        <th class="px-6 py-3.5 text-center">PCV</th>
+                        <th class="px-6 py-3.5 text-center">Rotavirus</th>
+                        <th class="px-6 py-3.5 text-center">Total Dosis</th>
+                        <th class="px-6 py-3.5">Cakupan (D/S)</th>
+                        <th class="px-6 py-3.5 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/70 text-sm">
+                    {% for r in rekap %}
+                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition duration-150">
+                        <td class="px-6 py-4">
+                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 block mb-0.5">{{ r.jadwal.tgl_kegiatan|date:"d M Y" }}</span>
+                            <span class="font-bold text-slate-800 dark:text-slate-200 block text-xs sm:text-sm">{{ r.jadwal.posyandu.nama }}</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">({{ r.jadwal.jns_kegiatan }})</span>
+                        </td>
+                        <td class="px-6 py-4 text-center font-semibold text-slate-700 dark:text-slate-300">{{ r.sasaran }}</td>
+
+                        {# HB-0 #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.hb0 > 0 %}bg-cyan-50 dark:bg-cyan-950/30 text-cyan-600 dark:text-cyan-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.hb0 }}
+                            </span>
+                        </td>
+
+                        {# BCG #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.bcg > 0 %}bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.bcg }}
+                            </span>
+                        </td>
+
+                        {# DPT-HB-Hib #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.dpt > 0 %}bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.dpt }}
+                            </span>
+                        </td>
+
+                        {# Polio #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.polio > 0 %}bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.polio }}
+                            </span>
+                        </td>
+
+                        {# MR #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.mr > 0 %}bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.mr }}
+                            </span>
+                        </td>
+
+                        {# PCV #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.pcv > 0 %}bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.pcv }}
+                            </span>
+                        </td>
+
+                        {# Rotavirus #}
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-lg text-xs font-bold
+                                {% if r.rotavirus > 0 %}bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400{% else %}text-slate-300 dark:text-slate-700{% endif %}">
+                                {{ r.rotavirus }}
+                            </span>
+                        </td>
+
+                        {# Total Dosis #}
+                        <td class="px-6 py-4 text-center font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/20 dark:bg-emerald-500/5">
+                            {{ r.total_dosis }}
+                        </td>
+
+                        {# Cakupan Progress Bar #}
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-24 bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full transition-all
+                                        {% if r.persen >= 80 %}bg-emerald-500{% elif r.persen >= 50 %}bg-amber-400{% else %}bg-rose-400{% endif %}"
+                                        style="width: {{ r.persen }}%">
+                                    </div>
+                                </div>
+                                <span class="text-xs font-bold
+                                    {% if r.persen >= 80 %}text-emerald-600 dark:text-emerald-400
+                                    {% elif r.persen >= 50 %}text-amber-600 dark:text-amber-400
+                                    {% else %}text-rose-500{% endif %}">
+                                    {{ r.persen }}%
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-center">
+                            {# Sesudah — arahkan ke laporan_jadwal yang sudah ada #}
+                            <a href="{% url 'laporan:laporan_jadwal' r.jadwal.id_jadwal %}" 
+                            class="inline-flex items-center justify-center gap-1.5 px-3 h-8 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white rounded-lg text-xs font-bold transition bg-white dark:bg-slate-900">
+                                <span class="material-symbols-outlined text-[15px]">visibility</span> Detail
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="12" class="px-6 py-14 text-center text-slate-400 dark:text-slate-500">
+                            <span class="material-symbols-outlined text-[48px] block mb-3 text-slate-300 dark:text-slate-700">vaccines</span>
+                            <p class="text-sm font-medium">Tidak ditemukan jadwal imunisasi pada periode terpilih.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ===== TABEL KELENGKAPAN PER SASARAN ===== #}
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100 dark:border-slate-800/70 flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-sky-500 text-xl">checklist</span>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white">Status Imunisasi per Sasaran</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-950 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-800">
+                        <th class="px-6 py-3.5">Nama Anak</th>
+                        <th class="px-6 py-3.5">Posyandu</th>
+                        {% for header in kelengkapan_headers %}
+                        <th class="px-6 py-3.5 text-center">{{ header }}</th>
+                        {% endfor %}
+                        <th class="px-6 py-3.5 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/70 text-sm">
+                    {% for s in sasaran_list %}
+                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition duration-150">
+                        <td class="px-6 py-3.5">
+                            <span class="font-semibold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">{{ s.nama_anak }}</span>
+                            <span class="text-[11px] text-slate-400 dark:text-slate-500 block">{{ s.tgl_lahir|date:"d M Y" }} &middot; {{ s.usia_bulan }} bln</span>
+                        </td>
+                        <td class="px-6 py-3.5 text-xs text-slate-500 dark:text-slate-400">{{ s.posyandu }}</td>
+
+                        {% for status in s.status_vaksin %}
+                        <td class="px-6 py-3.5 text-center">
+                            {% if status == 'lengkap' %}
+                                <span class="material-symbols-outlined text-emerald-500 text-[20px]" title="Lengkap">check_circle</span>
+                            {% elif status == 'sebagian' %}
+                                <span class="material-symbols-outlined text-amber-400 text-[20px]" title="Sebagian">pending</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700 text-[20px]" title="Belum">radio_button_unchecked</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+
+                        <td class="px-6 py-3.5 text-center">
+                            {% if s.status_lengkap %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900">
+                                    <span class="material-symbols-outlined text-[13px]">verified</span> Sesuai Usia
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-500 border border-rose-100 dark:border-rose-900">
+                                    <span class="material-symbols-outlined text-[13px]">warning</span> Belum Sesuai Usia
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        {# colspan = 2 (nama+posyandu) + jumlah header kelengkapan + 1 (status) #}
+                        <td colspan="10" class="px-6 py-14 text-center text-slate-400 dark:text-slate-500">
+                            <span class="material-symbols-outlined text-[48px] block mb-3 text-slate-300 dark:text-slate-700">child_care</span>
+                            <p class="text-sm font-medium">Tidak ada data sasaran balita untuk periode ini.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ===== KETERANGAN ISTILAH ===== #}
+    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm select-none">
+        <div class="flex items-center gap-2 mb-3 text-slate-700 dark:text-slate-300">
+            <span class="material-symbols-outlined text-amber-500 text-[18px]">info</span>
+            <h4 class="text-xs font-bold uppercase tracking-wider">Keterangan Jenis Vaksin &amp; Indikator</h4>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-4">
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-cyan-600 dark:text-cyan-400 block mb-1">HB-0</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Vaksin Hepatitis B pertama. Diberikan dalam 24 jam setelah lahir.
+                </p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-sky-600 dark:text-sky-400 block mb-1">BCG</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Vaksin tuberkulosis. Diberikan 1 kali pada usia 0–2 bulan.
+                </p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-violet-600 dark:text-violet-400 block mb-1">DPT-HB-Hib</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Vaksin difteri, pertusis, tetanus, hepatitis B, dan Hib. Dosis rutin dicatat pada usia 2, 3, 4, dan 18 bulan.
+                </p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-amber-600 dark:text-amber-400 block mb-1">Polio (OPV/IPV)</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Vaksin poliomielitis. Sistem mencatat bOPV 1–4 serta IPV 1–2 sesuai jadwal usia.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-rose-600 dark:text-rose-400 block mb-1">MR</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Vaksin campak dan rubella. Dosis rutin dicatat pada usia 9 dan 18 bulan.
+                </p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-teal-600 dark:text-teal-400 block mb-1">PCV</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Sistem mencatat PCV 1, PCV 2, dan PCV 3 sesuai usia sasaran.
+                </p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                <span class="font-bold text-indigo-600 dark:text-indigo-400 block mb-1">Rotavirus</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Sistem mencatat Rotavirus 1, 2, dan 3 sesuai jadwal usia.
+                </p>
+            </div>
+            <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50 sm:col-span-2">
+                <span class="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">Status Sesuai Usia</span>
+                <p class="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
+                    Persentase balita yang telah menerima seluruh vaksin yang <strong class="text-slate-600 dark:text-slate-300">sudah jatuh tempo berdasarkan usia</strong> pada akhir periode laporan. JE tidak dipaksakan dalam indikator ini karena pelaksanaannya bergantung program/wilayah.
+                </p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

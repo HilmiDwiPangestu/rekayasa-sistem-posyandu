@@ -1,0 +1,1455 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block subtitle %}
+Edit Jadwal Kegiatan
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    /* =========================================================
+       DJANGO FORM INPUT
+    ========================================================= */
+    .Django-custom-input input,
+    .Django-custom-input select {
+        display: block !important;
+        width: 100% !important;
+
+        padding: 0.625rem 0.875rem !important;
+
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 0.5rem !important;
+
+        font-size: 0.875rem !important;
+        color: #1e293b !important;
+
+        outline: none !important;
+
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background-color 0.2s ease;
+    }
+
+
+    .Django-custom-input input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+
+    .Django-custom-input input:focus,
+    .Django-custom-input select:focus {
+        background-color: #ffffff !important;
+        border-color: #2845D6 !important;
+
+        box-shadow:
+            0 0 0 3px rgba(40, 69, 214, 0.10) !important;
+    }
+
+
+    /* =========================================================
+       DARK MODE
+    ========================================================= */
+    .dark .Django-custom-input input,
+    .dark .Django-custom-input select {
+        background-color: rgba(16, 34, 16, 0.5) !important;
+        border-color: rgba(255, 255, 255, 0.10) !important;
+        color: #ffffff !important;
+    }
+
+
+    .dark .Django-custom-input input::placeholder {
+        color: #64748b !important;
+    }
+
+
+    .dark .Django-custom-input input:focus,
+    .dark .Django-custom-input select:focus {
+        background-color: #102210 !important;
+        border-color: #2845D6 !important;
+
+        box-shadow:
+            0 0 0 3px rgba(40, 69, 214, 0.15) !important;
+    }
+
+
+    /* Date / time icon dark mode */
+    .dark .Django-custom-input input[type="date"],
+    .dark .Django-custom-input input[type="time"] {
+        color-scheme: dark;
+    }
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                overflow-hidden
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+
+                sm:p-6
+            "
+        >
+
+            <!-- Decoration -->
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-20
+                    h-56
+                    w-56
+                    rounded-full
+                    bg-primary-dark/30
+                    blur-3xl
+                "
+            ></div>
+
+
+            <div
+                class="
+                    relative
+                    flex
+                    flex-col
+                    gap-4
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <!-- LEFT -->
+                <div class="flex items-start gap-4">
+
+                    <!-- ICON -->
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+
+                            bg-white/10
+                            text-white
+
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            edit_calendar
+                        </span>
+
+                    </div>
+
+
+                    <!-- TITLE -->
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Agenda Posyandu
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                tracking-tight
+
+                                sm:text-3xl
+                            "
+                        >
+                            Edit Jadwal Kegiatan
+                        </h1>
+
+
+                        <p
+                            class="
+                                mt-2
+                                max-w-2xl
+                                text-sm
+                                leading-6
+                                text-slate-300
+                            "
+                        >
+                            Perbarui detail waktu, jenis kegiatan,
+                            dan lokasi pelaksanaan kegiatan Posyandu.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BADGE -->
+                <div
+                    class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-2
+
+                        rounded-lg
+
+                        border
+                        border-white/10
+
+                        bg-white/10
+
+                        px-3 py-2
+
+                        text-xs
+                        font-semibold
+                        text-slate-200
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[16px]
+                            text-blue-200
+                        "
+                    >
+                        update
+                    </span>
+
+                    Perbarui Jadwal
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             FORM
+        ====================================================== -->
+        <form
+            method="POST"
+
+            class="
+                overflow-hidden
+                rounded-xl
+
+                border
+                border-slate-200
+
+                bg-white
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+            "
+        >
+
+            {% csrf_token %}
+
+
+
+            <!-- =================================================
+                 WAKTU PELAKSANAAN
+            ================================================== -->
+            <section
+                class="
+                    border-b
+                    border-slate-200
+
+                    p-5
+
+                    dark:border-white/10
+
+                    sm:p-6
+                "
+            >
+
+                <!-- SECTION HEADER -->
+                <div class="mb-6 flex items-center gap-3">
+
+                    <div
+                        class="
+                            flex
+                            h-10 w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[20px]">
+                            schedule
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-900
+
+                                dark:text-white
+                            "
+                        >
+                            Waktu Pelaksanaan
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-xs
+                                text-slate-500
+
+                                dark:text-slate-400
+                            "
+                        >
+                            Perbarui tanggal serta jam mulai dan
+                            selesai kegiatan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- FIELDS -->
+                <div
+                    class="
+                        grid
+                        grid-cols-1
+                        gap-5
+
+                        md:grid-cols-3
+                    "
+                >
+
+
+                    <!-- TANGGAL -->
+                    <div class="flex flex-col gap-1.5">
+
+                        <label
+                            for="{{ form.tgl_kegiatan.id_for_label }}"
+
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Tanggal Kegiatan
+
+                            <span class="text-rose-500">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <div class="Django-custom-input">
+
+                            {{ form.tgl_kegiatan }}
+
+                        </div>
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Tentukan tanggal pelaksanaan kegiatan.
+                        </p>
+
+
+                        {% if form.tgl_kegiatan.errors %}
+
+                        <div
+                            class="
+                                flex
+                                items-start
+                                gap-1.5
+                                text-rose-500
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    mt-0.5
+                                    text-[14px]
+                                "
+                            >
+                                error
+                            </span>
+
+
+                            <p class="text-xs font-medium">
+                                {{ form.tgl_kegiatan.errors.0 }}
+                            </p>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- JAM MULAI -->
+                    <div class="flex flex-col gap-1.5">
+
+                        <label
+                            for="{{ form.jam_mulai.id_for_label }}"
+
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Jam Mulai
+
+                            <span class="text-rose-500">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <div class="Django-custom-input">
+
+                            {{ form.jam_mulai }}
+
+                        </div>
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Waktu kegiatan mulai dilaksanakan.
+                        </p>
+
+
+                        {% if form.jam_mulai.errors %}
+
+                        <div
+                            class="
+                                flex
+                                items-start
+                                gap-1.5
+                                text-rose-500
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    mt-0.5
+                                    text-[14px]
+                                "
+                            >
+                                error
+                            </span>
+
+
+                            <p class="text-xs font-medium">
+                                {{ form.jam_mulai.errors.0 }}
+                            </p>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- JAM SELESAI -->
+                    <div class="flex flex-col gap-1.5">
+
+                        <label
+                            for="{{ form.jam_selesai.id_for_label }}"
+
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Jam Selesai
+
+                            <span class="text-rose-500">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <div class="Django-custom-input">
+
+                            {{ form.jam_selesai }}
+
+                        </div>
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Perkiraan waktu kegiatan selesai.
+                        </p>
+
+
+                        {% if form.jam_selesai.errors %}
+
+                        <div
+                            class="
+                                flex
+                                items-start
+                                gap-1.5
+                                text-rose-500
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    mt-0.5
+                                    text-[14px]
+                                "
+                            >
+                                error
+                            </span>
+
+
+                            <p class="text-xs font-medium">
+                                {{ form.jam_selesai.errors.0 }}
+                            </p>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 DETAIL KEGIATAN
+            ================================================== -->
+            <section
+                class="
+                    border-b
+                    border-slate-200
+
+                    p-5
+
+                    dark:border-white/10
+
+                    sm:p-6
+                "
+            >
+
+                <!-- SECTION HEADER -->
+                <div class="mb-6 flex items-center gap-3">
+
+                    <div
+                        class="
+                            flex
+                            h-10 w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[20px]">
+                            location_on
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-900
+
+                                dark:text-white
+                            "
+                        >
+                            Detail Kegiatan & Tempat
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-xs
+                                text-slate-500
+
+                                dark:text-slate-400
+                            "
+                        >
+                            Perbarui jenis kegiatan dan lokasi
+                            Posyandu tempat kegiatan dilaksanakan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div
+                    class="
+                        grid
+                        grid-cols-1
+                        gap-5
+
+                        md:grid-cols-2
+                    "
+                >
+
+
+                    <!-- JENIS KEGIATAN -->
+                    <div class="flex flex-col gap-1.5">
+
+                        <label
+                            for="{{ form.jns_kegiatan.id_for_label }}"
+
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Jenis Kegiatan
+
+                            <span class="text-rose-500">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <div class="Django-custom-input">
+
+                            {{ form.jns_kegiatan }}
+
+                        </div>
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Pilih jenis pelayanan yang dilaksanakan.
+                        </p>
+
+
+                        {% if form.jns_kegiatan.errors %}
+
+                        <div
+                            class="
+                                flex
+                                items-start
+                                gap-1.5
+                                text-rose-500
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    mt-0.5
+                                    text-[14px]
+                                "
+                            >
+                                error
+                            </span>
+
+
+                            <p class="text-xs font-medium">
+                                {{ form.jns_kegiatan.errors.0 }}
+                            </p>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- POSYANDU OTOMATIS -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Posyandu
+                        </label>
+
+                        <div class="flex min-h-[42px] items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                            <span class="material-symbols-outlined text-[20px] text-emerald-600">location_on</span>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ posyandu_otomatis.nama }}</p>
+                                {% if posyandu_otomatis.desa %}
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ posyandu_otomatis.desa }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] leading-4 text-slate-400">
+                            Lokasi mengikuti tempat tugas Kader secara otomatis dan tidak dapat diubah dari form.
+                        </p>
+                    </div>
+
+                </div>
+
+
+
+                <!-- INFO -->
+                <div
+                    class="
+                        mt-5
+                        flex
+                        items-start
+                        gap-2
+
+                        rounded-lg
+
+                        bg-primary-dark/5
+
+                        px-3 py-2.5
+
+                        dark:bg-primary-dark/10
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            mt-0.5
+                            shrink-0
+                            text-[15px]
+                            text-primary-dark
+
+                            dark:text-blue-300
+                        "
+                    >
+                        info
+                    </span>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Pastikan tanggal dan jam pelaksanaan
+                        tidak bentrok dengan jadwal lain pada
+                        Posyandu yang sama.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 NON FIELD ERROR
+            ================================================== -->
+            {% if form.non_field_errors %}
+
+            <div
+                class="
+                    border-b
+                    border-slate-200
+
+                    px-5 py-4
+
+                    dark:border-white/10
+
+                    sm:px-6
+                "
+            >
+
+                <div
+                    class="
+                        rounded-xl
+
+                        border
+                        border-rose-200
+
+                        bg-rose-50
+
+                        p-4
+
+                        dark:border-rose-900/50
+                        dark:bg-rose-950/20
+                    "
+                >
+
+                    <div class="flex items-start gap-3">
+
+                        <div
+                            class="
+                                flex
+                                h-8 w-8
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-lg
+
+                                bg-rose-100
+                                text-rose-600
+
+                                dark:bg-rose-500/10
+                                dark:text-rose-400
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[17px]">
+                                error
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <p
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-rose-700
+
+                                    dark:text-rose-400
+                                "
+                            >
+                                Jadwal belum dapat diperbarui
+                            </p>
+
+
+                            {% for error in form.non_field_errors %}
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-xs
+                                    leading-5
+                                    text-rose-600
+
+                                    dark:text-rose-300
+                                "
+                            >
+                                {{ error }}
+                            </p>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+
+            <!-- =================================================
+                 ACTION
+            ================================================== -->
+            <div
+                class="
+                    flex
+                    flex-col-reverse
+                    gap-2
+
+                    bg-slate-50
+
+                    px-5 py-4
+
+                    dark:bg-background-dark/40
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-end
+                    sm:px-6
+                "
+            >
+
+
+                <!-- BATAL -->
+                <a
+                    href="{% url 'posyandu:list_jadwal' %}"
+
+                    class="
+                        inline-flex
+                        h-10
+                        items-center
+                        justify-center
+                        gap-2
+
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-white
+
+                        px-5
+
+                        text-xs
+                        font-bold
+                        text-slate-600
+
+                        shadow-sm
+
+                        transition
+
+                        hover:border-primary-dark/30
+                        hover:bg-primary-dark/5
+                        hover:text-primary-dark
+
+                        dark:border-white/10
+                        dark:bg-primary
+                        dark:text-slate-300
+
+                        dark:hover:bg-primary-dark/10
+                        dark:hover:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[17px]">
+                        close
+                    </span>
+
+                    Batal
+
+                </a>
+
+
+
+                <!-- UPDATE -->
+                <button
+                    type="submit"
+
+                    class="
+                        inline-flex
+                        h-10
+                        items-center
+                        justify-center
+                        gap-2
+
+                        rounded-lg
+
+                        bg-primary-dark
+
+                        px-6
+
+                        text-xs
+                        font-bold
+                        text-white
+
+                        shadow-sm
+
+                        transition
+
+                        hover:bg-primary
+                        hover:shadow-md
+
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-primary-dark/30
+                        focus:ring-offset-2
+
+                        active:scale-[0.98]
+
+                        dark:focus:ring-offset-primary
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        save
+                    </span>
+
+                    Update Jadwal
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+
+        <!-- =====================================================
+             INFORMASI
+        ====================================================== -->
+        <div
+            class="
+                overflow-hidden
+                rounded-xl
+
+                border
+                border-slate-200
+
+                bg-white
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+            "
+        >
+
+            <!-- HEADER -->
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-3
+
+                    border-b
+                    border-slate-200
+
+                    px-5 py-4
+
+                    dark:border-white/10
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        info
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h4
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-900
+
+                            dark:text-white
+                        "
+                    >
+                        Informasi Perubahan Jadwal
+                    </h4>
+
+
+                    <p
+                        class="
+                            mt-0.5
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                        Hal yang perlu diperhatikan sebelum memperbarui jadwal.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONTENT -->
+            <div
+                class="
+                    grid
+                    grid-cols-1
+                    gap-3
+                    p-4
+
+                    md:grid-cols-3
+                "
+            >
+
+
+                <!-- WAKTU -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            schedule
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Waktu Kegiatan
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Pastikan jam mulai lebih awal daripada
+                        jam selesai dan sesuai dengan waktu
+                        pelayanan Posyandu.
+                    </p>
+
+                </div>
+
+
+
+                <!-- LOKASI -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            location_on
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Lokasi Posyandu
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Lokasi jadwal mengikuti tempat tugas Kader secara
+                        otomatis agar data tidak tercatat pada Posyandu lain.
+                    </p>
+
+                </div>
+
+
+
+                <!-- JENIS -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            medical_services
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Jenis Kegiatan
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Pastikan jenis kegiatan sesuai dengan
+                        layanan yang akan diberikan pada jadwal tersebut.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             BACK BUTTON
+        ====================================================== -->
+        <div class="flex justify-end">
+
+            <a
+                href="{% url 'posyandu:list_jadwal' %}"
+
+                class="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+
+                    rounded-lg
+
+                    border
+                    border-slate-200
+
+                    bg-white
+
+                    px-4
+
+                    text-xs
+                    font-bold
+                    text-slate-600
+
+                    shadow-sm
+
+                    transition
+
+                    hover:border-primary-dark/30
+                    hover:bg-primary-dark/5
+                    hover:text-primary-dark
+
+                    dark:border-white/10
+                    dark:bg-primary
+                    dark:text-slate-300
+
+                    dark:hover:bg-primary-dark/10
+                    dark:hover:text-blue-300
+                "
+            >
+
+                <span class="material-symbols-outlined text-[17px]">
+                    arrow_back
+                </span>
+
+                Kembali ke Jadwal
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

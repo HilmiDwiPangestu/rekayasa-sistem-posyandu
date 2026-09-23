@@ -1,0 +1,694 @@
+{% load static %}
+
+{% url 'dashboard:index' as url_dashboard %}
+{% url 'peserta:list' 'balita' as url_balita %}
+{% url 'peserta:list' 'bumil' as url_bumil %}
+{% url 'pemeriksaan:list' 'balita' as url_pemeriksaan %}
+{% url 'pemeriksaan:list_imunisasi' 'balita' as url_imunisasi %}
+{% url 'pemeriksaan:list' 'bumil' as url_pemeriksaan_bumil %}
+{% url 'pemeriksaan:list_imunisasi' 'bumil' as url_imunisasi_bumil %}
+{% url 'posyandu:list_jadwal' as url_jadwal %}
+{% url 'laporan:laporan_bulanan' as url_laporan %}
+{% url 'laporan:laporan_triwulan' as url_laporan_triwulan %}
+{% url 'accounts:setting' as url_setting %}
+
+{% with path=request.path %}
+
+<!-- SECTION: UTAMA -->
+<p class="px-4 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">Utama</p>
+
+<a href="{{ url_dashboard }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_dashboard %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_dashboard %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">home</span>
+  <span class="text-sm font-semibold">Dashboard</span>
+</a>
+
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">Peserta</p>
+
+<div class="flex flex-col">
+  <button type="button" data-dropdown-btn
+    class="group flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 w-full text-left
+      {% if path == url_balita or path == url_bumil %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+        {% if path == url_balita or path == url_bumil %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">
+        groups
+      </span>
+      <span class="text-sm font-semibold">Data Peserta</span>
+    </div>
+
+    <span data-dropdown-icon
+      class="material-symbols-outlined transition-all duration-200 text-[18px]
+      {% if path == url_balita or path == url_bumil %}text-white/70 rotate-180{% else %}text-white/40 group-hover:text-white/70{% endif %}">
+      expand_more
+    </span>
+  </button>
+
+  <div data-dropdown-menu
+    class="mt-1 ml-3 flex flex-col gap-0.5 pl-4 border-l border-white/20
+    {% if path == url_balita or path == url_bumil %}{% else %}hidden{% endif %}">
+
+    <a href="{{ url_balita }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+      {% if path == url_balita %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+      {% if path == url_balita %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}">
+      </span>
+
+      <span class="text-sm font-medium">Data Balita</span>
+    </a>
+
+    <a href="{{ url_bumil }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+      {% if path == url_bumil %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+      {% if path == url_bumil %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}">
+      </span>
+
+      <span class="text-sm font-medium">Data Ibu Hamil</span>
+    </a>
+
+  </div>
+</div>
+
+
+{% comment %} <a href="{{ url_balita }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_balita %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_balita %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">child_care</span>
+  <span class="text-sm font-semibold">Data Balita</span>
+</a> {% endcomment %}
+
+<!-- ========================================================= -->
+<!-- SECTION: LAYANAN -->
+<!-- ========================================================= -->
+
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">
+    Layanan
+</p>
+
+
+<!-- ========================================================= -->
+<!-- DROPDOWN UTAMA LAYANAN -->
+<!-- ========================================================= -->
+<div class="flex flex-col">
+
+    <button
+        type="button"
+        data-dropdown-btn
+        class="
+            group
+            flex
+            items-center
+            justify-between
+            gap-3
+            w-full
+            px-4
+            py-2.5
+            rounded-xl
+            text-left
+            transition-all
+            duration-200
+
+            {% if path == url_pemeriksaan or path == url_imunisasi or path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                bg-white/20 text-white
+            {% else %}
+                text-white/80
+                hover:text-white
+                hover:bg-white/10
+            {% endif %}
+        "
+    >
+
+        <div class="flex items-center gap-3">
+
+            <span
+                class="
+                    material-symbols-outlined
+                    text-[20px]
+                    transition-colors
+                    duration-200
+
+                    {% if path == url_pemeriksaan or path == url_imunisasi or path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                        text-white
+                    {% else %}
+                        text-white/60
+                        group-hover:text-white
+                    {% endif %}
+                "
+            >
+                medical_services
+            </span>
+
+
+            <span class="text-sm font-semibold">
+                Layanan
+            </span>
+
+        </div>
+
+
+        <span
+            data-dropdown-icon
+            class="
+                material-symbols-outlined
+                text-[18px]
+                transition-all
+                duration-200
+
+                {% if path == url_pemeriksaan or path == url_imunisasi or path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                    text-white/70
+                    rotate-180
+                {% else %}
+                    text-white/40
+                    group-hover:text-white/70
+                {% endif %}
+            "
+        >
+            expand_more
+        </span>
+
+    </button>
+
+
+    <!-- ===================================================== -->
+    <!-- ISI DROPDOWN LAYANAN -->
+    <!-- ===================================================== -->
+    <div
+        data-dropdown-menu
+        class="
+            mt-1
+            ml-3
+            flex
+            flex-col
+            gap-1
+            pl-4
+            border-l
+            border-white/20
+
+            {% if path == url_pemeriksaan or path == url_imunisasi or path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+            {% else %}
+                hidden
+            {% endif %}
+        "
+    >
+
+
+        <!-- ================================================= -->
+        <!-- BALITA -->
+        <!-- ================================================= -->
+        <div class="flex flex-col">
+
+            <button
+                type="button"
+                data-dropdown-btn
+                class="
+                    group
+                    flex
+                    items-center
+                    justify-between
+                    gap-3
+                    w-full
+                    px-3
+                    py-2.5
+                    rounded-lg
+                    text-left
+                    transition-all
+                    duration-200
+
+                    {% if path == url_pemeriksaan or path == url_imunisasi %}
+                        bg-white/10
+                        text-white
+                    {% else %}
+                        text-white/70
+                        hover:text-white
+                        hover:bg-white/10
+                    {% endif %}
+                "
+            >
+
+                <div class="flex items-center gap-3">
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[19px]
+
+                            {% if path == url_pemeriksaan or path == url_imunisasi %}
+                                text-white
+                            {% else %}
+                                text-white/50
+                                group-hover:text-white
+                            {% endif %}
+                        "
+                    >
+                        child_care
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Balita
+                    </span>
+
+                </div>
+
+
+                <span
+                    data-dropdown-icon
+                    class="
+                        material-symbols-outlined
+                        text-[17px]
+                        transition-transform
+                        duration-200
+
+                        {% if path == url_pemeriksaan or path == url_imunisasi %}
+                            rotate-180
+                            text-white/70
+                        {% else %}
+                            text-white/40
+                        {% endif %}
+                    "
+                >
+                    expand_more
+                </span>
+
+            </button>
+
+
+            <!-- ============================================= -->
+            <!-- SUBMENU BALITA -->
+            <!-- ============================================= -->
+            <div
+                data-dropdown-menu
+                class="
+                    mt-0.5
+                    ml-4
+                    flex
+                    flex-col
+                    gap-0.5
+                    pl-3
+                    border-l
+                    border-white/15
+
+                    {% if path == url_pemeriksaan or path == url_imunisasi %}
+                    {% else %}
+                        hidden
+                    {% endif %}
+                "
+            >
+
+
+                <!-- PEMERIKSAAN BALITA -->
+                <a
+                    href="{{ url_pemeriksaan }}"
+                    class="
+                        group
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2
+                        rounded-lg
+                        transition-all
+                        duration-200
+
+                        {% if path == url_pemeriksaan %}
+                            bg-white/10
+                            text-white
+                        {% else %}
+                            text-white/60
+                            hover:text-white
+                            hover:bg-white/10
+                        {% endif %}
+                    "
+                >
+
+                    <span
+                        class="
+                            w-1.5
+                            h-1.5
+                            rounded-full
+                            flex-shrink-0
+
+                            {% if path == url_pemeriksaan %}
+                                bg-white
+                            {% else %}
+                                bg-white/30
+                                group-hover:bg-white
+                            {% endif %}
+                        "
+                    >
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Pemeriksaan
+                    </span>
+
+                </a>
+
+
+                <!-- IMUNISASI BALITA -->
+                <a
+                    href="{{ url_imunisasi }}"
+                    class="
+                        group
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2
+                        rounded-lg
+                        transition-all
+                        duration-200
+
+                        {% if path == url_imunisasi %}
+                            bg-white/10
+                            text-white
+                        {% else %}
+                            text-white/60
+                            hover:text-white
+                            hover:bg-white/10
+                        {% endif %}
+                    "
+                >
+
+                    <span
+                        class="
+                            w-1.5
+                            h-1.5
+                            rounded-full
+                            flex-shrink-0
+
+                            {% if path == url_imunisasi %}
+                                bg-white
+                            {% else %}
+                                bg-white/30
+                                group-hover:bg-white
+                            {% endif %}
+                        "
+                    >
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Imunisasi
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- IBU HAMIL -->
+        <!-- ================================================= -->
+        <div class="flex flex-col">
+
+            <button
+                type="button"
+                data-dropdown-btn
+                class="
+                    group
+                    flex
+                    items-center
+                    justify-between
+                    gap-3
+                    w-full
+                    px-3
+                    py-2.5
+                    rounded-lg
+                    text-left
+                    transition-all
+                    duration-200
+
+                    {% if path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                        bg-white/10
+                        text-white
+                    {% else %}
+                        text-white/70
+                        hover:text-white
+                        hover:bg-white/10
+                    {% endif %}
+                "
+            >
+
+                <div class="flex items-center gap-3">
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[19px]
+
+                            {% if path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                                text-white
+                            {% else %}
+                                text-white/50
+                                group-hover:text-white
+                            {% endif %}
+                        "
+                    >
+                        pregnant_woman
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Ibu Hamil
+                    </span>
+
+                </div>
+
+
+                <span
+                    data-dropdown-icon
+                    class="
+                        material-symbols-outlined
+                        text-[17px]
+                        transition-transform
+                        duration-200
+
+                        {% if path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                            rotate-180
+                            text-white/70
+                        {% else %}
+                            text-white/40
+                        {% endif %}
+                    "
+                >
+                    expand_more
+                </span>
+
+            </button>
+
+
+            <!-- ============================================= -->
+            <!-- SUBMENU IBU HAMIL -->
+            <!-- ============================================= -->
+            <div
+                data-dropdown-menu
+                class="
+                    mt-0.5
+                    ml-4
+                    flex
+                    flex-col
+                    gap-0.5
+                    pl-3
+                    border-l
+                    border-white/15
+
+                    {% if path == url_pemeriksaan_bumil or path == url_imunisasi_bumil %}
+                    {% else %}
+                        hidden
+                    {% endif %}
+                "
+            >
+
+
+                <!-- PEMERIKSAAN IBU HAMIL -->
+                <a
+                    href="{{ url_pemeriksaan_bumil }}"
+                    class="
+                        group
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2
+                        rounded-lg
+                        transition-all
+                        duration-200
+
+                        {% if path == url_pemeriksaan_bumil %}
+                            bg-white/10
+                            text-white
+                        {% else %}
+                            text-white/60
+                            hover:text-white
+                            hover:bg-white/10
+                        {% endif %}
+                    "
+                >
+
+                    <span
+                        class="
+                            w-1.5
+                            h-1.5
+                            rounded-full
+                            flex-shrink-0
+
+                            {% if path == url_pemeriksaan_bumil %}
+                                bg-white
+                            {% else %}
+                                bg-white/30
+                                group-hover:bg-white
+                            {% endif %}
+                        "
+                    >
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Pemeriksaan
+                    </span>
+
+                </a>
+
+
+                <!-- IMUNISASI IBU HAMIL -->
+                <a
+                    href="{{ url_imunisasi_bumil }}"
+                    class="
+                        group
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2
+                        rounded-lg
+                        transition-all
+                        duration-200
+
+                        {% if path == url_imunisasi_bumil %}
+                            bg-white/10
+                            text-white
+                        {% else %}
+                            text-white/60
+                            hover:text-white
+                            hover:bg-white/10
+                        {% endif %}
+                    "
+                >
+
+                    <span
+                        class="
+                            w-1.5
+                            h-1.5
+                            rounded-full
+                            flex-shrink-0
+
+                            {% if path == url_imunisasi_bumil %}
+                                bg-white
+                            {% else %}
+                                bg-white/30
+                                group-hover:bg-white
+                            {% endif %}
+                        "
+                    >
+                    </span>
+
+
+                    <span class="text-sm font-medium">
+                        Imunisasi
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SECTION: POSYANDU -->
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">Posyandu</p>
+
+<a href="{{ url_jadwal }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_jadwal %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_jadwal %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">calendar_month</span>
+  <span class="text-sm font-semibold">Jadwal Posyandu</span>
+</a>
+
+<div class="flex flex-col">
+  <button type="button" data-dropdown-btn
+    class="group flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 w-full text-left
+      {% if path == url_laporan or path == url_laporan_triwulan %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+        {% if path == url_laporan or path == url_laporan_triwulan %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">
+        description
+      </span>
+      <span class="text-sm font-semibold">Laporan</span>
+    </div>
+
+    <span data-dropdown-icon
+      class="material-symbols-outlined transition-all duration-200 text-[18px]
+      {% if path == url_laporan or path == url_laporan_triwulan %}text-white/70 rotate-180{% else %}text-white/40 group-hover:text-white/70{% endif %}">
+      expand_more
+    </span>
+  </button>
+
+  <div data-dropdown-menu
+    class="mt-1 ml-3 flex flex-col gap-0.5 pl-4 border-l border-white/20
+    {% if path == url_laporan or path == url_laporan_triwulan %}{% else %}hidden{% endif %}">
+
+    <a href="{{ url_laporan }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+      {% if path == url_laporan %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+      {% if path == url_laporan %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}">
+      </span>
+
+      <span class="text-sm font-medium">Laporan Bulanan</span>
+    </a>
+
+    <a href="{{ url_laporan_triwulan }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+      {% if path == url_laporan_triwulan %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+      {% if path == url_laporan_triwulan %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}">
+      </span>
+
+      <span class="text-sm font-medium">Laporan Triwulan</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- SECTION: AKUN -->
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">Akun</p>
+
+<a href="{{ url_setting }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_setting %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_setting %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">settings</span>
+  <span class="text-sm font-semibold">Pengaturan</span>
+</a>
+
+{% endwith %}

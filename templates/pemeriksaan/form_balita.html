@@ -1,0 +1,2779 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block subtitle %}
+Pemeriksaan {{ status_peserta }}
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     STYLE KHUSUS CHECKBOX PELAYANAN
+========================================================= -->
+<style>
+    #id_vitamin_a,
+    #id_obat_cacing {
+        display: inline-block !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 5px !important;
+        box-shadow: none !important;
+        cursor: pointer;
+
+        /* primary-dark #2845D6 */
+        accent-color: #2845D6;
+    }
+
+    #id_vitamin_a:disabled,
+    #id_obat_cacing:disabled {
+        cursor: not-allowed;
+        opacity: .55;
+    }
+</style>
+
+
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                overflow-hidden
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+                sm:p-6
+            "
+        >
+
+            <!-- DECORATION -->
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-20
+                    h-56
+                    w-56
+                    rounded-full
+                    bg-primary-dark/30
+                    blur-3xl
+                "
+            >
+            </div>
+
+
+            <div
+                class="
+                    relative
+                    flex
+                    flex-col
+                    gap-4
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <div class="flex items-start gap-4">
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-white/10
+                            text-white
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            stethoscope
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Pencatatan Pemeriksaan
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                tracking-tight
+                                sm:text-3xl
+                            "
+                        >
+                            {% if is_edit %}Edit Pemeriksaan {{ status_peserta|title }}{% else %}Form Pemeriksaan {{ status_peserta|title }}{% endif %}
+                        </h1>
+
+
+                        <p
+                            class="
+                                mt-2
+                                max-w-2xl
+                                text-sm
+                                leading-6
+                                text-slate-300
+                            "
+                        >
+                            Masukkan data hasil pemeriksaan balita untuk
+                            pencatatan, pemantauan pertumbuhan, dan deteksi
+                            status gizi.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-2
+                        rounded-lg
+                        border
+                        border-white/10
+                        bg-white/10
+                        px-3 py-2
+                        text-xs
+                        font-semibold
+                        text-slate-200
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[16px] text-blue-200">
+                        calendar_month
+                    </span>
+
+                    {{ jadwal.tgl_kegiatan }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             MAIN GRID
+        ====================================================== -->
+        <div
+            class="
+                grid
+                grid-cols-1
+                items-start
+                gap-6
+                lg:grid-cols-3
+            "
+        >
+
+
+            <!-- =================================================
+                 KOLOM KIRI
+            ================================================== -->
+            <div
+                class="
+                    space-y-6
+                    lg:col-span-2
+                "
+            >
+
+
+                <!-- =================================================
+                     INFORMASI PESERTA
+                ================================================== -->
+                <div
+                    class="
+                        overflow-hidden
+                        rounded-xl
+                        border
+                        border-slate-200
+                        bg-white
+                        shadow-sm
+
+                        dark:border-white/10
+                        dark:bg-primary
+                    "
+                >
+
+
+                    <!-- HEADER CARD -->
+                    <div
+                        class="
+                            flex
+                            items-center
+                            gap-3
+                            border-b
+                            border-slate-200
+                            px-5 py-4
+
+                            dark:border-white/10
+                            sm:px-6
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                h-9 w-9
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-primary-dark/10
+                                text-primary-dark
+
+                                dark:bg-primary-dark/20
+                                dark:text-blue-300
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[19px]">
+                                badge
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <h3
+                                class="
+                                    text-sm
+                                    font-bold
+                                    text-slate-900
+                                    dark:text-white
+                                "
+                            >
+                                Informasi Peserta
+                            </h3>
+
+
+                            <p
+                                class="
+                                    mt-0.5
+                                    text-xs
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                Identitas balita yang sedang diperiksa.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CONTENT -->
+                    <div class="p-5 sm:p-6">
+
+                        <div
+                            class="
+                                grid
+                                grid-cols-1
+                                gap-x-6
+                                gap-y-5
+                                sm:grid-cols-2
+                                xl:grid-cols-3
+                            "
+                        >
+
+
+                            <!-- NAMA -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Nama Balita
+                                </span>
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    {{ peserta.nama_peserta }}
+                                </p>
+
+                            </div>
+
+
+
+                            <!-- IBU -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Nama Ibu
+                                </span>
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-medium
+                                        text-slate-600
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ peserta.nama_ibu|default:"-" }}
+                                </p>
+
+                            </div>
+
+
+
+                            <!-- AYAH -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Nama Ayah
+                                </span>
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-medium
+                                        text-slate-600
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ peserta.nama_ayah|default:"-" }}
+                                </p>
+
+                            </div>
+
+
+
+                            <!-- ANAK KE -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Anak Ke
+                                </span>
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-medium
+                                        text-slate-600
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ peserta.anak_ke|default:"-" }}
+                                </p>
+
+                            </div>
+
+
+
+                            <!-- GENDER -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Jenis Kelamin
+                                </span>
+
+
+                                <div>
+
+                                    {% if peserta.jenis_kelamin == "Laki-Laki" or peserta.jenis_kelamin == "L" %}
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            items-center
+                                            gap-1
+                                            rounded-full
+                                            bg-blue-100
+                                            px-2.5 py-1
+                                            text-[10px]
+                                            font-bold
+                                            text-blue-700
+
+                                            dark:bg-blue-500/10
+                                            dark:text-blue-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[12px]">
+                                            male
+                                        </span>
+
+                                        Laki-laki
+
+                                    </span>
+
+
+                                    {% else %}
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            items-center
+                                            gap-1
+                                            rounded-full
+                                            bg-pink-100
+                                            px-2.5 py-1
+                                            text-[10px]
+                                            font-bold
+                                            text-pink-700
+
+                                            dark:bg-pink-500/10
+                                            dark:text-pink-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[12px]">
+                                            female
+                                        </span>
+
+                                        Perempuan
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- JADWAL -->
+                            <div class="flex flex-col gap-1">
+
+                                <span
+                                    class="
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wider
+                                        text-slate-400
+                                    "
+                                >
+                                    Jadwal Pemeriksaan
+                                </span>
+
+
+                                <div
+                                    class="
+                                        flex
+                                        items-center
+                                        gap-1.5
+                                        text-sm
+                                        font-medium
+                                        text-slate-600
+
+                                        dark:text-slate-300
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-[15px]
+                                            text-primary-dark
+                                            dark:text-blue-300
+                                        "
+                                    >
+                                        calendar_month
+                                    </span>
+
+                                    {{ jadwal.tgl_kegiatan }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     GRAFIK KMS LENGKAP
+                ================================================== -->
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+                    <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-[19px]">show_chart</span>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white">Grafik KMS Balita</h3>
+                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">BB/U, PB/U atau TB/U, dan IMT/U usia 0–60 bulan</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'laporan:laporan_kms' peserta.id %}"
+                           class="inline-flex w-fit items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-2 text-xs font-bold text-white transition hover:bg-primary">
+                            <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                            KMS Lengkap
+                        </a>
+                    </div>
+
+                    <div class="space-y-5 p-4 sm:p-6">
+                        <div>
+                            <div class="mb-2 flex items-center justify-between gap-3">
+                                <div>
+                                    <h4 class="text-xs font-extrabold text-slate-800 dark:text-white">Berat Badan menurut Umur (BB/U)</h4>
+                                    <p class="mt-0.5 text-[10px] text-slate-400">Kurva -3 SD sampai +3 SD dan riwayat berat badan anak.</p>
+                                </div>
+                            </div>
+                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                                <canvas id="kmsFormBBU" aria-label="Grafik BB/U"></canvas>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-2">
+                                <h4 class="text-xs font-extrabold text-slate-800 dark:text-white">Panjang/Tinggi Badan menurut Umur (PB/U atau TB/U)</h4>
+                                <p class="mt-0.5 text-[10px] text-slate-400">PB/U sampai 24 bulan, selanjutnya TB/U.</p>
+                            </div>
+                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                                <canvas id="kmsFormTBU" aria-label="Grafik PB/U atau TB/U"></canvas>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-2">
+                                <h4 class="text-xs font-extrabold text-slate-800 dark:text-white">Indeks Massa Tubuh menurut Umur (IMT/U)</h4>
+                                <p class="mt-0.5 text-[10px] text-slate-400">IMT dihitung dari berat badan dan panjang/tinggi badan pemeriksaan.</p>
+                            </div>
+                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                                <canvas id="kmsFormIMTU" aria-label="Grafik IMT/U"></canvas>
+                            </div>
+                        </div>
+
+                        <p class="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[10px] leading-5 text-slate-500 dark:border-blue-500/10 dark:bg-blue-500/5 dark:text-slate-400">
+                            Grafik menggunakan standar antropometri anak 0–60 bulan dan tetap menampilkan kurva standar meskipun riwayat pemeriksaan belum tersedia.
+                        </p>
+                    </div>
+                </div>
+
+                {{ kms_chart_data|json_script:"kms-form-data" }}
+
+            </div>
+
+
+
+            <!-- =================================================
+                 KOLOM KANAN / FORM
+            ================================================== -->
+            <div class="lg:col-span-1">
+
+                <form
+                    method="POST"
+                    class="
+                        overflow-hidden
+                        rounded-xl
+                        border
+                        border-slate-200
+                        bg-white
+                        shadow-sm
+
+                        dark:border-white/10
+                        dark:bg-primary
+
+
+                        [&_input]:block
+                        [&_input]:w-full
+                        [&_input]:rounded-lg
+                        [&_input]:border
+                        [&_input]:border-solid
+                        [&_input]:border-slate-200
+                        [&_input]:bg-slate-50
+                        [&_input]:px-4
+                        [&_input]:py-2.5
+                        [&_input]:text-sm
+                        [&_input]:text-slate-800
+                        [&_input]:outline-none
+                        [&_input]:transition
+                        [&_input]:placeholder:text-slate-400
+
+                        [&_input:focus]:border-primary-dark
+                        [&_input:focus]:bg-white
+                        [&_input:focus]:ring-2
+                        [&_input:focus]:ring-primary-dark/10
+
+                        dark:[&_input]:border-white/10
+                        dark:[&_input]:bg-background-dark/50
+                        dark:[&_input]:text-white
+                        dark:[&_input]:placeholder:text-slate-500
+
+                        dark:[&_input:focus]:border-primary-dark
+                        dark:[&_input:focus]:bg-background-dark
+
+
+                        [&_textarea]:block
+                        [&_textarea]:w-full
+                        [&_textarea]:min-h-[100px]
+                        [&_textarea]:resize-y
+                        [&_textarea]:rounded-lg
+                        [&_textarea]:border
+                        [&_textarea]:border-solid
+                        [&_textarea]:border-slate-200
+                        [&_textarea]:bg-slate-50
+                        [&_textarea]:px-4
+                        [&_textarea]:py-3
+                        [&_textarea]:text-sm
+                        [&_textarea]:text-slate-800
+                        [&_textarea]:outline-none
+                        [&_textarea]:transition
+                        [&_textarea]:placeholder:text-slate-400
+
+                        [&_textarea:focus]:border-primary-dark
+                        [&_textarea:focus]:bg-white
+                        [&_textarea:focus]:ring-2
+                        [&_textarea:focus]:ring-primary-dark/10
+
+                        dark:[&_textarea]:border-white/10
+                        dark:[&_textarea]:bg-background-dark/50
+                        dark:[&_textarea]:text-white
+                        dark:[&_textarea]:placeholder:text-slate-500
+
+                        dark:[&_textarea:focus]:border-primary-dark
+                        dark:[&_textarea:focus]:bg-background-dark
+                    "
+                >
+
+                    {% csrf_token %}
+
+
+
+                    <!-- =================================================
+                         DATA PEMERIKSAAN
+                    ================================================== -->
+                    <div
+                        class="
+                            border-b
+                            border-slate-200
+                            p-5
+
+                            dark:border-white/10
+                            sm:p-6
+                        "
+                    >
+
+
+                        <!-- HEADER -->
+                        <div class="mb-6 flex items-center gap-3">
+
+                            <div
+                                class="
+                                    flex
+                                    h-10 w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined">
+                                    monitor_weight
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    Data Pemeriksaan
+                                </h3>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-xs
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    "
+                                >
+                                    Masukkan hasil pengukuran balita.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="space-y-5">
+
+                            <div>
+                                <label class="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                                    Bidan/Tenaga Kesehatan Pendamping
+                                </label>
+
+                                {% if bidan_otomatis %}
+                                    <div class="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                                        <span class="material-symbols-outlined text-[20px] text-emerald-600">medical_services</span>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ bidan_otomatis.nama }}</p>
+                                            <p class="text-[10px] leading-4 text-slate-500 dark:text-slate-400">Ditentukan otomatis dari cakupan wilayah {{ jadwal.posyandu.nama }}.</p>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 dark:border-rose-900/50 dark:bg-rose-950/20">
+                                        <p class="text-xs font-bold text-rose-600 dark:text-rose-300">Bidan belum terhubung ke Posyandu ini.</p>
+                                        <p class="mt-1 text-[10px] leading-4 text-rose-500 dark:text-rose-400">Admin Kelurahan perlu mengatur cakupan wilayah Bidan untuk {{ jadwal.posyandu.nama }} sebelum pemeriksaan dapat disimpan.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- =========================================
+                                 BERAT BADAN
+                            ========================================== -->
+                            <div>
+
+                                <label
+                                    for="{{ form.berat_badan.id_for_label }}"
+                                    class="
+                                        mb-2
+                                        block
+                                        text-xs
+                                        font-bold
+                                        text-slate-700
+
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    Berat Badan
+                                    <span class="text-rose-500">*</span>
+                                </label>
+
+
+                                <div class="relative">
+
+                                    {{ form.berat_badan }}
+
+
+                                    <div
+                                        class="
+                                            pointer-events-none
+                                            absolute
+                                            inset-y-0
+                                            right-0
+                                            flex
+                                            items-center
+                                            pr-4
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                text-xs
+                                                font-semibold
+                                                text-slate-400
+                                            "
+                                        >
+                                            Kg
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <p
+                                    class="
+                                        mt-1.5
+                                        text-[10px]
+                                        leading-4
+                                        text-slate-400
+                                    "
+                                >
+                                    Masukkan berat badan balita dalam kilogram.
+                                </p>
+
+
+                                {% if form.berat_badan.errors %}
+
+                                <div
+                                    class="
+                                        mt-2
+                                        flex
+                                        items-start
+                                        gap-1.5
+                                        text-rose-500
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            mt-0.5
+                                            text-[15px]
+                                        "
+                                    >
+                                        error
+                                    </span>
+
+                                    <small class="text-xs font-medium">
+                                        {{ form.berat_badan.errors.0 }}
+                                    </small>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- =========================================
+                                 TINGGI BADAN
+                            ========================================== -->
+                            <div>
+
+                                <label
+                                    for="{{ form.tinggi_badan.id_for_label }}"
+                                    class="
+                                        mb-2
+                                        block
+                                        text-xs
+                                        font-bold
+                                        text-slate-700
+
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ form.tinggi_badan.label }}
+                                    <span class="text-rose-500">*</span>
+                                </label>
+
+
+                                <div class="relative">
+
+                                    {{ form.tinggi_badan }}
+
+
+                                    <div
+                                        class="
+                                            pointer-events-none
+                                            absolute
+                                            inset-y-0
+                                            right-0
+                                            flex
+                                            items-center
+                                            pr-4
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                text-xs
+                                                font-semibold
+                                                text-slate-400
+                                            "
+                                        >
+                                            Cm
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <p
+                                    class="
+                                        mt-1.5
+                                        text-[10px]
+                                        leading-4
+                                        text-slate-400
+                                    "
+                                >
+                                    {{ form.tinggi_badan.help_text|default:"Masukkan panjang atau tinggi badan dalam sentimeter." }}
+                                </p>
+
+
+                                {% if form.tinggi_badan.errors %}
+
+                                <div
+                                    class="
+                                        mt-2
+                                        flex
+                                        items-start
+                                        gap-1.5
+                                        text-rose-500
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            mt-0.5
+                                            text-[15px]
+                                        "
+                                    >
+                                        error
+                                    </span>
+
+                                    <small class="text-xs font-medium">
+                                        {{ form.tinggi_badan.errors.0 }}
+                                    </small>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- =========================================
+                                 LILA
+                            ========================================== -->
+                            <div>
+
+                                <label
+                                    for="{{ form.lila_balita.id_for_label }}"
+                                    class="
+                                        mb-2
+                                        block
+                                        text-xs
+                                        font-bold
+                                        text-slate-700
+
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    LILA Balita
+                                </label>
+
+
+                                <div class="relative">
+
+                                    {{ form.lila_balita }}
+
+
+                                    <div
+                                        class="
+                                            pointer-events-none
+                                            absolute
+                                            inset-y-0
+                                            right-0
+                                            flex
+                                            items-center
+                                            pr-4
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                text-xs
+                                                font-semibold
+                                                text-slate-400
+                                            "
+                                        >
+                                            Cm
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <p
+                                    class="
+                                        mt-1.5
+                                        text-[10px]
+                                        leading-4
+                                        text-slate-400
+                                    "
+                                >
+                                    Masukkan lingkar lengan atas balita.
+                                </p>
+
+
+                                {% if form.lila_balita.errors %}
+
+                                <div
+                                    class="
+                                        mt-2
+                                        flex
+                                        items-start
+                                        gap-1.5
+                                        text-rose-500
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            mt-0.5
+                                            text-[15px]
+                                        "
+                                    >
+                                        error
+                                    </span>
+
+                                    <small class="text-xs font-medium">
+                                        {{ form.lila_balita.errors.0 }}
+                                    </small>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- =========================================
+                                 LINGKAR KEPALA
+                            ========================================== -->
+                            <div>
+
+                                <label
+                                    for="{{ form.lingkar_kepala.id_for_label }}"
+                                    class="
+                                        mb-2
+                                        block
+                                        text-xs
+                                        font-bold
+                                        text-slate-700
+
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    Lingkar Kepala
+                                </label>
+
+
+                                <div class="relative">
+
+                                    {{ form.lingkar_kepala }}
+
+
+                                    <div
+                                        class="
+                                            pointer-events-none
+                                            absolute
+                                            inset-y-0
+                                            right-0
+                                            flex
+                                            items-center
+                                            pr-4
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                text-xs
+                                                font-semibold
+                                                text-slate-400
+                                            "
+                                        >
+                                            Cm
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <p
+                                    class="
+                                        mt-1.5
+                                        text-[10px]
+                                        leading-4
+                                        text-slate-400
+                                    "
+                                >
+                                    Masukkan ukuran lingkar kepala balita.
+                                </p>
+
+
+                                {% if form.lingkar_kepala.errors %}
+
+                                <div
+                                    class="
+                                        mt-2
+                                        flex
+                                        items-start
+                                        gap-1.5
+                                        text-rose-500
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            mt-0.5
+                                            text-[15px]
+                                        "
+                                    >
+                                        error
+                                    </span>
+
+                                    <small class="text-xs font-medium">
+                                        {{ form.lingkar_kepala.errors.0 }}
+                                    </small>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         PELAYANAN BALITA
+                    ================================================== -->
+                    <div
+                        class="
+                            border-b
+                            border-slate-200
+                            p-5
+
+                            dark:border-white/10
+                            sm:p-6
+                        "
+                    >
+
+
+                        <!-- HEADER -->
+                        <div class="mb-5 flex items-center gap-3">
+
+                            <div
+                                class="
+                                    flex
+                                    h-10 w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined">
+                                    health_and_safety
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    Pelayanan Balita
+                                </h3>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-xs
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    "
+                                >
+                                    Vitamin A dan obat cacing.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             INFORMASI PERIODE
+                        ================================================== -->
+                        {% if pelayanan_status.periode_aktif %}
+
+                        <div
+                            class="
+                                mb-4
+                                rounded-lg
+                                border
+                                border-primary-dark/20
+                                bg-primary-dark/5
+                                p-3
+
+                                dark:border-primary-dark/30
+                                dark:bg-primary-dark/10
+                            "
+                        >
+
+                            <div class="flex items-start gap-2.5">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        mt-0.5
+                                        text-[18px]
+                                        text-primary-dark
+
+                                        dark:text-blue-300
+                                    "
+                                >
+                                    calendar_month
+                                </span>
+
+
+                                <div>
+
+                                    <p
+                                        class="
+                                            text-xs
+                                            text-slate-600
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        Periode
+
+                                        <strong class="text-primary-dark dark:text-blue-300">
+                                            {{ pelayanan_status.nama_periode }}
+                                            {{ pelayanan_status.tahun }}
+                                        </strong>
+                                    </p>
+
+
+                                    <p
+                                        class="
+                                            mt-1
+                                            text-xs
+                                            text-slate-500
+                                            dark:text-slate-400
+                                        "
+                                    >
+                                        Usia balita:
+
+                                        <strong
+                                            class="
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ pelayanan_status.usia_bulan }}
+                                            bulan
+                                        </strong>
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {% else %}
+
+
+                        <!-- BUKAN PERIODE -->
+                        <div
+                            class="
+                                mb-4
+                                rounded-lg
+                                border
+                                border-amber-200
+                                bg-amber-50
+                                p-4
+
+                                dark:border-amber-900/50
+                                dark:bg-amber-950/20
+                            "
+                        >
+
+                            <div class="flex items-start gap-3">
+
+                                <div
+                                    class="
+                                        flex
+                                        h-8 w-8
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-amber-100
+                                        text-amber-600
+
+                                        dark:bg-amber-500/10
+                                        dark:text-amber-400
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[18px]">
+                                        event_busy
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <p
+                                        class="
+                                            text-xs
+                                            font-bold
+                                            text-amber-700
+
+                                            dark:text-amber-400
+                                        "
+                                    >
+                                        Bukan periode pemberian
+                                    </p>
+
+
+                                    <p
+                                        class="
+                                            mt-1
+                                            text-xs
+                                            leading-5
+                                            text-amber-700/80
+
+                                            dark:text-amber-300/80
+                                        "
+                                    >
+                                        Pelayanan Vitamin A dan obat cacing
+                                        pada Posyandu ini dilaksanakan pada
+                                        bulan Februari dan Agustus.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+
+
+                        <div class="space-y-3">
+
+
+                            <!-- =========================================
+                                 VITAMIN A
+                            ========================================== -->
+                            <div
+                                class="
+                                    overflow-hidden
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+
+                                    dark:border-white/10
+                                "
+                            >
+
+
+                                <!-- SUDAH -->
+                                {% if pelayanan_status.vitamin_a_sudah %}
+
+                                <div
+                                    class="
+                                        bg-emerald-50
+                                        p-4
+
+                                        dark:bg-emerald-950/20
+                                    "
+                                >
+
+                                    <div class="flex items-start gap-3">
+
+                                        <div
+                                            class="
+                                                flex
+                                                h-8 w-8
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-lg
+                                                bg-emerald-100
+                                                text-emerald-600
+
+                                                dark:bg-emerald-500/10
+                                                dark:text-emerald-400
+                                            "
+                                        >
+
+                                            <span class="material-symbols-outlined text-[18px]">
+                                                check_circle
+                                            </span>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-emerald-700
+
+                                                    dark:text-emerald-400
+                                                "
+                                            >
+                                                Vitamin A sudah diberikan
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    mt-1
+                                                    text-xs
+                                                    leading-5
+                                                    text-emerald-700/80
+
+                                                    dark:text-emerald-300/80
+                                                "
+                                            >
+                                                Diberikan pada
+                                                {{ pelayanan_status.vitamin_a_tanggal|date:"d F Y" }}.
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    leading-5
+                                                    text-emerald-700/80
+
+                                                    dark:text-emerald-300/80
+                                                "
+                                            >
+                                                Tidak dapat diberikan kembali
+                                                pada periode ini.
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- BOLEH -->
+                                {% elif pelayanan_status.vitamin_a_boleh %}
+
+                                <label
+                                    for="{{ form.vitamin_a.id_for_label }}"
+                                    class="
+                                        flex
+                                        cursor-pointer
+                                        items-center
+                                        gap-3
+                                        bg-slate-50
+                                        p-4
+                                        transition
+
+                                        hover:bg-primary-dark/5
+
+                                        dark:bg-background-dark/50
+                                        dark:hover:bg-primary-dark/10
+                                    "
+                                >
+
+                                    <div class="flex shrink-0 items-center">
+                                        {{ form.vitamin_a }}
+                                    </div>
+
+
+                                    <div class="min-w-0 flex-1">
+
+                                        <div class="flex items-center gap-2">
+
+                                            <span
+                                                class="
+                                                    material-symbols-outlined
+                                                    text-[19px]
+                                                    text-primary-dark
+
+                                                    dark:text-blue-300
+                                                "
+                                            >
+                                                medication_liquid
+                                            </span>
+
+
+                                            <span
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-slate-800
+
+                                                    dark:text-white
+                                                "
+                                            >
+                                                Berikan Vitamin A
+                                            </span>
+
+                                        </div>
+
+
+                                        <p
+                                            class="
+                                                mt-1
+                                                text-xs
+                                                text-slate-500
+
+                                                dark:text-slate-400
+                                            "
+                                        >
+                                            {{ pelayanan_status.vitamin_a_jenis_display }}
+
+                                            &middot;
+
+                                            <strong
+                                                class="
+                                                    text-slate-700
+                                                    dark:text-slate-300
+                                                "
+                                            >
+                                                {{ pelayanan_status.vitamin_a_dosis }}
+                                            </strong>
+                                        </p>
+
+                                    </div>
+
+                                </label>
+
+
+
+                                {% if form.vitamin_a.errors %}
+
+                                <div
+                                    class="
+                                        border-t
+                                        border-rose-100
+                                        bg-rose-50
+                                        px-4 py-2
+                                        text-xs
+                                        font-medium
+                                        text-rose-500
+
+                                        dark:border-rose-900/30
+                                        dark:bg-rose-950/20
+                                    "
+                                >
+                                    {{ form.vitamin_a.errors.0 }}
+                                </div>
+
+                                {% endif %}
+
+
+
+                                <!-- CATATAN VITAMIN -->
+                                <div
+                                    id="vitaminADetail"
+                                    class="
+                                        hidden
+                                        border-t
+                                        border-slate-200
+                                        bg-white
+                                        p-4
+
+                                        dark:border-white/10
+                                        dark:bg-background-dark/30
+                                    "
+                                >
+
+                                    <label
+                                        for="{{ form.catatan_vitamin_a.id_for_label }}"
+                                        class="
+                                            mb-2
+                                            block
+                                            text-xs
+                                            font-bold
+                                            text-slate-700
+
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        Catatan Vitamin A
+                                    </label>
+
+
+                                    {{ form.catatan_vitamin_a }}
+
+
+                                    <p
+                                        class="
+                                            mt-1.5
+                                            text-[10px]
+                                            leading-4
+                                            text-slate-400
+                                        "
+                                    >
+                                        Opsional. Isi apabila terdapat
+                                        keterangan tambahan.
+                                    </p>
+
+
+                                    {% if form.catatan_vitamin_a.errors %}
+
+                                    <p
+                                        class="
+                                            mt-2
+                                            text-xs
+                                            font-medium
+                                            text-rose-500
+                                        "
+                                    >
+                                        {{ form.catatan_vitamin_a.errors.0 }}
+                                    </p>
+
+                                    {% endif %}
+
+                                </div>
+
+
+
+                                <!-- TIDAK BOLEH -->
+                                {% else %}
+
+                                <div
+                                    class="
+                                        bg-slate-50
+                                        p-4
+
+                                        dark:bg-background-dark/50
+                                    "
+                                >
+
+                                    <div class="flex items-start gap-3">
+
+                                        <div
+                                            class="
+                                                flex
+                                                h-8 w-8
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-lg
+                                                bg-slate-100
+                                                text-slate-400
+
+                                                dark:bg-white/10
+                                            "
+                                        >
+
+                                            <span class="material-symbols-outlined text-[18px]">
+                                                info
+                                            </span>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-slate-600
+
+                                                    dark:text-slate-300
+                                                "
+                                            >
+                                                Vitamin A belum dapat diberikan
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    mt-1
+                                                    text-xs
+                                                    leading-5
+                                                    text-slate-500
+
+                                                    dark:text-slate-400
+                                                "
+                                            >
+                                                {{ pelayanan_status.vitamin_a_alasan }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- =========================================
+                                 OBAT CACING
+                            ========================================== -->
+                            <div
+                                class="
+                                    overflow-hidden
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+
+                                    dark:border-white/10
+                                "
+                            >
+
+
+                                <!-- SUDAH -->
+                                {% if pelayanan_status.obat_cacing_sudah %}
+
+                                <div
+                                    class="
+                                        bg-emerald-50
+                                        p-4
+
+                                        dark:bg-emerald-950/20
+                                    "
+                                >
+
+                                    <div class="flex items-start gap-3">
+
+                                        <div
+                                            class="
+                                                flex
+                                                h-8 w-8
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-lg
+                                                bg-emerald-100
+                                                text-emerald-600
+
+                                                dark:bg-emerald-500/10
+                                                dark:text-emerald-400
+                                            "
+                                        >
+
+                                            <span class="material-symbols-outlined text-[18px]">
+                                                check_circle
+                                            </span>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-emerald-700
+
+                                                    dark:text-emerald-400
+                                                "
+                                            >
+                                                Obat cacing sudah diberikan
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    mt-1
+                                                    text-xs
+                                                    leading-5
+                                                    text-emerald-700/80
+
+                                                    dark:text-emerald-300/80
+                                                "
+                                            >
+                                                Diberikan pada
+                                                {{ pelayanan_status.obat_cacing_tanggal|date:"d F Y" }}.
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    leading-5
+                                                    text-emerald-700/80
+
+                                                    dark:text-emerald-300/80
+                                                "
+                                            >
+                                                Tidak dapat diberikan kembali
+                                                pada periode ini.
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- BOLEH -->
+                                {% elif pelayanan_status.obat_cacing_boleh %}
+
+                                <label
+                                    for="{{ form.obat_cacing.id_for_label }}"
+                                    class="
+                                        flex
+                                        cursor-pointer
+                                        items-center
+                                        gap-3
+                                        bg-slate-50
+                                        p-4
+                                        transition
+
+                                        hover:bg-primary-dark/5
+
+                                        dark:bg-background-dark/50
+                                        dark:hover:bg-primary-dark/10
+                                    "
+                                >
+
+                                    <div class="flex shrink-0 items-center">
+                                        {{ form.obat_cacing }}
+                                    </div>
+
+
+                                    <div class="min-w-0 flex-1">
+
+                                        <div class="flex items-center gap-2">
+
+                                            <span
+                                                class="
+                                                    material-symbols-outlined
+                                                    text-[19px]
+                                                    text-primary-dark
+
+                                                    dark:text-blue-300
+                                                "
+                                            >
+                                                medication
+                                            </span>
+
+
+                                            <span
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-slate-800
+
+                                                    dark:text-white
+                                                "
+                                            >
+                                                Berikan Obat Cacing
+                                            </span>
+
+                                        </div>
+
+
+                                        <p
+                                            class="
+                                                mt-1
+                                                text-xs
+                                                text-slate-500
+
+                                                dark:text-slate-400
+                                            "
+                                        >
+                                            {{ pelayanan_status.obat_cacing_nama }}
+
+                                            &middot;
+
+                                            <strong
+                                                class="
+                                                    text-slate-700
+                                                    dark:text-slate-300
+                                                "
+                                            >
+                                                {{ pelayanan_status.obat_cacing_dosis }}
+                                            </strong>
+                                        </p>
+
+
+                                        <p
+                                            class="
+                                                mt-1
+                                                text-[10px]
+                                                leading-4
+                                                text-slate-400
+                                            "
+                                        >
+                                            {{ pelayanan_status.obat_cacing_keterangan_dosis }}
+                                        </p>
+
+                                    </div>
+
+                                </label>
+
+
+
+                                {% if form.obat_cacing.errors %}
+
+                                <div
+                                    class="
+                                        border-t
+                                        border-rose-100
+                                        bg-rose-50
+                                        px-4 py-2
+                                        text-xs
+                                        font-medium
+                                        text-rose-500
+
+                                        dark:border-rose-900/30
+                                        dark:bg-rose-950/20
+                                    "
+                                >
+                                    {{ form.obat_cacing.errors.0 }}
+                                </div>
+
+                                {% endif %}
+
+
+
+                                <!-- CATATAN OBAT -->
+                                <div
+                                    id="obatCacingDetail"
+                                    class="
+                                        hidden
+                                        border-t
+                                        border-slate-200
+                                        bg-white
+                                        p-4
+
+                                        dark:border-white/10
+                                        dark:bg-background-dark/30
+                                    "
+                                >
+
+
+                                    <!-- DOSIS OTOMATIS -->
+                                    <div
+                                        class="
+                                            mb-4
+                                            rounded-lg
+                                            border
+                                            border-primary-dark/20
+                                            bg-primary-dark/5
+                                            p-3
+
+                                            dark:border-primary-dark/30
+                                            dark:bg-primary-dark/10
+                                        "
+                                    >
+
+                                        <div class="flex items-start gap-2">
+
+                                            <span
+                                                class="
+                                                    material-symbols-outlined
+                                                    text-[18px]
+                                                    text-primary-dark
+
+                                                    dark:text-blue-300
+                                                "
+                                            >
+                                                verified
+                                            </span>
+
+
+                                            <div>
+
+                                                <p
+                                                    class="
+                                                        text-xs
+                                                        font-bold
+                                                        text-primary-dark
+
+                                                        dark:text-blue-300
+                                                    "
+                                                >
+                                                    Dosis otomatis
+                                                </p>
+
+
+                                                <p
+                                                    class="
+                                                        mt-1
+                                                        text-xs
+                                                        leading-5
+                                                        text-slate-600
+
+                                                        dark:text-slate-300
+                                                    "
+                                                >
+                                                    {{ pelayanan_status.obat_cacing_nama }}
+                                                    {{ pelayanan_status.obat_cacing_dosis }}
+
+                                                    &middot;
+
+                                                    {{ pelayanan_status.obat_cacing_keterangan_dosis }}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <label
+                                        for="{{ form.catatan_obat_cacing.id_for_label }}"
+                                        class="
+                                            mb-2
+                                            block
+                                            text-xs
+                                            font-bold
+                                            text-slate-700
+
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        Catatan Obat Cacing
+                                    </label>
+
+
+                                    {{ form.catatan_obat_cacing }}
+
+
+                                    <p
+                                        class="
+                                            mt-1.5
+                                            text-[10px]
+                                            leading-4
+                                            text-slate-400
+                                        "
+                                    >
+                                        Opsional. Isi apabila terdapat
+                                        keterangan tambahan.
+                                    </p>
+
+
+                                    {% if form.catatan_obat_cacing.errors %}
+
+                                    <p
+                                        class="
+                                            mt-2
+                                            text-xs
+                                            font-medium
+                                            text-rose-500
+                                        "
+                                    >
+                                        {{ form.catatan_obat_cacing.errors.0 }}
+                                    </p>
+
+                                    {% endif %}
+
+                                </div>
+
+
+
+                                <!-- TIDAK BOLEH -->
+                                {% else %}
+
+                                <div
+                                    class="
+                                        bg-slate-50
+                                        p-4
+
+                                        dark:bg-background-dark/50
+                                    "
+                                >
+
+                                    <div class="flex items-start gap-3">
+
+                                        <div
+                                            class="
+                                                flex
+                                                h-8 w-8
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-lg
+                                                bg-slate-100
+                                                text-slate-400
+
+                                                dark:bg-white/10
+                                            "
+                                        >
+
+                                            <span class="material-symbols-outlined text-[18px]">
+                                                info
+                                            </span>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <p
+                                                class="
+                                                    text-xs
+                                                    font-bold
+                                                    text-slate-600
+
+                                                    dark:text-slate-300
+                                                "
+                                            >
+                                                Obat cacing belum dapat diberikan
+                                            </p>
+
+
+                                            <p
+                                                class="
+                                                    mt-1
+                                                    text-xs
+                                                    leading-5
+                                                    text-slate-500
+
+                                                    dark:text-slate-400
+                                                "
+                                            >
+                                                {{ pelayanan_status.obat_cacing_alasan }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         CATATAN PEMERIKSAAN
+                    ================================================== -->
+                    <div
+                        class="
+                            border-b
+                            border-slate-200
+                            p-5
+
+                            dark:border-white/10
+                            sm:p-6
+                        "
+                    >
+
+
+                        <div class="mb-5 flex items-center gap-3">
+
+                            <div
+                                class="
+                                    flex
+                                    h-10 w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined">
+                                    clinical_notes
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    Catatan Pemeriksaan
+                                </h3>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-xs
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    "
+                                >
+                                    Informasi tambahan hasil pemeriksaan.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <label
+                            for="{{ form.catatan.id_for_label }}"
+                            class="
+                                mb-2
+                                block
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Catatan
+                        </label>
+
+
+                        {{ form.catatan }}
+
+
+                        <p
+                            class="
+                                mt-1.5
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Tuliskan keluhan, kondisi, atau keterangan tambahan
+                            jika diperlukan.
+                        </p>
+
+
+                        {% if form.catatan.errors %}
+
+                        <div
+                            class="
+                                mt-2
+                                flex
+                                items-start
+                                gap-1.5
+                                text-rose-500
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    mt-0.5
+                                    text-[15px]
+                                "
+                            >
+                                error
+                            </span>
+
+                            <small class="text-xs font-medium">
+                                {{ form.catatan.errors.0 }}
+                            </small>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         NON FIELD ERRORS
+                    ================================================== -->
+                    {% if form.non_field_errors %}
+
+                    <div
+                        class="
+                            mx-5
+                            mt-5
+                            rounded-lg
+                            border
+                            border-rose-200
+                            bg-rose-50
+                            p-4
+
+                            dark:border-rose-900/50
+                            dark:bg-rose-950/20
+
+                            sm:mx-6
+                        "
+                    >
+
+                        <div class="flex items-start gap-3">
+
+                            <div
+                                class="
+                                    flex
+                                    h-8 w-8
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-rose-100
+                                    text-rose-500
+
+                                    dark:bg-rose-500/10
+                                    dark:text-rose-400
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[18px]">
+                                    warning
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <p
+                                    class="
+                                        text-xs
+                                        font-bold
+                                        text-rose-700
+
+                                        dark:text-rose-400
+                                    "
+                                >
+                                    Data belum dapat disimpan
+                                </p>
+
+
+                                {% for error in form.non_field_errors %}
+
+                                <p
+                                    class="
+                                        mt-1
+                                        text-xs
+                                        leading-5
+                                        text-rose-600
+
+                                        dark:text-rose-300
+                                    "
+                                >
+                                    {{ error }}
+                                </p>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+
+
+                    <!-- =================================================
+                         ACTION
+                    ================================================== -->
+                    <div
+                        class="
+                            flex
+                            flex-col-reverse
+                            gap-2
+                            bg-slate-50
+                            px-5 py-4
+
+                            dark:bg-background-dark/40
+
+                            sm:flex-row
+                            sm:justify-end
+                            sm:px-6
+                        "
+                    >
+
+
+                        <!-- BATAL -->
+                        <a
+                            href="{% url 'pemeriksaan:list_peserta' status_peserta jadwal.id_jadwal %}"
+
+                            class="
+                                inline-flex
+                                h-10
+                                items-center
+                                justify-center
+                                gap-2
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-white
+                                px-4
+                                text-xs
+                                font-bold
+                                text-slate-600
+                                shadow-sm
+                                transition
+
+                                hover:border-primary-dark/30
+                                hover:bg-primary-dark/5
+                                hover:text-primary-dark
+
+                                dark:border-white/10
+                                dark:bg-primary
+                                dark:text-slate-300
+                                dark:hover:bg-primary-dark/10
+                                dark:hover:text-blue-300
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[17px]">
+                                close
+                            </span>
+
+                            Batal
+
+                        </a>
+
+
+
+                        <!-- SIMPAN -->
+                        <button
+                            type="submit"
+
+                            class="
+                                inline-flex
+                                h-10
+                                items-center
+                                justify-center
+                                gap-2
+                                rounded-lg
+                                bg-primary-dark
+                                px-5
+                                text-xs
+                                font-bold
+                                text-white
+                                shadow-sm
+                                transition
+
+                                hover:bg-primary
+                                hover:shadow-md
+
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-primary-dark/30
+                                focus:ring-offset-2
+
+                                active:scale-[0.98]
+
+                                dark:focus:ring-offset-primary
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[17px]">
+                                save
+                            </span>
+
+                            {% if is_edit %}Simpan Perubahan{% else %}Simpan Data{% endif %}
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+
+<!-- Grafik KMS tanpa CDN -->
+<script src="{% static 'js/kms_charts.js' %}"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    // =====================================================
+    // GRAFIK KMS LENGKAP: BB/U, PB/TB/U, IMT/U
+    // =====================================================
+    const kmsDataElement = document.getElementById("kms-form-data");
+    let kmsPayload = {};
+
+    if (kmsDataElement) {
+        try {
+            kmsPayload = JSON.parse(kmsDataElement.textContent || "{}");
+        } catch (error) {
+            console.error("Gagal membaca data KMS:", error);
+        }
+    }
+
+    function renderKMSForm() {
+        if (!window.KMSCharts) return;
+        window.KMSCharts.renderTriple(kmsPayload, {
+            bbu: "kmsFormBBU",
+            tbu: "kmsFormTBU",
+            imtu: "kmsFormIMTU"
+        });
+    }
+
+    renderKMSForm();
+
+    let kmsResizeTimer = null;
+    window.addEventListener("resize", function () {
+        clearTimeout(kmsResizeTimer);
+        kmsResizeTimer = setTimeout(renderKMSForm, 120);
+    });
+
+    const kmsThemeObserver = new MutationObserver(renderKMSForm);
+    kmsThemeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"]
+    });
+
+
+    // =====================================================
+    // PELAYANAN BALITA
+    // =====================================================
+    const vitaminCheckbox =
+        document.getElementById(
+            "id_vitamin_a"
+        );
+
+
+    const vitaminDetail =
+        document.getElementById(
+            "vitaminADetail"
+        );
+
+
+    const obatCacingCheckbox =
+        document.getElementById(
+            "id_obat_cacing"
+        );
+
+
+    const obatCacingDetail =
+        document.getElementById(
+            "obatCacingDetail"
+        );
+
+
+
+    // =====================================================
+    // TOGGLE VITAMIN A
+    // =====================================================
+    function toggleVitaminA() {
+
+        if (
+            !vitaminCheckbox ||
+            !vitaminDetail
+        ) {
+            return;
+        }
+
+
+        vitaminDetail.classList.toggle(
+            "hidden",
+            !vitaminCheckbox.checked
+        );
+
+    }
+
+
+
+    // =====================================================
+    // TOGGLE OBAT CACING
+    // =====================================================
+    function toggleObatCacing() {
+
+        if (
+            !obatCacingCheckbox ||
+            !obatCacingDetail
+        ) {
+            return;
+        }
+
+
+        obatCacingDetail.classList.toggle(
+            "hidden",
+            !obatCacingCheckbox.checked
+        );
+
+    }
+
+
+
+    // =====================================================
+    // KONDISI AWAL
+    // =====================================================
+    toggleVitaminA();
+    toggleObatCacing();
+
+
+
+    // =====================================================
+    // EVENT CHECKBOX
+    // =====================================================
+    if (vitaminCheckbox) {
+
+        vitaminCheckbox.addEventListener(
+            "change",
+            toggleVitaminA
+        );
+
+    }
+
+
+    if (obatCacingCheckbox) {
+
+        obatCacingCheckbox.addEventListener(
+            "change",
+            toggleObatCacing
+        );
+
+    }
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,2134 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}
+Laporan Posyandu
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                overflow-hidden
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+
+                sm:p-6
+            "
+        >
+
+            <!-- DECORATION -->
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-20
+                    h-56
+                    w-56
+                    rounded-full
+                    bg-primary-dark/30
+                    blur-3xl
+                "
+            ></div>
+
+
+            <div
+                class="
+                    relative
+                    flex
+                    flex-col
+                    gap-4
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <!-- LEFT -->
+                <div class="flex items-start gap-4">
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+
+                            bg-white/10
+                            text-white
+
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            analytics
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Pelaporan Posyandu
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                tracking-tight
+
+                                sm:text-3xl
+                            "
+                        >
+                            Laporan Bulanan Posyandu
+                        </h1>
+
+
+                        <p
+                            class="
+                                mt-2
+                                max-w-3xl
+                                text-sm
+                                leading-6
+                                text-slate-300
+                            "
+                        >
+                            Pantau ringkasan statistik, tingkat partisipasi
+                            masyarakat, dan rasio cakupan kunjungan sasaran
+                            berdasarkan periode laporan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PERIOD BADGE -->
+                <div
+                    class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-2
+
+                        rounded-lg
+
+                        border
+                        border-white/10
+                        bg-white/10
+
+                        px-3 py-2
+
+                        text-xs
+                        font-semibold
+                        text-slate-200
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[16px]
+                            text-blue-200
+                        "
+                    >
+                        calendar_month
+                    </span>
+
+                    {{ bulan_label }} {{ tahun }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             FILTER
+        ====================================================== -->
+        <div
+            class="
+                rounded-xl
+
+                border
+                border-slate-200
+
+                bg-white
+
+                p-4
+
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+
+                sm:p-5
+            "
+        >
+
+            <form
+                method="GET"
+
+                class="
+                    grid
+                    grid-cols-1
+                    gap-4
+
+                    sm:grid-cols-[minmax(0,1fr)_160px_auto]
+                    sm:items-end
+
+                    lg:max-w-3xl
+                "
+            >
+
+
+                <!-- BULAN -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="bulan"
+
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Pilih Periode Bulan
+                    </label>
+
+
+                    <div class="relative">
+
+                        <select
+                            id="bulan"
+                            name="bulan"
+
+                            class="
+                                h-11
+                                w-full
+                                appearance-none
+
+                                rounded-lg
+
+                                border
+                                border-slate-200
+
+                                bg-slate-50
+
+                                pl-4 pr-10
+
+                                text-sm
+                                font-medium
+                                text-slate-700
+
+                                outline-none
+                                transition
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-slate-200
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                            {% for b_val, b_name in bulan_choices %}
+
+                            <option
+                                value="{{ b_val }}"
+
+                                {% if b_val == bulan %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ b_name }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+
+                                text-[18px]
+                                text-slate-400
+                            "
+                        >
+                            expand_more
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TAHUN -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="tahun"
+
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Tahun
+                    </label>
+
+
+                    <div class="relative">
+
+                        <select
+                            id="tahun"
+                            name="tahun"
+
+                            class="
+                                h-11
+                                w-full
+                                appearance-none
+
+                                rounded-lg
+
+                                border
+                                border-slate-200
+
+                                bg-slate-50
+
+                                pl-4 pr-10
+
+                                text-sm
+                                font-medium
+                                text-slate-700
+
+                                outline-none
+                                transition
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-slate-200
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                            {% for t in tahun_choices %}
+
+                            <option
+                                value="{{ t }}"
+
+                                {% if t == tahun %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ t }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+
+                                text-[18px]
+                                text-slate-400
+                            "
+                        >
+                            expand_more
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- APPLY -->
+                <button
+                    type="submit"
+
+                    class="
+                        inline-flex
+                        h-11
+                        w-full
+                        items-center
+                        justify-center
+                        gap-2
+
+                        rounded-lg
+
+                        bg-primary-dark
+
+                        px-5
+
+                        text-xs
+                        font-bold
+                        text-white
+
+                        shadow-sm
+
+                        transition
+
+                        hover:bg-primary
+                        hover:shadow-md
+
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-primary-dark/30
+
+                        active:scale-[0.98]
+
+                        sm:w-auto
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[17px]">
+                        filter_alt
+                    </span>
+
+                    Terapkan Filter
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             REKAP PARTISIPASI
+        ====================================================== -->
+        <div
+            class="
+                overflow-hidden
+                rounded-xl
+
+                border
+                border-slate-200
+
+                bg-white
+
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+            "
+        >
+
+
+            <!-- HEADER -->
+            <div
+                class="
+                    flex
+                    flex-col
+                    gap-3
+
+                    border-b
+                    border-slate-200
+
+                    px-5 py-4
+
+                    dark:border-white/10
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <div class="flex items-center gap-3">
+
+                    <div
+                        class="
+                            flex
+                            h-9 w-9
+                            shrink-0
+                            items-center
+                            justify-center
+
+                            rounded-lg
+
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[18px]">
+                            analytics
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-900
+
+                                dark:text-white
+                            "
+                        >
+                            Rekap Partisipasi Kegiatan
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-[10px]
+                                text-slate-400
+                            "
+                        >
+                            {{ bulan_label }} {{ tahun }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <span
+                    class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-1.5
+
+                        rounded-full
+
+                        bg-primary-dark/10
+
+                        px-2.5 py-1
+
+                        text-[10px]
+                        font-bold
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[13px]">
+                        assessment
+                    </span>
+
+                    Laporan Bulanan
+
+                </span>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MOBILE VIEW
+            ================================================== -->
+            <div
+                class="
+                    space-y-3
+
+                    bg-slate-50/70
+
+                    p-3
+
+                    dark:bg-background-dark/30
+
+                    md:hidden
+                "
+            >
+
+                {% for r in rekap %}
+
+                <div
+                    class="
+                        rounded-xl
+
+                        border
+                        border-slate-200
+
+                        bg-white
+
+                        p-4
+
+                        shadow-sm
+
+                        dark:border-white/10
+                        dark:bg-primary
+                    "
+                >
+
+
+                    <!-- HEADER -->
+                    <div class="flex items-start gap-3">
+
+                        <div
+                            class="
+                                flex
+                                h-10 w-10
+                                shrink-0
+                                items-center
+                                justify-center
+
+                                rounded-lg
+
+                                bg-primary-dark/10
+                                text-primary-dark
+
+                                dark:bg-primary-dark/20
+                                dark:text-blue-300
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[19px]">
+                                home_health
+                            </span>
+
+                        </div>
+
+
+                        <div class="min-w-0 flex-1">
+
+                            <p
+                                class="
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wide
+                                    text-slate-400
+                                "
+                            >
+                                {{ r.jadwal.tgl_kegiatan|date:"d M Y" }}
+                            </p>
+
+
+                            <h4
+                                class="
+                                    mt-1
+                                    text-sm
+                                    font-bold
+                                    text-slate-900
+
+                                    dark:text-white
+                                "
+                            >
+                                {{ r.jadwal.posyandu.nama_posyandu }}
+                            </h4>
+
+
+                            <p
+                                class="
+                                    mt-0.5
+                                    text-xs
+                                    text-slate-500
+
+                                    dark:text-slate-400
+                                "
+                            >
+                                {{ r.jadwal.jns_kegiatan }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- STATS -->
+                    <div
+                        class="
+                            mt-4
+                            grid
+                            grid-cols-3
+                            gap-2
+                        "
+                    >
+
+
+                        <!-- TERDAFTAR -->
+                        <div
+                            class="
+                                rounded-lg
+                                bg-slate-50
+                                p-3
+
+                                text-center
+
+                                dark:bg-background-dark/50
+                            "
+                        >
+
+                            <p
+                                class="
+                                    text-lg
+                                    font-black
+                                    text-slate-800
+
+                                    dark:text-white
+                                "
+                            >
+                                {{ r.terdaftar }}
+                            </p>
+
+
+                            <p
+                                class="
+                                    mt-0.5
+                                    text-[9px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wide
+                                    text-slate-400
+                                "
+                            >
+                                Terdaftar
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- HADIR -->
+                        <div
+                            class="
+                                rounded-lg
+
+                                bg-emerald-50
+
+                                p-3
+
+                                text-center
+
+                                dark:bg-emerald-500/10
+                            "
+                        >
+
+                            <p
+                                class="
+                                    text-lg
+                                    font-black
+                                    text-emerald-600
+
+                                    dark:text-emerald-400
+                                "
+                            >
+                                {{ r.hadir }}
+                            </p>
+
+
+                            <p
+                                class="
+                                    mt-0.5
+                                    text-[9px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wide
+                                    text-emerald-600/70
+
+                                    dark:text-emerald-400/70
+                                "
+                            >
+                                Hadir
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- ABSEN -->
+                        <div
+                            class="
+                                rounded-lg
+
+                                bg-rose-50
+
+                                p-3
+
+                                text-center
+
+                                dark:bg-rose-500/10
+                            "
+                        >
+
+                            <p
+                                class="
+                                    text-lg
+                                    font-black
+                                    text-rose-600
+
+                                    dark:text-rose-400
+                                "
+                            >
+                                {{ r.tidak_hadir }}
+                            </p>
+
+
+                            <p
+                                class="
+                                    mt-0.5
+                                    text-[9px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wide
+                                    text-rose-600/70
+
+                                    dark:text-rose-400/70
+                                "
+                            >
+                                Absen
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- RATIO -->
+                    <div class="mt-4">
+
+                        <div
+                            class="
+                                mb-2
+                                flex
+                                items-center
+                                justify-between
+                            "
+                        >
+
+                            <span
+                                class="
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wide
+                                    text-slate-400
+                                "
+                            >
+                                Rasio Cakupan D/S
+                            </span>
+
+
+                            <span
+                                class="
+                                    text-xs
+                                    font-black
+                                    text-primary-dark
+
+                                    dark:text-blue-300
+                                "
+                            >
+                                {{ r.persen }}%
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                h-2
+                                overflow-hidden
+                                rounded-full
+
+                                bg-slate-100
+
+                                dark:bg-background-dark
+                            "
+                        >
+
+                            <div
+                                class="
+                                    h-full
+                                    rounded-full
+                                    bg-primary-dark
+                                    transition-all
+                                "
+                                style="width: {{ r.persen }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ACTION -->
+                    <div
+                        class="
+                            mt-4
+
+                            border-t
+                            border-slate-100
+
+                            pt-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        {% if r.jadwal.jns_kegiatan == 'Imunisasi' %}
+
+                        <!-- REVISI:
+                             langsung ke detail imunisasi berdasarkan id_jadwal -->
+                        <a
+                            href="{% url 'laporan:laporan_jadwal' r.jadwal.id_jadwal %}"
+
+                            class="
+                                inline-flex
+                                h-9
+                                w-full
+                                items-center
+                                justify-center
+                                gap-2
+
+                                rounded-lg
+
+                                bg-primary-dark/10
+
+                                text-xs
+                                font-bold
+                                text-primary-dark
+
+                                transition
+
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:bg-primary-dark/20
+                                dark:text-blue-300
+                                dark:hover:bg-primary-dark
+                                dark:hover:text-white
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[17px]">
+                                vaccines
+                            </span>
+
+                            Lihat Detail
+
+                        </a>
+
+
+                        {% else %}
+
+                        <a
+                            href="{% url 'laporan:laporan_jadwal' r.jadwal.id_jadwal %}"
+
+                            class="
+                                inline-flex
+                                h-9
+                                w-full
+                                items-center
+                                justify-center
+                                gap-2
+
+                                rounded-lg
+
+                                bg-primary-dark/10
+
+                                text-xs
+                                font-bold
+                                text-primary-dark
+
+                                transition
+
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:bg-primary-dark/20
+                                dark:text-blue-300
+                                dark:hover:bg-primary-dark
+                                dark:hover:text-white
+                            "
+                        >
+
+                            <span class="material-symbols-outlined text-[17px]">
+                                visibility
+                            </span>
+
+                            Lihat Detail
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+
+                {% empty %}
+
+                <div
+                    class="
+                        flex
+                        flex-col
+                        items-center
+                        justify-center
+
+                        rounded-xl
+
+                        border
+                        border-dashed
+                        border-slate-300
+
+                        bg-white
+
+                        px-6 py-12
+
+                        text-center
+
+                        dark:border-white/10
+                        dark:bg-primary
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            items-center
+                            justify-center
+
+                            rounded-full
+
+                            bg-slate-100
+                            text-slate-400
+
+                            dark:bg-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            folder_open
+                        </span>
+
+                    </div>
+
+
+                    <h3
+                        class="
+                            mt-3
+                            text-sm
+                            font-bold
+                            text-slate-600
+
+                            dark:text-slate-300
+                        "
+                    >
+                        Tidak ada data laporan
+                    </h3>
+
+
+                    <p
+                        class="
+                            mt-1
+                            max-w-xs
+                            text-xs
+                            leading-5
+                            text-slate-400
+                        "
+                    >
+                        Tidak ditemukan rekaman aktivitas Posyandu
+                        pada periode yang dipilih.
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div class="hidden overflow-x-auto md:block">
+
+                <table class="min-w-full">
+
+                    <thead
+                        class="
+                            bg-slate-50
+                            dark:bg-background-dark/50
+                        "
+                    >
+
+                        <tr
+                            class="
+                                border-b
+                                border-slate-200
+
+                                dark:border-white/10
+                            "
+                        >
+
+                            <th
+                                class="
+                                    min-w-[220px]
+                                    px-5 py-3.5
+
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Kegiatan / Posko
+                            </th>
+
+
+                            <th
+                                class="
+                                    min-w-[130px]
+                                    px-4 py-3.5
+
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Sasaran Terdaftar
+                            </th>
+
+
+                            <th
+                                class="
+                                    min-w-[140px]
+                                    px-4 py-3.5
+
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Partisipasi Hadir (D)
+                            </th>
+
+
+                            <th
+                                class="
+                                    min-w-[90px]
+                                    px-4 py-3.5
+
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Absen
+                            </th>
+
+
+                            <th
+                                class="
+                                    min-w-[220px]
+                                    px-4 py-3.5
+
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Rasio Cakupan (D/S)
+                            </th>
+
+
+                            <th
+                                class="
+                                    min-w-[100px]
+                                    px-4 py-3.5
+
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                "
+                            >
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+
+                    <tbody
+                        class="
+                            divide-y
+                            divide-slate-100
+
+                            dark:divide-white/10
+                        "
+                    >
+
+                        {% for r in rekap %}
+
+                        <tr
+                            class="
+                                transition
+
+                                hover:bg-primary-dark/[0.035]
+                                dark:hover:bg-white/[0.03]
+                            "
+                        >
+
+
+                            <!-- KEGIATAN -->
+                            <td class="px-5 py-4">
+
+                                <div class="flex items-start gap-3">
+
+                                    <div
+                                        class="
+                                            flex
+                                            h-9 w-9
+                                            shrink-0
+                                            items-center
+                                            justify-center
+
+                                            rounded-lg
+
+                                            bg-primary-dark/10
+                                            text-primary-dark
+
+                                            dark:bg-primary-dark/20
+                                            dark:text-blue-300
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-[17px]">
+                                            home_health
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="min-w-0">
+
+                                        <span
+                                            class="
+                                                block
+                                                text-[10px]
+                                                font-bold
+                                                uppercase
+                                                tracking-wide
+                                                text-slate-400
+                                            "
+                                        >
+                                            {{ r.jadwal.tgl_kegiatan|date:"d M Y" }}
+                                        </span>
+
+
+                                        <span
+                                            class="
+                                                mt-0.5
+                                                block
+                                                text-sm
+                                                font-bold
+                                                text-slate-800
+
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ r.jadwal.posyandu.nama_posyandu }}
+                                        </span>
+
+
+                                        <span
+                                            class="
+                                                mt-0.5
+                                                block
+                                                text-[10px]
+                                                text-slate-500
+
+                                                dark:text-slate-400
+                                            "
+                                        >
+                                            {{ r.jadwal.jns_kegiatan }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- TERDAFTAR -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-center
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        min-w-8
+                                        items-center
+                                        justify-center
+
+                                        rounded-lg
+
+                                        bg-slate-100
+
+                                        px-2 py-1
+
+                                        text-xs
+                                        font-bold
+                                        text-slate-700
+
+                                        dark:bg-white/10
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ r.terdaftar }}
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- HADIR -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-center
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        items-center
+                                        gap-1.5
+
+                                        rounded-full
+
+                                        bg-emerald-100
+
+                                        px-2.5 py-1
+
+                                        text-xs
+                                        font-bold
+                                        text-emerald-700
+
+                                        dark:bg-emerald-500/10
+                                        dark:text-emerald-400
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                        "
+                                    >
+                                        check_circle
+                                    </span>
+
+                                    {{ r.hadir }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- ABSEN -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-center
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        inline-flex
+                                        items-center
+                                        gap-1.5
+
+                                        rounded-full
+
+                                        bg-rose-100
+
+                                        px-2.5 py-1
+
+                                        text-xs
+                                        font-bold
+                                        text-rose-700
+
+                                        dark:bg-rose-500/10
+                                        dark:text-rose-400
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                        "
+                                    >
+                                        person_off
+                                    </span>
+
+                                    {{ r.tidak_hadir }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- RATIO -->
+                            <td class="px-4 py-4">
+
+                                <div
+                                    class="
+                                        flex
+                                        items-center
+                                        gap-3
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            h-2
+                                            w-28
+                                            overflow-hidden
+
+                                            rounded-full
+
+                                            bg-slate-100
+
+                                            dark:bg-background-dark
+                                        "
+                                    >
+
+                                        <div
+                                            class="
+                                                h-full
+                                                rounded-full
+                                                bg-primary-dark
+                                                transition-all
+                                            "
+                                            style="width: {{ r.persen }}%;"
+                                        ></div>
+
+                                    </div>
+
+
+                                    <span
+                                        class="
+                                            min-w-[44px]
+                                            text-xs
+                                            font-black
+                                            text-primary-dark
+
+                                            dark:text-blue-300
+                                        "
+                                    >
+                                        {{ r.persen }}%
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- ACTION -->
+                            <td
+                                class="
+                                    px-4 py-4
+                                    text-center
+                                "
+                            >
+
+                                {% if r.jadwal.jns_kegiatan == 'Imunisasi' %}
+
+                                <!-- REVISI:
+                                     langsung ke detail imunisasi berdasarkan id_jadwal -->
+                                <a
+                                    href="{% url 'laporan:laporan_jadwal' r.jadwal.id_jadwal %}"
+
+                                    class="
+                                        inline-flex
+                                        h-8
+                                        items-center
+                                        justify-center
+                                        gap-1.5
+
+                                        rounded-lg
+
+                                        bg-primary-dark/10
+
+                                        px-3
+
+                                        text-[10px]
+                                        font-bold
+                                        text-primary-dark
+
+                                        transition
+
+                                        hover:bg-primary-dark
+                                        hover:text-white
+
+                                        dark:bg-primary-dark/20
+                                        dark:text-blue-300
+                                        dark:hover:bg-primary-dark
+                                        dark:hover:text-white
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[15px]">
+                                        vaccines
+                                    </span>
+
+                                    Detail
+
+                                </a>
+
+
+                                {% else %}
+
+                                <a
+                                    href="{% url 'laporan:laporan_jadwal' r.jadwal.id_jadwal %}"
+
+                                    class="
+                                        inline-flex
+                                        h-8
+                                        items-center
+                                        justify-center
+                                        gap-1.5
+
+                                        rounded-lg
+
+                                        bg-primary-dark/10
+
+                                        px-3
+
+                                        text-[10px]
+                                        font-bold
+                                        text-primary-dark
+
+                                        transition
+
+                                        hover:bg-primary-dark
+                                        hover:text-white
+
+                                        dark:bg-primary-dark/20
+                                        dark:text-blue-300
+                                        dark:hover:bg-primary-dark
+                                        dark:hover:text-white
+                                    "
+                                >
+
+                                    <span class="material-symbols-outlined text-[15px]">
+                                        visibility
+                                    </span>
+
+                                    Detail
+
+                                </a>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+
+                                class="
+                                    px-6 py-16
+                                    text-center
+                                "
+                            >
+
+                                <div class="flex flex-col items-center">
+
+                                    <div
+                                        class="
+                                            flex
+                                            h-12 w-12
+                                            items-center
+                                            justify-center
+
+                                            rounded-full
+
+                                            bg-slate-100
+                                            text-slate-400
+
+                                            dark:bg-white/10
+                                        "
+                                    >
+
+                                        <span class="material-symbols-outlined text-2xl">
+                                            folder_open
+                                        </span>
+
+                                    </div>
+
+
+                                    <h3
+                                        class="
+                                            mt-3
+                                            text-sm
+                                            font-bold
+                                            text-slate-600
+
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        Tidak ada data laporan
+                                    </h3>
+
+
+                                    <p
+                                        class="
+                                            mt-1
+                                            text-xs
+                                            text-slate-400
+                                        "
+                                    >
+                                        Tidak ditemukan rekaman aktivitas
+                                        Posyandu pada periode terpilih.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             KETERANGAN INDIKATOR
+        ====================================================== -->
+        <div
+            class="
+                overflow-hidden
+                rounded-xl
+
+                border
+                border-slate-200
+
+                bg-white
+
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+            "
+        >
+
+            <!-- HEADER -->
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-3
+
+                    border-b
+                    border-slate-200
+
+                    px-5 py-4
+
+                    dark:border-white/10
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        items-center
+                        justify-center
+
+                        rounded-lg
+
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        info
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h4
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-900
+
+                            dark:text-white
+                        "
+                    >
+                        Keterangan Rumus & Istilah Indikator
+                    </h4>
+
+
+                    <p
+                        class="
+                            mt-0.5
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                        Penjelasan indikator yang digunakan pada laporan partisipasi.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONTENT -->
+            <div
+                class="
+                    grid
+                    grid-cols-1
+                    gap-3
+
+                    p-4
+
+                    md:grid-cols-3
+                "
+            >
+
+
+                <!-- SASARAN -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            groups
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Sasaran Terdaftar
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Total jumlah bayi, balita, atau ibu hamil
+                        yang terdata dan seharusnya datang ke
+                        Posyandu pada kegiatan tersebut.
+                    </p>
+
+                </div>
+
+
+
+                <!-- HADIR -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-emerald-600
+
+                                dark:text-emerald-400
+                            "
+                        >
+                            how_to_reg
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-emerald-700
+
+                                dark:text-emerald-400
+                            "
+                        >
+                            Partisipasi Hadir (D)
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Jumlah sasaran yang hadir dan tercatat
+                        mengikuti pelayanan atau pemeriksaan
+                        pada kegiatan Posyandu.
+                    </p>
+
+                </div>
+
+
+
+                <!-- RATIO -->
+                <div
+                    class="
+                        rounded-lg
+
+                        border
+                        border-slate-200
+
+                        bg-slate-50
+
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+                    "
+                >
+
+                    <div class="mb-2 flex items-center gap-2">
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[16px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            percent
+                        </span>
+
+
+                        <span
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Rasio Cakupan (D/S)
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Persentase kehadiran sasaran terhadap
+                        keseluruhan sasaran terdaftar pada kegiatan.
+                    </p>
+
+
+                    <div
+                        class="
+                            mt-3
+
+                            rounded-lg
+
+                            bg-primary-dark/5
+
+                            px-3 py-2
+
+                            text-center
+
+                            dark:bg-primary-dark/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                font-mono
+                                text-[11px]
+                                font-bold
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            (Hadir / Terdaftar) &times; 100%
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             BACK BUTTON
+        ====================================================== -->
+        <div class="flex justify-end">
+
+            <a
+                href="javascript:history.back()"
+
+                class="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+
+                    rounded-lg
+
+                    border
+                    border-slate-200
+
+                    bg-white
+
+                    px-4
+
+                    text-xs
+                    font-bold
+                    text-slate-600
+
+                    shadow-sm
+
+                    transition
+
+                    hover:border-primary-dark/30
+                    hover:bg-primary-dark/5
+                    hover:text-primary-dark
+
+                    dark:border-white/10
+                    dark:bg-primary
+                    dark:text-slate-300
+
+                    dark:hover:bg-primary-dark/10
+                    dark:hover:text-blue-300
+                "
+            >
+
+                <span class="material-symbols-outlined text-[17px]">
+                    arrow_back
+                </span>
+
+                Kembali
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

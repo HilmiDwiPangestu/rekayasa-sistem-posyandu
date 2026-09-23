@@ -1,0 +1,3791 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block subtitle %}
+Laporan Triwulan
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                z-20
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+                sm:p-6
+            "
+        >
+
+            <!-- =================================================
+                 DECORATION
+                 Overflow hanya diterapkan ke layer dekorasi
+                 supaya dropdown tidak terpotong.
+            ================================================== -->
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    overflow-hidden
+                    rounded-xl
+                "
+            >
+
+                <div
+                    class="
+                        absolute
+                        -right-16
+                        -top-20
+                        h-56
+                        w-56
+                        rounded-full
+                        bg-primary-dark/30
+                        blur-3xl
+                    "
+                ></div>
+
+            </div>
+
+
+            <!-- HEADER CONTENT -->
+            <div
+                class="
+                    relative
+                    z-10
+                    flex
+                    flex-col
+                    gap-5
+                    lg:flex-row
+                    lg:items-center
+                    lg:justify-between
+                "
+            >
+
+
+                <!-- =================================================
+                     LEFT HEADER
+                ================================================== -->
+                <div class="flex items-start gap-4">
+
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-white/10
+                            text-white
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+                            summarize
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Pelaporan Posyandu
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                tracking-tight
+                                sm:text-3xl
+                            "
+                        >
+                            Laporan Triwulan
+                        </h1>
+
+
+                        <div
+                            class="
+                                mt-3
+                                flex
+                                flex-wrap
+                                gap-x-4
+                                gap-y-2
+                                text-xs
+                                text-slate-300
+                            "
+                        >
+
+                            <span
+                                class="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[15px]
+                                        text-blue-200
+                                    "
+                                >
+                                    calendar_today
+                                </span>
+
+                                {{ triwulan_label }} {{ tahun }}
+
+                            </span>
+
+
+                            <span
+                                class="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[15px]
+                                        text-blue-200
+                                    "
+                                >
+                                    date_range
+                                </span>
+
+                                {{ tanggal_mulai|date:"d F Y" }}
+                                –
+                                {{ tanggal_selesai|date:"d F Y" }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     CETAK LAPORAN
+                ================================================== -->
+                <details
+                    class="
+                        group
+                        relative
+                        z-50
+                        w-full
+                        lg:w-auto
+                    "
+                >
+
+                    <summary
+                        class="
+                            flex
+                            h-10
+                            w-full
+                            cursor-pointer
+                            list-none
+                            items-center
+                            justify-center
+                            gap-2
+                            rounded-lg
+                            bg-rose-600
+                            px-4
+                            text-xs
+                            font-bold
+                            text-white
+                            shadow-sm
+                            transition
+
+                            hover:bg-rose-500
+
+                            lg:w-auto
+
+                            [&::-webkit-details-marker]:hidden
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                            "
+                        >
+                            picture_as_pdf
+                        </span>
+
+                        Cetak Laporan
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                transition-transform
+                                group-open:rotate-180
+                            "
+                        >
+                            expand_more
+                        </span>
+
+                    </summary>
+
+
+
+                    <!-- =================================================
+                         DROPDOWN CETAK
+                    ================================================== -->
+                    <div
+                        class="
+                            absolute
+                            right-0
+                            z-[100]
+                            mt-2
+                            w-full
+                            overflow-hidden
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-800
+                            shadow-2xl
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:text-white
+
+                            sm:w-72
+                        "
+                    >
+
+
+                        {% if is_admin_kelurahan %}
+                        <div class="px-4 pb-1 pt-3 text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                            Posyandu Terpilih
+                        </div>
+                        {% endif %}
+
+                        <!-- BALITA -->
+                        <a
+                            href="{% url 'laporan:export_laporan_triwulan_pdf' %}?tahun={{ tahun }}&triwulan={{ triwulan }}&jenis=balita&scope=selected{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                group/item
+                                flex
+                                items-center
+                                gap-3
+                                px-4 py-3
+                                transition
+
+                                hover:bg-primary-dark/5
+                                dark:hover:bg-primary-dark/10
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    h-10 w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[19px]
+                                    "
+                                >
+                                    child_care
+                                </span>
+
+                            </div>
+
+
+                            <div class="min-w-0 flex-1">
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                        dark:text-white
+                                    "
+                                >
+                                    {% if is_admin_kelurahan %}
+                                        Balita - Posyandu Dipilih
+                                    {% else %}
+                                        Laporan Balita
+                                    {% endif %}
+                                </p>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-[10px]
+                                        text-slate-400
+                                    "
+                                >
+                                    {% if is_admin_kelurahan and selected_posyandu %}
+                                        {{ selected_posyandu.nama }}
+                                    {% else %}
+                                        Cetak PDF pemeriksaan Balita
+                                    {% endif %}
+                                </p>
+
+                            </div>
+
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[17px]
+                                    text-slate-300
+                                    transition
+                                    group-hover/item:text-primary-dark
+                                "
+                            >
+                                chevron_right
+                            </span>
+
+                        </a>
+
+
+
+                        <div
+                            class="
+                                border-t
+                                border-slate-100
+                                dark:border-white/10
+                            "
+                        ></div>
+
+
+
+                        <!-- IBU HAMIL -->
+                        <a
+                            href="{% url 'laporan:export_laporan_triwulan_pdf' %}?tahun={{ tahun }}&triwulan={{ triwulan }}&jenis=bumil&scope=selected{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                group/item
+                                flex
+                                items-center
+                                gap-3
+                                px-4 py-3
+                                transition
+
+                                hover:bg-primary-dark/5
+                                dark:hover:bg-primary-dark/10
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    h-10 w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[19px]
+                                    "
+                                >
+                                    pregnant_woman
+                                </span>
+
+                            </div>
+
+
+                            <div class="min-w-0 flex-1">
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                        dark:text-white
+                                    "
+                                >
+                                    {% if is_admin_kelurahan %}
+                                        Ibu Hamil - Posyandu Dipilih
+                                    {% else %}
+                                        Laporan Ibu Hamil
+                                    {% endif %}
+                                </p>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-[10px]
+                                        text-slate-400
+                                    "
+                                >
+                                    {% if is_admin_kelurahan and selected_posyandu %}
+                                        {{ selected_posyandu.nama }}
+                                    {% else %}
+                                        Cetak PDF pemeriksaan Ibu Hamil
+                                    {% endif %}
+                                </p>
+
+                            </div>
+
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[17px]
+                                    text-slate-300
+                                    transition
+                                    group-hover/item:text-primary-dark
+                                "
+                            >
+                                chevron_right
+                            </span>
+
+                        </a>
+
+                        {% if is_admin_kelurahan %}
+                        <div class="border-t border-slate-100 dark:border-white/10"></div>
+
+                        <div class="px-4 pb-1 pt-3 text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">
+                            Semua Posyandu · 1 PDF
+                        </div>
+
+                        <a
+                            href="{% url 'laporan:export_laporan_triwulan_pdf' %}?tahun={{ tahun }}&triwulan={{ triwulan }}&jenis=balita&scope=all"
+                            class="group/item flex items-center gap-3 px-4 py-3 transition hover:bg-primary-dark/5 dark:hover:bg-primary-dark/10"
+                        >
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+                                <span class="material-symbols-outlined text-[19px]">picture_as_pdf</span>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold text-slate-800 dark:text-white">Semua Posyandu - Balita</p>
+                                <p class="mt-0.5 text-[10px] text-slate-400">{{ daftar_posyandu_filter|length }} Posyandu · 1 PDF · 1 Posyandu per halaman</p>
+                            </div>
+                            <span class="material-symbols-outlined text-[17px] text-slate-300 transition group-hover/item:text-primary-dark">download</span>
+                        </a>
+
+                        <div class="border-t border-slate-100 dark:border-white/10"></div>
+
+                        <a
+                            href="{% url 'laporan:export_laporan_triwulan_pdf' %}?tahun={{ tahun }}&triwulan={{ triwulan }}&jenis=bumil&scope=all"
+                            class="group/item flex items-center gap-3 px-4 py-3 transition hover:bg-primary-dark/5 dark:hover:bg-primary-dark/10"
+                        >
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+                                <span class="material-symbols-outlined text-[19px]">picture_as_pdf</span>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold text-slate-800 dark:text-white">Semua Posyandu - Ibu Hamil</p>
+                                <p class="mt-0.5 text-[10px] text-slate-400">{{ daftar_posyandu_filter|length }} Posyandu · 1 PDF · 1 Posyandu per halaman</p>
+                            </div>
+                            <span class="material-symbols-outlined text-[17px] text-slate-300 transition group-hover/item:text-primary-dark">download</span>
+                        </a>
+                        {% endif %}
+
+                    </div>
+
+                </details>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             FILTER
+        ====================================================== -->
+        <div
+            class="
+                rounded-xl
+                border
+                border-slate-200
+                bg-white
+                p-4
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+
+                sm:p-5
+            "
+        >
+
+            <form
+                method="get"
+
+                class="
+                    grid
+                    grid-cols-1
+                    gap-4
+
+                    sm:grid-cols-2
+                    sm:items-end
+                    {% if is_admin_kelurahan %}
+                    lg:grid-cols-[minmax(180px,240px)_140px_minmax(220px,320px)_auto]
+                    {% else %}
+                    lg:grid-cols-[minmax(180px,240px)_140px_auto]
+                    {% endif %}
+                "
+            >
+
+
+                <!-- TRIWULAN -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="triwulan"
+
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Triwulan
+                    </label>
+
+
+                    <div class="relative">
+
+                        <select
+                            id="triwulan"
+                            name="triwulan"
+
+                            class="
+                                h-11
+                                w-full
+                                appearance-none
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                pl-4 pr-10
+                                text-sm
+                                font-medium
+                                text-slate-700
+                                outline-none
+                                transition
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-slate-200
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                            {% for nilai, label in daftar_triwulan %}
+
+                            <option
+                                value="{{ nilai }}"
+
+                                {% if nilai == triwulan %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ label }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                text-[18px]
+                                text-slate-400
+                            "
+                        >
+                            expand_more
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TAHUN -->
+                <div class="flex flex-col gap-1.5">
+
+                    <label
+                        for="tahun"
+
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Tahun
+                    </label>
+
+
+                    <div class="relative">
+
+                        <select
+                            id="tahun"
+                            name="tahun"
+
+                            class="
+                                h-11
+                                w-full
+                                appearance-none
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                pl-4 pr-10
+                                text-sm
+                                font-medium
+                                text-slate-700
+                                outline-none
+                                transition
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-slate-200
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                            {% for th in daftar_tahun %}
+
+                            <option
+                                value="{{ th }}"
+
+                                {% if th == tahun %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ th }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                text-[18px]
+                                text-slate-400
+                            "
+                        >
+                            expand_more
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                {% if is_admin_kelurahan %}
+                <!-- POSYANDU -->
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        for="posyandu"
+                        class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                    >
+                        Posyandu
+                    </label>
+
+                    <div class="relative">
+                        <select
+                            id="posyandu"
+                            name="posyandu"
+                            class="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 pl-4 pr-10 text-sm font-medium text-slate-700 outline-none transition focus:border-primary-dark focus:bg-white focus:ring-2 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark/50 dark:text-slate-200 dark:focus:bg-background-dark"
+                        >
+                            {% for pos in daftar_posyandu_filter %}
+                            <option
+                                value="{{ pos.pk }}"
+                                {% if selected_posyandu_id == pos.pk %}selected{% endif %}
+                            >
+                                {{ pos.nama }}
+                            </option>
+                            {% empty %}
+                            <option value="">Tidak ada Posyandu</option>
+                            {% endfor %}
+                        </select>
+
+                        <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
+                            expand_more
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+
+
+                <!-- APPLY -->
+                <button
+                    type="submit"
+
+                    class="
+                        inline-flex
+                        h-11
+                        w-full
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-lg
+                        bg-primary-dark
+                        px-5
+                        text-xs
+                        font-bold
+                        text-white
+                        shadow-sm
+                        transition
+
+                        hover:bg-primary
+                        hover:shadow-md
+
+                        active:scale-[0.98]
+
+                        sm:w-auto
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[17px]
+                        "
+                    >
+                        filter_alt
+                    </span>
+
+                    Terapkan Filter
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             EMPTY PERIOD
+        ====================================================== -->
+        {% if total_pemeriksaan_balita == 0 and total_pemeriksaan_bumil == 0 %}
+
+        <div
+            class="
+                flex
+                items-start
+                gap-3
+                rounded-xl
+                border
+                border-amber-200
+                bg-amber-50
+                p-4
+
+                dark:border-amber-900/50
+                dark:bg-amber-950/20
+
+                sm:p-5
+            "
+        >
+
+            <div
+                class="
+                    flex
+                    h-9 w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    bg-amber-100
+                    text-amber-600
+
+                    dark:bg-amber-500/10
+                    dark:text-amber-400
+                "
+            >
+
+                <span
+                    class="
+                        material-symbols-outlined
+                        text-[18px]
+                    "
+                >
+                    info
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <p
+                    class="
+                        text-sm
+                        font-bold
+                        text-amber-800
+                        dark:text-amber-300
+                    "
+                >
+                    Belum ada data pada periode ini
+                </p>
+
+
+                <p
+                    class="
+                        mt-1
+                        text-xs
+                        leading-5
+                        text-amber-700
+                        dark:text-amber-300/80
+                    "
+                >
+                    Tidak ditemukan data pemeriksaan Balita maupun
+                    Ibu Hamil untuk {{ triwulan_label }} {{ tahun }}.
+                    Silakan pilih triwulan atau tahun lainnya.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% else %}
+
+
+
+        <!-- =====================================================
+             STAT CARDS
+        ====================================================== -->
+        <section
+            class="
+                grid
+                grid-cols-1
+                gap-3
+                sm:grid-cols-2
+            "
+        >
+
+
+            <!-- BALITA -->
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-4
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    p-4
+                    shadow-sm
+
+                    dark:border-white/10
+                    dark:bg-primary
+
+                    sm:p-5
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-11 w-11
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[20px]
+                        "
+                    >
+                        child_care
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <p
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Total Pemeriksaan Balita
+                    </p>
+
+
+                    <p
+                        class="
+                            mt-1
+                            text-2xl
+                            font-black
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                        {{ total_pemeriksaan_balita }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUMIL -->
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-4
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    p-4
+                    shadow-sm
+
+                    dark:border-white/10
+                    dark:bg-primary
+
+                    sm:p-5
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-11 w-11
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[20px]
+                        "
+                    >
+                        pregnant_woman
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <p
+                        class="
+                            text-[10px]
+                            font-bold
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                        "
+                    >
+                        Total Pemeriksaan Ibu Hamil
+                    </p>
+
+
+                    <p
+                        class="
+                            mt-1
+                            text-2xl
+                            font-black
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                        {{ total_pemeriksaan_bumil }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+
+        <!-- =====================================================
+             BALITA
+        ====================================================== -->
+        <section class="space-y-3">
+
+
+            <!-- SECTION TITLE -->
+            <div class="flex items-center gap-3">
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[18px]
+                        "
+                    >
+                        child_care
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                        Ringkasan Balita
+                    </h2>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                        Perkembangan pemeriksaan selama tiga bulan
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CARD -->
+            <div
+                class="
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    shadow-sm
+
+                    dark:border-white/10
+                    dark:bg-primary
+                "
+            >
+
+
+                <!-- HEADER -->
+                <div
+                    class="
+                        flex
+                        items-center
+                        justify-between
+                        gap-3
+                        border-b
+                        border-slate-200
+                        px-4 py-4
+
+                        dark:border-white/10
+
+                        sm:px-5
+                    "
+                >
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            Pemeriksaan Balita per Bulan
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-[10px]
+                                text-slate-400
+                            "
+                        >
+                            Berat badan, tinggi badan, dan status gizi
+                        </p>
+
+                    </div>
+
+
+                    <span
+                        class="
+                            shrink-0
+                            rounded-full
+                            bg-primary-dark/10
+                            px-2.5 py-1
+                            text-[10px]
+                            font-bold
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+                        {{ data_balita.paginator.count }} peserta
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BALITA MOBILE
+                ================================================== -->
+                <div
+                    class="
+                        divide-y
+                        divide-slate-100
+                        dark:divide-white/10
+
+                        sm:hidden
+                    "
+                >
+
+                    {% for row in data_balita %}
+
+                    <div class="p-4">
+
+
+                        <!-- PARTICIPANT -->
+                        <div
+                            class="
+                                mb-3
+                                flex
+                                items-center
+                                justify-between
+                                gap-2
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    min-w-0
+                                    items-center
+                                    gap-2
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        flex
+                                        h-7 w-7
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-slate-100
+                                        text-[10px]
+                                        font-bold
+                                        text-slate-500
+
+                                        dark:bg-white/10
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ data_balita.start_index|add:forloop.counter0 }}
+                                </span>
+
+
+                                <span
+                                    class="
+                                        truncate
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                        dark:text-white
+                                    "
+                                >
+                                    {{ row.peserta.nama_peserta }}
+                                </span>
+
+                            </div>
+
+
+                            {% if daftar_bulan|length > 1 %}
+
+                            <span
+                                class="
+                                    flex
+                                    shrink-0
+                                    items-center
+                                    gap-1
+                                    text-[9px]
+                                    text-slate-400
+                                "
+                            >
+
+                                Geser
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[13px]
+                                    "
+                                >
+                                    swipe
+                                </span>
+
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- MONTH CARDS -->
+                        <div
+                            class="
+                                -mx-4
+                                flex
+                                snap-x
+                                snap-mandatory
+                                gap-2
+                                overflow-x-auto
+                                px-4
+                                pb-1
+
+                                [&::-webkit-scrollbar]:hidden
+                            "
+                        >
+
+                            {% for b in daftar_bulan %}
+                            {% with p=row.bulan|index:forloop.counter0 %}
+
+                            <div
+                                class="
+                                    w-[170px]
+                                    shrink-0
+                                    snap-start
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    p-3
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                "
+                            >
+
+                                <p
+                                    class="
+                                        mb-3
+                                        flex
+                                        items-center
+                                        gap-1.5
+                                        whitespace-nowrap
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wide
+                                        text-slate-400
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                            text-primary-dark
+                                            dark:text-blue-300
+                                        "
+                                    >
+                                        calendar_month
+                                    </span>
+
+                                    {{ b.nama }}
+
+                                </p>
+
+
+
+                                {% if p %}
+
+                                <div
+                                    class="
+                                        mb-3
+                                        grid
+                                        grid-cols-2
+                                        gap-2
+                                    "
+                                >
+
+
+                                    <!-- BB -->
+                                    <div
+                                        class="
+                                            rounded-lg
+                                            bg-white
+                                            p-2
+                                            text-center
+
+                                            dark:bg-primary
+                                        "
+                                    >
+
+                                        <p
+                                            class="
+                                                text-[9px]
+                                                text-slate-400
+                                            "
+                                        >
+                                            BB
+                                        </p>
+
+
+                                        <p
+                                            class="
+                                                mt-0.5
+                                                text-xs
+                                                font-bold
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ p.berat_badan|default:"-" }}
+
+                                            <span
+                                                class="
+                                                    text-[9px]
+                                                    font-medium
+                                                    text-slate-400
+                                                "
+                                            >
+                                                kg
+                                            </span>
+                                        </p>
+
+                                    </div>
+
+
+
+                                    <!-- TB -->
+                                    <div
+                                        class="
+                                            rounded-lg
+                                            bg-white
+                                            p-2
+                                            text-center
+
+                                            dark:bg-primary
+                                        "
+                                    >
+
+                                        <p
+                                            class="
+                                                text-[9px]
+                                                text-slate-400
+                                            "
+                                        >
+                                            TB
+                                        </p>
+
+
+                                        <p
+                                            class="
+                                                mt-0.5
+                                                text-xs
+                                                font-bold
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ p.tinggi_badan|default:"-" }}
+
+                                            <span
+                                                class="
+                                                    text-[9px]
+                                                    font-medium
+                                                    text-slate-400
+                                                "
+                                            >
+                                                cm
+                                            </span>
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- STATUS -->
+                                <span
+                                    class="
+                                        block
+                                        whitespace-nowrap
+                                        rounded-full
+                                        px-2 py-1
+                                        text-center
+                                        text-[10px]
+                                        font-bold
+
+                                        {% if p.status_gizi == 'normal' %}
+                                            bg-emerald-100
+                                            text-emerald-700
+                                            dark:bg-emerald-500/10
+                                            dark:text-emerald-400
+
+                                        {% elif p.status_gizi == 'tinggi' %}
+                                            bg-amber-100
+                                            text-amber-700
+                                            dark:bg-amber-500/10
+                                            dark:text-amber-400
+
+                                        {% elif p.status_gizi == 'stunting' %}
+                                            bg-rose-100
+                                            text-rose-700
+                                            dark:bg-rose-500/10
+                                            dark:text-rose-400
+
+                                        {% else %}
+                                            bg-orange-100
+                                            text-orange-700
+                                            dark:bg-orange-500/10
+                                            dark:text-orange-400
+                                        {% endif %}
+                                    "
+                                >
+                                    {{ p.get_status_gizi_display }}
+                                </span>
+
+
+                                {% else %}
+
+                                <div
+                                    class="
+                                        flex
+                                        min-h-[72px]
+                                        items-center
+                                        justify-center
+                                        text-center
+                                    "
+                                >
+
+                                    <p
+                                        class="
+                                            text-[10px]
+                                            italic
+                                            text-slate-400
+                                        "
+                                    >
+                                        Tidak ada data
+                                    </p>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                            {% endwith %}
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+
+                    {% empty %}
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            items-center
+                            justify-center
+                            px-6 py-12
+                            text-center
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                h-12 w-12
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-slate-100
+                                text-slate-400
+
+                                dark:bg-white/10
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-2xl
+                                "
+                            >
+                                child_care
+                            </span>
+
+                        </div>
+
+
+                        <p
+                            class="
+                                mt-3
+                                text-xs
+                                font-medium
+                                text-slate-400
+                            "
+                        >
+                            Belum ada data pemeriksaan Balita pada periode ini.
+                        </p>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BALITA DESKTOP TABLE
+                ================================================== -->
+                <div
+                    class="
+                        hidden
+                        overflow-x-auto
+                        sm:block
+                    "
+                >
+
+                    <table
+                        class="
+                            min-w-full
+                            border-collapse
+                            text-sm
+                        "
+                    >
+
+                        <thead
+                            class="
+                                bg-slate-50
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+
+                                dark:bg-background-dark/50
+                            "
+                        >
+
+                            <tr>
+
+                                <th
+                                    rowspan="2"
+
+                                    class="
+                                        w-14
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    No
+                                </th>
+
+
+                                <th
+                                    rowspan="2"
+
+                                    class="
+                                        min-w-[190px]
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-left
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    Nama Peserta
+                                </th>
+
+
+                                {% for b in daftar_bulan %}
+
+                                <th
+                                    colspan="3"
+
+                                    class="
+                                        min-w-[300px]
+                                        whitespace-nowrap
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+                                        text-primary-dark
+
+                                        dark:border-white/10
+                                        dark:text-blue-300
+                                    "
+                                >
+                                    {{ b.nama }}
+                                </th>
+
+                                {% endfor %}
+
+                            </tr>
+
+
+                            <tr>
+
+                                {% for b in daftar_bulan %}
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    BB (kg)
+                                </th>
+
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    TB (cm)
+                                </th>
+
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    Status Gizi
+                                </th>
+
+                                {% endfor %}
+
+                            </tr>
+
+                        </thead>
+
+
+
+                        <tbody>
+
+                            {% for row in data_balita %}
+
+                            <tr
+                                class="
+                                    transition
+                                    hover:bg-primary-dark/[0.035]
+                                    dark:hover:bg-white/[0.03]
+                                "
+                            >
+
+                                <!-- NO -->
+                                <td
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            h-7 w-7
+                                            items-center
+                                            justify-center
+                                            rounded-lg
+                                            bg-slate-100
+                                            text-[10px]
+                                            font-bold
+                                            text-slate-500
+
+                                            dark:bg-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ data_balita.start_index|add:forloop.counter0 }}
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- NAME -->
+                                <td
+                                    class="
+                                        whitespace-nowrap
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-xs
+                                        font-bold
+                                        text-slate-800
+
+                                        dark:border-white/10
+                                        dark:text-slate-200
+                                    "
+                                >
+                                    {{ row.peserta.nama_peserta }}
+                                </td>
+
+
+
+                                {% for p in row.bulan %}
+
+                                    {% if p %}
+
+                                    <!-- BB -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-xs
+                                            text-slate-600
+
+                                            dark:border-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ p.berat_badan|default:"-" }}
+                                    </td>
+
+
+                                    <!-- TB -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-xs
+                                            text-slate-600
+
+                                            dark:border-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ p.tinggi_badan|default:"-" }}
+                                    </td>
+
+
+                                    <!-- STATUS -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+
+                                            dark:border-white/10
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                inline-flex
+                                                whitespace-nowrap
+                                                rounded-full
+                                                px-2.5 py-1
+                                                text-[10px]
+                                                font-bold
+
+                                                {% if p.status_gizi == 'normal' %}
+                                                    bg-emerald-100
+                                                    text-emerald-700
+                                                    dark:bg-emerald-500/10
+                                                    dark:text-emerald-400
+
+                                                {% elif p.status_gizi == 'tinggi' %}
+                                                    bg-amber-100
+                                                    text-amber-700
+                                                    dark:bg-amber-500/10
+                                                    dark:text-amber-400
+
+                                                {% elif p.status_gizi == 'stunting' %}
+                                                    bg-rose-100
+                                                    text-rose-700
+                                                    dark:bg-rose-500/10
+                                                    dark:text-rose-400
+
+                                                {% else %}
+                                                    bg-orange-100
+                                                    text-orange-700
+                                                    dark:bg-orange-500/10
+                                                    dark:text-orange-400
+                                                {% endif %}
+                                            "
+                                        >
+                                            {{ p.get_status_gizi_display }}
+                                        </span>
+
+                                    </td>
+
+
+                                    {% else %}
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </tr>
+
+
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="2"
+
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-6 py-12
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            flex
+                                            flex-col
+                                            items-center
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                material-symbols-outlined
+                                                text-3xl
+                                                text-slate-300
+                                            "
+                                        >
+                                            child_care
+                                        </span>
+
+
+                                        <p
+                                            class="
+                                                mt-2
+                                                text-xs
+                                                text-slate-400
+                                            "
+                                        >
+                                            Belum ada data Balita.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td
+                                    colspan="{% widthratio daftar_bulan|length 1 3 %}"
+
+                                    class="
+                                        border
+                                        border-slate-200
+
+                                        dark:border-white/10
+                                    "
+                                ></td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BALITA PAGINATION
+                ================================================== -->
+                {% if data_balita.has_other_pages %}
+
+                <div
+                    class="
+                        flex
+                        flex-col
+                        gap-3
+                        border-t
+                        border-slate-200
+                        bg-slate-50
+                        px-4 py-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/40
+
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
+                    "
+                >
+
+                    <p
+                        class="
+                            order-2
+                            text-center
+                            text-xs
+                            text-slate-500
+
+                            sm:order-1
+                            sm:text-left
+                        "
+                    >
+
+                        Halaman
+
+                        <strong
+                            class="
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            {{ data_balita.number }}
+                        </strong>
+
+                        dari
+
+                        <strong
+                            class="
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            {{ data_balita.paginator.num_pages }}
+                        </strong>
+
+                    </p>
+
+
+
+                    <div
+                        class="
+                            order-1
+                            flex
+                            items-center
+                            justify-center
+                            gap-2
+
+                            sm:order-2
+                        "
+                    >
+
+                        {% if data_balita.has_previous %}
+
+                        <a
+                            href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ data_balita.previous_page_number }}&page_bumil={{ data_bumil.number }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                flex
+                                h-9 w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-white
+                                text-slate-500
+                                transition
+
+                                hover:border-primary-dark
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:border-white/10
+                                dark:bg-primary
+                                dark:text-slate-300
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[18px]
+                                "
+                            >
+                                chevron_left
+                            </span>
+
+                        </a>
+
+                        {% endif %}
+
+
+
+                        <div
+                            class="
+                                hidden
+                                items-center
+                                gap-1
+
+                                sm:flex
+                            "
+                        >
+
+                            {% for i in data_balita.paginator.page_range %}
+
+                                {% if i == data_balita.number %}
+
+                                <span
+                                    class="
+                                        flex
+                                        h-9
+                                        min-w-9
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-primary-dark
+                                        px-2
+                                        text-xs
+                                        font-bold
+                                        text-white
+                                    "
+                                >
+                                    {{ i }}
+                                </span>
+
+
+                                {% else %}
+
+                                <a
+                                    href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ i }}&page_bumil={{ data_bumil.number }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                                    class="
+                                        flex
+                                        h-9
+                                        min-w-9
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        border
+                                        border-slate-200
+                                        bg-white
+                                        px-2
+                                        text-xs
+                                        font-bold
+                                        text-slate-500
+                                        transition
+
+                                        hover:border-primary-dark
+                                        hover:text-primary-dark
+
+                                        dark:border-white/10
+                                        dark:bg-primary
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ i }}
+                                </a>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+
+
+                        <!-- MOBILE PAGE -->
+                        <span
+                            class="
+                                flex
+                                h-9
+                                min-w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-primary-dark
+                                px-2
+                                text-xs
+                                font-bold
+                                text-white
+
+                                sm:hidden
+                            "
+                        >
+                            {{ data_balita.number }}
+                        </span>
+
+
+
+                        {% if data_balita.has_next %}
+
+                        <a
+                            href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ data_balita.next_page_number }}&page_bumil={{ data_bumil.number }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                flex
+                                h-9 w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-white
+                                text-slate-500
+                                transition
+
+                                hover:border-primary-dark
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:border-white/10
+                                dark:bg-primary
+                                dark:text-slate-300
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[18px]
+                                "
+                            >
+                                chevron_right
+                            </span>
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             IBU HAMIL
+        ====================================================== -->
+        <section class="space-y-3">
+
+
+            <!-- SECTION TITLE -->
+            <div class="flex items-center gap-3">
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[18px]
+                        "
+                    >
+                        pregnant_woman
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                        Ringkasan Ibu Hamil
+                    </h2>
+
+
+                    <p
+                        class="
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                        Perkembangan pemeriksaan selama tiga bulan
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CARD -->
+            <div
+                class="
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    shadow-sm
+
+                    dark:border-white/10
+                    dark:bg-primary
+                "
+            >
+
+
+                <!-- HEADER -->
+                <div
+                    class="
+                        flex
+                        items-center
+                        justify-between
+                        gap-3
+                        border-b
+                        border-slate-200
+                        px-4 py-4
+
+                        dark:border-white/10
+
+                        sm:px-5
+                    "
+                >
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            Pemeriksaan Ibu Hamil per Bulan
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-[10px]
+                                text-slate-400
+                            "
+                        >
+                            Tekanan darah, LiLA, dan status kehamilan
+                        </p>
+
+                    </div>
+
+
+                    <span
+                        class="
+                            shrink-0
+                            rounded-full
+                            bg-primary-dark/10
+                            px-2.5 py-1
+                            text-[10px]
+                            font-bold
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+                        {{ data_bumil.paginator.count }} peserta
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BUMIL MOBILE
+                ================================================== -->
+                <div
+                    class="
+                        divide-y
+                        divide-slate-100
+                        dark:divide-white/10
+
+                        sm:hidden
+                    "
+                >
+
+                    {% for row in data_bumil %}
+
+                    <div class="p-4">
+
+                        <div
+                            class="
+                                mb-3
+                                flex
+                                items-center
+                                justify-between
+                                gap-2
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    min-w-0
+                                    items-center
+                                    gap-2
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        flex
+                                        h-7 w-7
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-slate-100
+                                        text-[10px]
+                                        font-bold
+                                        text-slate-500
+
+                                        dark:bg-white/10
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ data_bumil.start_index|add:forloop.counter0 }}
+                                </span>
+
+
+                                <span
+                                    class="
+                                        truncate
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                        dark:text-white
+                                    "
+                                >
+                                    {{ row.peserta.nama_peserta }}
+                                </span>
+
+                            </div>
+
+
+                            {% if daftar_bulan|length > 1 %}
+
+                            <span
+                                class="
+                                    flex
+                                    shrink-0
+                                    items-center
+                                    gap-1
+                                    text-[9px]
+                                    text-slate-400
+                                "
+                            >
+
+                                Geser
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-[13px]
+                                    "
+                                >
+                                    swipe
+                                </span>
+
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- MONTH CARDS -->
+                        <div
+                            class="
+                                -mx-4
+                                flex
+                                snap-x
+                                snap-mandatory
+                                gap-2
+                                overflow-x-auto
+                                px-4
+                                pb-1
+
+                                [&::-webkit-scrollbar]:hidden
+                            "
+                        >
+
+                            {% for b in daftar_bulan %}
+                            {% with p=row.bulan|index:forloop.counter0 %}
+
+                            <div
+                                class="
+                                    w-[170px]
+                                    shrink-0
+                                    snap-start
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    p-3
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                "
+                            >
+
+                                <p
+                                    class="
+                                        mb-3
+                                        flex
+                                        items-center
+                                        gap-1.5
+                                        whitespace-nowrap
+                                        text-[10px]
+                                        font-bold
+                                        uppercase
+                                        tracking-wide
+                                        text-slate-400
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                            text-primary-dark
+                                            dark:text-blue-300
+                                        "
+                                    >
+                                        calendar_month
+                                    </span>
+
+                                    {{ b.nama }}
+
+                                </p>
+
+
+
+                                {% if p %}
+
+                                <div
+                                    class="
+                                        mb-3
+                                        grid
+                                        grid-cols-2
+                                        gap-2
+                                    "
+                                >
+
+
+                                    <!-- TD -->
+                                    <div
+                                        class="
+                                            rounded-lg
+                                            bg-white
+                                            p-2
+                                            text-center
+
+                                            dark:bg-primary
+                                        "
+                                    >
+
+                                        <p
+                                            class="
+                                                text-[9px]
+                                                text-slate-400
+                                            "
+                                        >
+                                            TD
+                                        </p>
+
+
+                                        <p
+                                            class="
+                                                mt-0.5
+                                                text-xs
+                                                font-bold
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ p.tekanan_darah|default:"-" }}
+                                        </p>
+
+                                    </div>
+
+
+
+                                    <!-- LILA -->
+                                    <div
+                                        class="
+                                            rounded-lg
+                                            bg-white
+                                            p-2
+                                            text-center
+
+                                            dark:bg-primary
+                                        "
+                                    >
+
+                                        <p
+                                            class="
+                                                text-[9px]
+                                                text-slate-400
+                                            "
+                                        >
+                                            LiLA
+                                        </p>
+
+
+                                        <p
+                                            class="
+                                                mt-0.5
+                                                text-xs
+                                                font-bold
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {{ p.lila_bumil|default:"-" }}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <!-- STATUS -->
+                                <span
+                                    class="
+                                        block
+                                        whitespace-nowrap
+                                        rounded-full
+                                        px-2 py-1
+                                        text-center
+                                        text-[10px]
+                                        font-bold
+
+                                        {% if p.status_kehamilan == 'normal' %}
+                                            bg-emerald-100
+                                            text-emerald-700
+                                            dark:bg-emerald-500/10
+                                            dark:text-emerald-400
+
+                                        {% elif p.status_kehamilan == 'resiko' %}
+                                            bg-rose-100
+                                            text-rose-700
+                                            dark:bg-rose-500/10
+                                            dark:text-rose-400
+
+                                        {% elif p.status_kehamilan == 'anemia' %}
+                                            bg-amber-100
+                                            text-amber-700
+                                            dark:bg-amber-500/10
+                                            dark:text-amber-400
+
+                                        {% else %}
+                                            bg-orange-100
+                                            text-orange-700
+                                            dark:bg-orange-500/10
+                                            dark:text-orange-400
+                                        {% endif %}
+                                    "
+                                >
+                                    {{ p.get_status_kehamilan_display }}
+                                </span>
+
+
+                                {% else %}
+
+                                <div
+                                    class="
+                                        flex
+                                        min-h-[72px]
+                                        items-center
+                                        justify-center
+                                        text-center
+                                    "
+                                >
+
+                                    <p
+                                        class="
+                                            text-[10px]
+                                            italic
+                                            text-slate-400
+                                        "
+                                    >
+                                        Tidak ada data
+                                    </p>
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                            {% endwith %}
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+
+                    {% empty %}
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            items-center
+                            justify-center
+                            px-6 py-12
+                            text-center
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                h-12 w-12
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-slate-100
+                                text-slate-400
+
+                                dark:bg-white/10
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-2xl
+                                "
+                            >
+                                pregnant_woman
+                            </span>
+
+                        </div>
+
+
+                        <p
+                            class="
+                                mt-3
+                                text-xs
+                                font-medium
+                                text-slate-400
+                            "
+                        >
+                            Belum ada data pemeriksaan Ibu Hamil pada periode ini.
+                        </p>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BUMIL DESKTOP
+                ================================================== -->
+                <div
+                    class="
+                        hidden
+                        overflow-x-auto
+                        sm:block
+                    "
+                >
+
+                    <table
+                        class="
+                            min-w-full
+                            border-collapse
+                            text-sm
+                        "
+                    >
+
+                        <thead
+                            class="
+                                bg-slate-50
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+
+                                dark:bg-background-dark/50
+                            "
+                        >
+
+                            <tr>
+
+                                <th
+                                    rowspan="2"
+
+                                    class="
+                                        w-14
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    No
+                                </th>
+
+
+                                <th
+                                    rowspan="2"
+
+                                    class="
+                                        min-w-[190px]
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-left
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    Nama Peserta
+                                </th>
+
+
+                                {% for b in daftar_bulan %}
+
+                                <th
+                                    colspan="3"
+
+                                    class="
+                                        min-w-[300px]
+                                        whitespace-nowrap
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+                                        text-primary-dark
+
+                                        dark:border-white/10
+                                        dark:text-blue-300
+                                    "
+                                >
+                                    {{ b.nama }}
+                                </th>
+
+                                {% endfor %}
+
+                            </tr>
+
+
+                            <tr>
+
+                                {% for b in daftar_bulan %}
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    TD
+                                </th>
+
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    LiLA
+                                </th>
+
+
+                                <th
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-3 py-2
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+                                    Status
+                                </th>
+
+                                {% endfor %}
+
+                            </tr>
+
+                        </thead>
+
+
+
+                        <tbody>
+
+                            {% for row in data_bumil %}
+
+                            <tr
+                                class="
+                                    transition
+                                    hover:bg-primary-dark/[0.035]
+                                    dark:hover:bg-white/[0.03]
+                                "
+                            >
+
+
+                                <!-- NO -->
+                                <td
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            inline-flex
+                                            h-7 w-7
+                                            items-center
+                                            justify-center
+                                            rounded-lg
+                                            bg-slate-100
+                                            text-[10px]
+                                            font-bold
+                                            text-slate-500
+
+                                            dark:bg-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ data_bumil.start_index|add:forloop.counter0 }}
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- NAME -->
+                                <td
+                                    class="
+                                        whitespace-nowrap
+                                        border
+                                        border-slate-200
+                                        px-4 py-3
+                                        text-xs
+                                        font-bold
+                                        text-slate-800
+
+                                        dark:border-white/10
+                                        dark:text-slate-200
+                                    "
+                                >
+                                    {{ row.peserta.nama_peserta }}
+                                </td>
+
+
+
+                                {% for p in row.bulan %}
+
+                                    {% if p %}
+
+                                    <!-- TD -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-xs
+                                            text-slate-600
+
+                                            dark:border-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ p.tekanan_darah|default:"-" }}
+                                    </td>
+
+
+                                    <!-- LILA -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-xs
+                                            text-slate-600
+
+                                            dark:border-white/10
+                                            dark:text-slate-300
+                                        "
+                                    >
+                                        {{ p.lila_bumil|default:"-" }}
+                                    </td>
+
+
+                                    <!-- STATUS -->
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+
+                                            dark:border-white/10
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                inline-flex
+                                                whitespace-nowrap
+                                                rounded-full
+                                                px-2.5 py-1
+                                                text-[10px]
+                                                font-bold
+
+                                                {% if p.status_kehamilan == 'normal' %}
+                                                    bg-emerald-100
+                                                    text-emerald-700
+                                                    dark:bg-emerald-500/10
+                                                    dark:text-emerald-400
+
+                                                {% elif p.status_kehamilan == 'resiko' %}
+                                                    bg-rose-100
+                                                    text-rose-700
+                                                    dark:bg-rose-500/10
+                                                    dark:text-rose-400
+
+                                                {% elif p.status_kehamilan == 'anemia' %}
+                                                    bg-amber-100
+                                                    text-amber-700
+                                                    dark:bg-amber-500/10
+                                                    dark:text-amber-400
+
+                                                {% else %}
+                                                    bg-orange-100
+                                                    text-orange-700
+                                                    dark:bg-orange-500/10
+                                                    dark:text-orange-400
+                                                {% endif %}
+                                            "
+                                        >
+                                            {{ p.get_status_kehamilan_display }}
+                                        </span>
+
+                                    </td>
+
+
+                                    {% else %}
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+
+                                    <td
+                                        class="
+                                            border
+                                            border-slate-200
+                                            px-3 py-3
+                                            text-center
+                                            text-slate-300
+
+                                            dark:border-white/10
+                                        "
+                                    >
+                                        –
+                                    </td>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </tr>
+
+
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="2"
+
+                                    class="
+                                        border
+                                        border-slate-200
+                                        px-6 py-12
+                                        text-center
+
+                                        dark:border-white/10
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            flex
+                                            flex-col
+                                            items-center
+                                        "
+                                    >
+
+                                        <span
+                                            class="
+                                                material-symbols-outlined
+                                                text-3xl
+                                                text-slate-300
+                                            "
+                                        >
+                                            pregnant_woman
+                                        </span>
+
+
+                                        <p
+                                            class="
+                                                mt-2
+                                                text-xs
+                                                text-slate-400
+                                            "
+                                        >
+                                            Belum ada data Ibu Hamil.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td
+                                    colspan="{% widthratio daftar_bulan|length 1 3 %}"
+
+                                    class="
+                                        border
+                                        border-slate-200
+                                        dark:border-white/10
+                                    "
+                                ></td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BUMIL PAGINATION
+                ================================================== -->
+                {% if data_bumil.has_other_pages %}
+
+                <div
+                    class="
+                        flex
+                        flex-col
+                        gap-3
+                        border-t
+                        border-slate-200
+                        bg-slate-50
+                        px-4 py-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/40
+
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
+                    "
+                >
+
+                    <p
+                        class="
+                            order-2
+                            text-center
+                            text-xs
+                            text-slate-500
+
+                            sm:order-1
+                            sm:text-left
+                        "
+                    >
+
+                        Halaman
+
+                        <strong
+                            class="
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            {{ data_bumil.number }}
+                        </strong>
+
+                        dari
+
+                        <strong
+                            class="
+                                text-slate-800
+                                dark:text-white
+                            "
+                        >
+                            {{ data_bumil.paginator.num_pages }}
+                        </strong>
+
+                    </p>
+
+
+
+                    <div
+                        class="
+                            order-1
+                            flex
+                            items-center
+                            justify-center
+                            gap-2
+
+                            sm:order-2
+                        "
+                    >
+
+                        {% if data_bumil.has_previous %}
+
+                        <a
+                            href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ data_balita.number }}&page_bumil={{ data_bumil.previous_page_number }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                flex
+                                h-9 w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-white
+                                text-slate-500
+                                transition
+
+                                hover:border-primary-dark
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:border-white/10
+                                dark:bg-primary
+                                dark:text-slate-300
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[18px]
+                                "
+                            >
+                                chevron_left
+                            </span>
+
+                        </a>
+
+                        {% endif %}
+
+
+
+                        <div
+                            class="
+                                hidden
+                                items-center
+                                gap-1
+
+                                sm:flex
+                            "
+                        >
+
+                            {% for i in data_bumil.paginator.page_range %}
+
+                                {% if i == data_bumil.number %}
+
+                                <span
+                                    class="
+                                        flex
+                                        h-9
+                                        min-w-9
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-primary-dark
+                                        px-2
+                                        text-xs
+                                        font-bold
+                                        text-white
+                                    "
+                                >
+                                    {{ i }}
+                                </span>
+
+
+                                {% else %}
+
+                                <a
+                                    href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ data_balita.number }}&page_bumil={{ i }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                                    class="
+                                        flex
+                                        h-9
+                                        min-w-9
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        border
+                                        border-slate-200
+                                        bg-white
+                                        px-2
+                                        text-xs
+                                        font-bold
+                                        text-slate-500
+                                        transition
+
+                                        hover:border-primary-dark
+                                        hover:text-primary-dark
+
+                                        dark:border-white/10
+                                        dark:bg-primary
+                                        dark:text-slate-300
+                                    "
+                                >
+                                    {{ i }}
+                                </a>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </div>
+
+
+
+                        <!-- MOBILE PAGE -->
+                        <span
+                            class="
+                                flex
+                                h-9
+                                min-w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-primary-dark
+                                px-2
+                                text-xs
+                                font-bold
+                                text-white
+
+                                sm:hidden
+                            "
+                        >
+                            {{ data_bumil.number }}
+                        </span>
+
+
+
+                        {% if data_bumil.has_next %}
+
+                        <a
+                            href="?tahun={{ tahun }}&triwulan={{ triwulan }}&page_balita={{ data_balita.number }}&page_bumil={{ data_bumil.next_page_number }}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+
+                            class="
+                                flex
+                                h-9 w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-white
+                                text-slate-500
+                                transition
+
+                                hover:border-primary-dark
+                                hover:bg-primary-dark
+                                hover:text-white
+
+                                dark:border-white/10
+                                dark:bg-primary
+                                dark:text-slate-300
+                            "
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-[18px]
+                                "
+                            >
+                                chevron_right
+                            </span>
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             KETERANGAN
+        ====================================================== -->
+        <div
+            class="
+                rounded-xl
+                border
+                border-slate-200
+                bg-white
+                p-4
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+
+                sm:p-5
+            "
+        >
+
+            <div
+                class="
+                    flex
+                    items-start
+                    gap-3
+                "
+            >
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-primary-dark/10
+                        text-primary-dark
+
+                        dark:bg-primary-dark/20
+                        dark:text-blue-300
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[18px]
+                        "
+                    >
+                        info
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h4
+                        class="
+                            text-xs
+                            font-bold
+                            text-slate-700
+                            dark:text-slate-300
+                        "
+                    >
+                        Keterangan Laporan Triwulan
+                    </h4>
+
+
+                    <p
+                        class="
+                            mt-1
+                            text-[10px]
+                            leading-5
+                            text-slate-500
+
+                            dark:text-slate-400
+                        "
+                    >
+                        Laporan menampilkan perkembangan pemeriksaan
+                        peserta pada setiap bulan dalam satu periode
+                        triwulan. Data Balita menampilkan BB, TB, dan
+                        status gizi, sedangkan data Ibu Hamil menampilkan
+                        tekanan darah, LiLA, dan status kehamilan.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             BACK
+        ====================================================== -->
+        <div class="flex justify-end">
+
+            <a
+                href="javascript:history.back()"
+
+                class="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    text-xs
+                    font-bold
+                    text-slate-600
+                    shadow-sm
+                    transition
+
+                    hover:border-primary-dark/30
+                    hover:bg-primary-dark/5
+                    hover:text-primary-dark
+
+                    dark:border-white/10
+                    dark:bg-primary
+                    dark:text-slate-300
+
+                    dark:hover:bg-primary-dark/10
+                    dark:hover:text-blue-300
+                "
+            >
+
+                <span
+                    class="
+                        material-symbols-outlined
+                        text-[17px]
+                    "
+                >
+                    arrow_back
+                </span>
+
+                Kembali
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

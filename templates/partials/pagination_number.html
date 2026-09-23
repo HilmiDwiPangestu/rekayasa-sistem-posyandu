@@ -1,0 +1,11 @@
+{% for num in page_range %}
+    {% if page_obj.number == num %}
+        <span class="flex h-10 min-w-[40px] items-center justify-center rounded-xl bg-green-700 px-3 text-sm font-bold text-white shadow-sm">
+            {{ num }}
+        </span>
+    {% else %}
+        <a href="?page={{ num }}{% if querystring %}&{{ querystring }}{% endif %}" class="flex h-10 min-w-[40px] items-center justify-center rounded-xl px-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition">
+            {{ num }}
+        </a>
+    {% endif %}
+{% endfor %}

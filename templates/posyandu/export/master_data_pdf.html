@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 12mm 10mm 14mm 10mm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #222;
+            font-size: 9pt;
+        }
+        h1 {
+            margin: 0;
+            text-align: center;
+            font-size: 16pt;
+        }
+        .meta {
+            margin: 6px 0 12px;
+            text-align: center;
+            color: #555;
+            font-size: 8.5pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 0.6pt solid #888;
+            padding: 5px 4px;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #e9eef5;
+            font-weight: bold;
+            text-align: center;
+        }
+        .empty {
+            text-align: center;
+            padding: 18px;
+            color: #666;
+        }
+        .footer {
+            margin-top: 9px;
+            color: #666;
+            font-size: 8pt;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <div class="meta">
+        Total {{ total_data }} data · Diekspor {{ generated_at|date:"d-m-Y H:i" }}
+        {% if filter_text %} · Filter: {{ filter_text }}{% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                {% for header in headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell|default:"-" }}</td>
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="empty" colspan="{{ headers|length }}">Tidak ada data untuk diekspor.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">Sistem Informasi Posyandu · Master Data Admin Kelurahan</div>
+</body>
+</html>

@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}KMS Balita{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-100">
+  <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+
+    <div class="mb-6 overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Pemantauan Pertumbuhan</p>
+          <h1 class="mt-1 text-2xl font-extrabold sm:text-3xl">Kartu Menuju Sehat (KMS)</h1>
+          <p class="mt-2 text-sm text-white/70">
+            {{ peserta.nama_peserta }} · {{ peserta.jenis_kelamin|default:'-' }} · {{ peserta.usia }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-xs leading-5 text-white/75">
+          Acuan: Permenkes RI No. 2 Tahun 2020, standar antropometri anak 0–60 bulan.
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Jumlah Pemeriksaan</p>
+        <p class="mt-2 text-2xl font-black">{{ riwayat|length }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Berat Terakhir</p>
+        <p class="mt-2 text-2xl font-black">{% if pemeriksaan_terakhir.berat_badan %}{{ pemeriksaan_terakhir.berat_badan }} kg{% else %}-{% endif %}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Panjang/Tinggi Terakhir</p>
+        <p class="mt-2 text-2xl font-black">{% if pemeriksaan_terakhir.tinggi_badan %}{{ pemeriksaan_terakhir.tinggi_badan }} cm{% else %}-{% endif %}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">IMT Terakhir</p>
+        <p id="imtTerakhir" class="mt-2 text-2xl font-black">-</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+        <div class="mb-4">
+          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Berat Badan menurut Umur (BB/U)</h2>
+          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            Berat badan anak dibandingkan dengan kurva standar -3 SD sampai +3 SD sesuai jenis kelamin.
+          </p>
+        </div>
+        <div class="relative h-[430px] w-full">
+          <canvas id="chartBBU" class="h-full w-full" aria-label="Grafik Berat Badan menurut Umur"></canvas>
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
+        <div class="mb-4">
+          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Panjang/Tinggi Badan menurut Umur (PB/U atau TB/U)</h2>
+          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            PB/U digunakan sampai usia 24 bulan; setelah 24 bulan menggunakan TB/U.
+          </p>
+        </div>
+        <div class="relative h-[430px] w-full">
+          <canvas id="chartTBU" class="h-full w-full" aria-label="Grafik Panjang atau Tinggi Badan menurut Umur"></canvas>
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary xl:col-span-2">
+        <div class="mb-4">
+          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Indeks Massa Tubuh menurut Umur (IMT/U)</h2>
+          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            IMT dihitung dari berat badan ÷ tinggi badan² dan dibandingkan dengan standar IMT/U 0–60 bulan.
+          </p>
+        </div>
+        <div class="relative h-[430px] w-full">
+          <canvas id="chartIMTU" class="h-full w-full" aria-label="Grafik Indeks Massa Tubuh menurut Umur"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+      <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+        <h2 class="font-extrabold">Riwayat Pemeriksaan</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-background-dark/40 dark:text-slate-400">
+            <tr>
+              <th class="px-4 py-3 text-center">Tanggal</th>
+              <th class="px-4 py-3 text-center">Usia</th>
+              <th class="px-4 py-3 text-center">BB</th>
+              <th class="px-4 py-3 text-center">PB/TB</th>
+              <th class="px-4 py-3 text-center">IMT</th>
+              <th class="px-4 py-3 text-center">Z-Score TB/U</th>
+              <th class="px-4 py-3 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-white/10" id="riwayatBody">
+            {% for r in riwayat %}
+            <tr data-pemeriksaan-id="{{ r.id_periksa }}">
+              <td class="px-4 py-3 text-center">{{ r.tgl_pemeriksaan|date:'d-m-Y' }}</td>
+              <td class="px-4 py-3 text-center font-semibold">{{ r.usia_bulan|default:'-' }} bln</td>
+              <td class="px-4 py-3 text-center">{{ r.berat_badan|default:'-' }} kg</td>
+              <td class="px-4 py-3 text-center">{{ r.tinggi_badan|default:'-' }} cm</td>
+              <td class="px-4 py-3 text-center imt-cell">-</td>
+              <td class="px-4 py-3 text-center">{% if r.z_score != None %}{{ r.z_score|floatformat:2 }}{% else %}-{% endif %}</td>
+              <td class="px-4 py-3">{{ r.get_status_gizi_display|default:'-' }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Belum ada data pemeriksaan balita.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+      Grafik digunakan untuk memantau tren pertumbuhan. Penentuan status gizi tetap perlu memperhatikan seluruh indeks antropometri secara bersama-sama dan hasil pemeriksaan petugas kesehatan.
+    </div>
+  </div>
+</div>
+
+{{ chart_data|json_script:"kms-data" }}
+<script>
+(function () {
+  "use strict";
+
+  const dataElement = document.getElementById("kms-data");
+  if (!dataElement) return;
+
+  const payload = JSON.parse(dataElement.textContent || "{}");
+  const points = Array.isArray(payload.points) ? payload.points : [];
+
+  // Tidak menggunakan Chart.js/CDN agar grafik tetap tampil saat aplikasi
+  // dijalankan tanpa koneksi internet.
+  const curveKeys = [
+    ["sd3neg", "-3 SD", "#b91c1c"],
+    ["sd2neg", "-2 SD", "#d97706"],
+    ["sd1neg", "-1 SD", "#64748b"],
+    ["median", "Median", "#15803d"],
+    ["sd1", "+1 SD", "#64748b"],
+    ["sd2", "+2 SD", "#d97706"],
+    ["sd3", "+3 SD", "#b91c1c"]
+  ];
+
+  const childColor = "#2563eb";
+
+  function finiteNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function childSeries(key) {
+    return points
+      .map((p) => ({
+        x: finiteNumber(p.bulan),
+        y: finiteNumber(p[key]),
+        tanggal: p.tanggal || "-"
+      }))
+      .filter((p) => p.x !== null && p.y !== null && p.x >= 0 && p.x <= 60)
+      .sort((a, b) => a.x - b.x);
+  }
+
+  function standardSeries(std, key) {
+    if (!std || !Array.isArray(std.month) || !Array.isArray(std[key])) return [];
+    return std.month.map((m, i) => ({
+      x: finiteNumber(m),
+      y: finiteNumber(std[key][i])
+    })).filter((p) => p.x !== null && p.y !== null);
+  }
+
+  function getThemeColors() {
+    const dark = document.documentElement.classList.contains("dark");
+    return dark ? {
+      grid: "rgba(148,163,184,.18)",
+      axis: "#94a3b8",
+      text: "#cbd5e1",
+      background: "transparent"
+    } : {
+      grid: "rgba(100,116,139,.16)",
+      axis: "#64748b",
+      text: "#475569",
+      background: "transparent"
+    };
+  }
+
+  function niceStep(range, targetTicks) {
+    if (!Number.isFinite(range) || range <= 0) return 1;
+    const rough = range / Math.max(targetTicks, 2);
+    const power = Math.pow(10, Math.floor(Math.log10(rough)));
+    const fraction = rough / power;
+    let niceFraction;
+    if (fraction <= 1) niceFraction = 1;
+    else if (fraction <= 2) niceFraction = 2;
+    else if (fraction <= 5) niceFraction = 5;
+    else niceFraction = 10;
+    return niceFraction * power;
+  }
+
+  function drawChart(canvasId, standard, child, yTitle, childLabel, decimals = 1) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const parent = canvas.parentElement;
+    const rect = parent.getBoundingClientRect();
+    const cssWidth = Math.max(320, Math.floor(rect.width));
+    const cssHeight = Math.max(360, Math.floor(rect.height));
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+    canvas.style.width = cssWidth + "px";
+    canvas.style.height = cssHeight + "px";
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const theme = getThemeColors();
+    const margin = { left: 68, right: 22, top: 18, bottom: 82 };
+    const plotW = cssWidth - margin.left - margin.right;
+    const plotH = cssHeight - margin.top - margin.bottom;
+
+    const allY = [];
+    curveKeys.forEach(([key]) => standardSeries(standard, key).forEach((p) => allY.push(p.y)));
+    child.forEach((p) => allY.push(p.y));
+
+    if (!allY.length) {
+      ctx.fillStyle = theme.text;
+      ctx.font = "13px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Data standar tidak tersedia.", cssWidth / 2, cssHeight / 2);
+      return;
+    }
+
+    let yMin = Math.min(...allY);
+    let yMax = Math.max(...allY);
+    const rawRange = Math.max(yMax - yMin, 1);
+    const pad = rawRange * 0.08;
+    yMin -= pad;
+    yMax += pad;
+
+    const yStep = niceStep(yMax - yMin, 6);
+    yMin = Math.floor(yMin / yStep) * yStep;
+    yMax = Math.ceil(yMax / yStep) * yStep;
+
+    const xToPx = (x) => margin.left + (x / 60) * plotW;
+    const yToPx = (y) => margin.top + ((yMax - y) / (yMax - yMin)) * plotH;
+
+    // Grid + sumbu X
+    ctx.lineWidth = 1;
+    ctx.font = "11px sans-serif";
+    ctx.fillStyle = theme.text;
+    ctx.strokeStyle = theme.grid;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    for (let month = 0; month <= 60; month += 6) {
+      const x = xToPx(month);
+      ctx.beginPath();
+      ctx.moveTo(x, margin.top);
+      ctx.lineTo(x, margin.top + plotH);
+      ctx.stroke();
+      ctx.fillText(String(month), x, margin.top + plotH + 9);
+    }
+
+    // Grid + sumbu Y
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    const yTicks = Math.round((yMax - yMin) / yStep);
+    for (let i = 0; i <= yTicks; i++) {
+      const value = yMin + i * yStep;
+      const y = yToPx(value);
+      ctx.beginPath();
+      ctx.moveTo(margin.left, y);
+      ctx.lineTo(margin.left + plotW, y);
+      ctx.stroke();
+      ctx.fillText(value.toFixed(decimals), margin.left - 10, y);
+    }
+
+    // Garis sumbu utama
+    ctx.strokeStyle = theme.axis;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top);
+    ctx.lineTo(margin.left, margin.top + plotH);
+    ctx.lineTo(margin.left + plotW, margin.top + plotH);
+    ctx.stroke();
+
+    // Label sumbu X
+    ctx.fillStyle = theme.text;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("Umur (bulan penuh)", margin.left + plotW / 2, cssHeight - 36);
+
+    // Label sumbu Y
+    ctx.save();
+    ctx.translate(17, margin.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(yTitle, 0, 0);
+    ctx.restore();
+
+    // Kurva standar
+    curveKeys.forEach(([key, label, color]) => {
+      const series = standardSeries(standard, key);
+      if (!series.length) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = key === "median" ? 2.2 : 1.35;
+      ctx.setLineDash(key === "median" ? [] : [5, 4]);
+      ctx.beginPath();
+      series.forEach((p, index) => {
+        const x = xToPx(p.x);
+        const y = yToPx(p.y);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+
+    // Garis dan titik pemeriksaan anak
+    if (child.length) {
+      ctx.strokeStyle = childColor;
+      ctx.fillStyle = childColor;
+      ctx.lineWidth = 3;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      child.forEach((p, index) => {
+        const x = xToPx(p.x);
+        const y = yToPx(p.y);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      if (child.length > 1) ctx.stroke();
+
+      child.forEach((p) => {
+        const x = xToPx(p.x);
+        const y = yToPx(p.y);
+        ctx.beginPath();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
+
+    // Legend ringkas
+    const legendItems = [
+      ["-3 SD", "#b91c1c"], ["-2 SD", "#d97706"], ["-1 SD", "#64748b"],
+      ["Median", "#15803d"], ["+1 SD", "#64748b"], ["+2 SD", "#d97706"],
+      ["+3 SD", "#b91c1c"], [childLabel, childColor]
+    ];
+
+    const legendY = cssHeight - 15;
+    ctx.font = "10px sans-serif";
+    ctx.textBaseline = "middle";
+    let cursorX = margin.left;
+    legendItems.forEach(([label, color]) => {
+      const textW = ctx.measureText(label).width;
+      const itemW = 18 + textW + 14;
+      if (cursorX + itemW > cssWidth - margin.right) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = label === childLabel ? 3 : 1.5;
+      ctx.setLineDash(label === childLabel || label === "Median" ? [] : [4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(cursorX, legendY);
+      ctx.lineTo(cursorX + 14, legendY);
+      ctx.stroke();
+      ctx.fillStyle = theme.text;
+      ctx.textAlign = "left";
+      ctx.fillText(label, cursorX + 18, legendY);
+      cursorX += itemW;
+    });
+    ctx.setLineDash([]);
+  }
+
+  const childBB = childSeries("berat");
+  const childTB = childSeries("tinggi");
+  const childIMT = childSeries("imt");
+
+  function renderAll() {
+    drawChart("chartBBU", payload.bbu, childBB, "Berat badan (kg)", "BB anak", 1);
+    drawChart("chartTBU", payload.pbu_tbu, childTB, "Panjang/Tinggi (cm)", "PB/TB anak", 1);
+    drawChart("chartIMTU", payload.imtu, childIMT, "IMT (kg/m²)", "IMT anak", 1);
+  }
+
+  // Isi IMT terakhir dan kolom IMT pada riwayat.
+  const imtTerakhir = document.getElementById("imtTerakhir");
+  if (imtTerakhir && childIMT.length) {
+    imtTerakhir.textContent = childIMT[childIMT.length - 1].y.toFixed(2) + " kg/m²";
+  }
+
+  const imtCells = document.querySelectorAll(".imt-cell");
+  const allPointsByOrder = points.filter((p) => p.imt !== null && p.imt !== undefined);
+  // Baris riwayat mengikuti urutan queryset; cari berdasarkan usia/tanggal agar tidak bergantung indeks.
+  document.querySelectorAll("#riwayatBody tr[data-pemeriksaan-id]").forEach((row, rowIndex) => {
+    const cells = row.querySelectorAll("td");
+    if (cells.length < 5) return;
+    const dateText = (cells[0].textContent || "").trim();
+    const ageText = (cells[1].textContent || "").trim();
+    const age = parseInt(ageText, 10);
+    const found = points.find((p) => Number(p.bulan) === age && String(p.tanggal || "") === dateText);
+    if (found && found.imt !== null && found.imt !== undefined) {
+      cells[4].textContent = Number(found.imt).toFixed(2) + " kg/m²";
+    }
+  });
+
+  renderAll();
+
+  let resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(renderAll, 120);
+  });
+
+  // Jika mode gelap/terang berubah, gambar ulang agar teks dan grid tetap terbaca.
+  const observer = new MutationObserver(renderAll);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+})();
+</script>
+{% endblock %}

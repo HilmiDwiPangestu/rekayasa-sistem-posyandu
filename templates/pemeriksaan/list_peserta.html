@@ -1,0 +1,4282 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load paginations_tags %}
+
+{% block extra_css %}
+<style>
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-slideUp {
+        animation: slideUp 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+
+{% block subtitle %}
+Data {{ status_peserta|title }}
+{% endblock %}
+
+
+{% block head_script %}
+<script src="{% static 'js/kms_charts.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const pemeriksaanData = {{ periksa_json|safe }};
+    const statusPeserta = "{{ status_peserta }}";
+
+
+    // =========================================================
+    // STATUS CONFIG
+    // =========================================================
+    const statusGiziConfig = {
+        normal: {
+            label: 'Normal',
+            cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+        },
+
+        stunting: {
+            label: 'Stunting',
+            cls: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
+        },
+
+        gizi_kurang: {
+            label: 'Gizi Kurang',
+            cls: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+        },
+
+        gizi_buruk: {
+            label: 'Gizi Buruk',
+            cls: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400'
+        },
+    };
+
+
+    const statusKehamilanConfig = {
+        normal: {
+            label: 'Normal',
+            cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+        },
+
+        resiko: {
+            label: 'Resiko Tinggi',
+            cls: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
+        },
+
+        anemia: {
+            label: 'Anemia',
+            cls: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+        },
+
+        kek: {
+            label: 'KEK',
+            cls: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400'
+        },
+    };
+
+
+    // =========================================================
+    // DETAIL CARD GENERATOR
+    // =========================================================
+    function makeCard(icon, label, value, unit = '') {
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ''
+        ) {
+            return '';
+        }
+
+        return `
+            <div class="
+                rounded-lg
+                border border-slate-200
+                bg-slate-50
+                p-3
+                dark:border-white/10
+                dark:bg-background-dark/50
+            ">
+
+                <div class="mb-1 flex items-center gap-1.5">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[15px]
+                        text-primary-dark
+                        dark:text-blue-300
+                    ">
+                        ${icon}
+                    </span>
+
+                    <p class="
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-wider
+                        text-slate-400
+                    ">
+                        ${label}
+                    </p>
+
+                </div>
+
+                <p class="
+                    text-sm
+                    font-bold
+                    text-slate-900
+                    dark:text-white
+                ">
+
+                    ${value}
+
+                    ${
+                        unit
+                        ? `
+                            <span class="
+                                text-xs
+                                font-normal
+                                text-slate-400
+                            ">
+                                ${unit}
+                            </span>
+                        `
+                        : ''
+                    }
+
+                </p>
+
+            </div>
+        `;
+    }
+
+
+
+    // =========================================================
+    // TAB SWITCHER
+    // =========================================================
+    window.showTab = function(tab) {
+
+        const panelData =
+            document.getElementById('panelData');
+
+        const panelGrafik =
+            document.getElementById('panelGrafik');
+
+        const tabData =
+            document.getElementById('tabBtnData');
+
+        const tabGrafik =
+            document.getElementById('tabBtnGrafik');
+
+
+        const activeTab = [
+            'bg-white',
+            'dark:bg-primary',
+            'text-slate-900',
+            'dark:text-white',
+            'shadow-sm'
+        ];
+
+
+        const inactiveTab = [
+            'text-slate-400'
+        ];
+
+
+        if (tab === 'tab-data') {
+
+            panelData.classList.remove('hidden');
+            panelGrafik.classList.add('hidden');
+
+            tabData.classList.add(...activeTab);
+            tabData.classList.remove(...inactiveTab);
+
+            tabGrafik.classList.remove(...activeTab);
+            tabGrafik.classList.add(...inactiveTab);
+
+        } else {
+
+            panelGrafik.classList.remove('hidden');
+            panelData.classList.add('hidden');
+
+            tabGrafik.classList.add(...activeTab);
+            tabGrafik.classList.remove(...inactiveTab);
+
+            tabData.classList.remove(...activeTab);
+            tabData.classList.add(...inactiveTab);
+
+
+            setTimeout(renderActiveKMS, 40);
+
+        }
+
+    };
+
+
+
+    // =========================================================
+    // KMS LENGKAP: BB/U, PB/TB/U, IMT/U
+    // =========================================================
+    let activeKmsPayload = null;
+
+    function renderActiveKMS() {
+        if (!activeKmsPayload || !window.KMSCharts) return;
+        window.KMSCharts.renderTriple(activeKmsPayload, {
+            bbu: 'kmsModalBBU',
+            tbu: 'kmsModalTBU',
+            imtu: 'kmsModalIMTU'
+        });
+    }
+
+    function renderKMSChart(d) {
+        activeKmsPayload = d.kms_chart_data || null;
+
+        const kmsLink = document.getElementById('kmsFullLink');
+        if (kmsLink) {
+            kmsLink.href = d.kms_url || '#';
+            kmsLink.classList.toggle('pointer-events-none', !d.kms_url);
+            kmsLink.classList.toggle('opacity-50', !d.kms_url);
+        }
+
+        const panelGrafik = document.getElementById('panelGrafik');
+        if (panelGrafik && !panelGrafik.classList.contains('hidden')) {
+            setTimeout(renderActiveKMS, 30);
+        }
+    }
+
+
+    // =========================================================
+    // OPEN DETAIL PEMERIKSAAN
+    // =========================================================
+    function openDetailModal(id) {
+
+        const d = pemeriksaanData[id];
+
+
+        if (!d) {
+
+            console.warn(
+                'Data tidak ditemukan untuk id:',
+                id
+            );
+
+            return;
+
+        }
+
+
+        document
+            .getElementById('detailNama')
+            .textContent = d.nama;
+
+
+        document
+            .getElementById('detailSubtitle')
+            .textContent =
+                `Diperiksa ${d.tgl} · ${d.petugas}`;
+
+
+        document
+            .getElementById('detailMeta')
+            .textContent =
+                `${d.gender} · ${d.usia}`;
+
+
+
+        const deteksiSection =
+            document.getElementById(
+                'detailDeteksiSection'
+            );
+
+
+        const statusWrap =
+            document.getElementById(
+                'detailStatusWrap'
+            );
+
+
+
+        // =====================================================
+        // STATUS
+        // =====================================================
+        if (statusPeserta === 'balita') {
+
+            deteksiSection
+                .classList
+                .remove('hidden');
+
+
+            const s =
+                statusGiziConfig[d.status_gizi] ||
+                statusGiziConfig.normal;
+
+
+            statusWrap.innerHTML = `
+
+                <div class="
+                    flex
+                    flex-wrap
+                    items-center
+                    gap-2
+                ">
+
+                    <span class="
+                        inline-flex
+                        items-center
+                        gap-1
+                        rounded-full
+                        px-3 py-1
+                        text-xs
+                        font-bold
+                        ${s.cls}
+                    ">
+
+                        <span class="
+                            material-symbols-outlined
+                            text-[14px]
+                        ">
+                            monitor_heart
+                        </span>
+
+                        Status Gizi:
+                        ${s.label}
+
+                    </span>
+
+
+                    ${
+                        d.hsl_prediksi
+                        ? `
+                            <span class="
+                                text-xs
+                                text-slate-400
+                            ">
+                                Prediksi ML:
+
+                                <strong class="
+                                    text-slate-600
+                                    dark:text-slate-300
+                                ">
+                                    ${d.hsl_prediksi}
+                                </strong>
+                            </span>
+                        `
+                        : ''
+                    }
+
+                </div>
+
+            `;
+
+
+        } else {
+
+            deteksiSection
+                .classList
+                .add('hidden');
+
+
+            const s =
+                statusKehamilanConfig[
+                    d.status_kehamilan
+                ] ||
+                statusKehamilanConfig.normal;
+
+
+            statusWrap.innerHTML = `
+
+                <div class="flex flex-col gap-2">
+
+                    <span class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-1
+                        rounded-full
+                        px-3 py-1
+                        text-xs
+                        font-bold
+                        ${s.cls}
+                    ">
+
+                        <span class="
+                            material-symbols-outlined
+                            text-[14px]
+                        ">
+                            monitor_heart
+                        </span>
+
+                        Status:
+                        ${s.label}
+
+                    </span>
+
+
+                    ${
+                        d.perlu_rujukan
+                        ? `
+
+                            <div class="
+                                flex
+                                flex-col
+                                gap-1.5
+                                rounded-lg
+                                border border-rose-200
+                                bg-rose-50
+                                p-3
+
+                                dark:border-rose-900/50
+                                dark:bg-rose-950/20
+                            ">
+
+                                <div class="
+                                    flex
+                                    items-center
+                                    gap-1.5
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[16px]
+                                        text-rose-600
+                                        dark:text-rose-400
+                                    ">
+                                        emergency
+                                    </span>
+
+                                    <span class="
+                                        text-xs
+                                        font-bold
+                                        text-rose-700
+                                        dark:text-rose-400
+                                    ">
+                                        Perlu Rujukan
+                                    </span>
+
+                                </div>
+
+
+                                ${
+                                    d.tujuan_rujukan
+                                    ? `
+
+                                        <div class="
+                                            flex
+                                            items-center
+                                            gap-1.5
+                                        ">
+
+                                            <span class="
+                                                material-symbols-outlined
+                                                text-[14px]
+                                                text-rose-400
+                                            ">
+                                                location_on
+                                            </span>
+
+                                            <p class="
+                                                text-xs
+                                                text-rose-600
+                                                dark:text-rose-300
+                                            ">
+
+                                                Tujuan:
+
+                                                <span class="
+                                                    font-semibold
+                                                ">
+                                                    ${d.tujuan_rujukan}
+                                                </span>
+
+                                            </p>
+
+                                        </div>
+
+                                    `
+                                    : ''
+                                }
+
+                            </div>
+
+                        `
+                        : ''
+                    }
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        // =====================================================
+        // DETAIL
+        // =====================================================
+        const grid =
+            document.getElementById(
+                'detailGrid'
+            );
+
+
+        const detailHasil =
+            document.getElementById(
+                'detailHasil'
+            );
+
+
+        if (statusPeserta === 'balita') {
+
+            grid.innerHTML = [
+
+                makeCard(
+                    'scale',
+                    'Berat Badan',
+                    d.berat,
+                    'kg'
+                ),
+
+                makeCard(
+                    'height',
+                    'Tinggi Badan',
+                    d.tinggi,
+                    'cm'
+                ),
+
+                makeCard(
+                    'straighten',
+                    'LILA',
+                    d.lila,
+                    'cm'
+                ),
+
+                makeCard(
+                    'radio_button_checked',
+                    'Lingkar Kepala',
+                    d.lingkar_kepala,
+                    'cm'
+                ),
+
+            ].join('');
+
+
+            detailHasil.innerHTML = `
+
+                <div class="
+                    grid
+                    grid-cols-2
+                    gap-3
+                ">
+
+                    ${makeCard(
+                        'analytics',
+                        'Z-Score',
+                        d.z_score
+                    )}
+
+                    ${
+                        d.hsl_prediksi
+                        ? makeCard(
+                            'psychology',
+                            'Prediksi ML',
+                            d.hsl_prediksi
+                        )
+                        : ''
+                    }
+
+                </div>
+
+
+                ${
+                    d.prob_ml !== null && d.prob_ml !== undefined
+                    ? `
+
+                        <div class="
+                            mt-3
+                            flex
+                            items-center
+                            gap-2
+                            rounded-lg
+                            bg-primary-dark/5
+                            px-3 py-2
+                            text-xs
+                            text-slate-500
+
+                            dark:bg-primary-dark/10
+                            dark:text-slate-400
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[15px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            ">
+                                percent
+                            </span>
+
+                            Probabilitas:
+
+                            <strong class="
+                                text-primary-dark
+                                dark:text-blue-300
+                            ">
+                                ${d.prob_ml}%
+                            </strong>
+
+                        </div>
+
+                    `
+                    : ''
+                }
+
+            `;
+
+
+        } else {
+
+            grid.innerHTML = [
+
+                makeCard(
+                    'pregnant_woman',
+                    'Usia Kehamilan',
+                    d.usia_kehamilan,
+                    'minggu'
+                ),
+
+                makeCard(
+                    'scale',
+                    'Berat Badan',
+                    d.berat,
+                    'kg'
+                ),
+
+                makeCard(
+                    'height',
+                    'Tinggi Badan',
+                    d.tinggi,
+                    'cm'
+                ),
+
+                makeCard(
+                    'straighten',
+                    'LILA',
+                    d.lila,
+                    'cm'
+                ),
+
+                makeCard(
+                    'favorite',
+                    'Tekanan Darah',
+                    d.tekanan_darah
+                ),
+
+                makeCard(
+                    'straighten',
+                    'Tinggi Fundus',
+                    d.tinggi_fundus,
+                    'cm'
+                ),
+
+                makeCard(
+                    'ecg_heart',
+                    'DJJ',
+                    d.djj,
+                    'bpm'
+                ),
+
+                makeCard(
+                    'water_drop',
+                    'Hemoglobin',
+                    d.hemoglobin,
+                    'g/dL'
+                ),
+
+            ].join('');
+
+
+            detailHasil.innerHTML = '';
+
+        }
+
+
+
+        // =====================================================
+        // CATATAN
+        // =====================================================
+        const catatanWrap =
+            document.getElementById(
+                'detailCatatanWrap'
+            );
+
+
+        const catatanText =
+            d.catatan ||
+            d.keluhan ||
+            '';
+
+
+        if (catatanText) {
+
+            document
+                .getElementById(
+                    'detailCatatan'
+                )
+                .textContent =
+                    catatanText;
+
+
+            catatanWrap
+                .classList
+                .remove('hidden');
+
+        } else {
+
+            catatanWrap
+                .classList
+                .add('hidden');
+
+        }
+
+
+
+        showTab('tab-data');
+
+
+        document
+            .getElementById(
+                'btnGrafikKMS'
+            )
+            .classList
+            .toggle(
+                'hidden',
+                statusPeserta !== 'balita'
+            );
+
+
+
+        const detailModal =
+            document.getElementById(
+                'detailModal'
+            );
+
+
+        const detailBox =
+            document.getElementById(
+                'detailBox'
+            );
+
+
+        detailModal
+            .classList
+            .remove('hidden');
+
+
+        detailModal
+            .classList
+            .add('flex');
+
+
+        setTimeout(() => {
+
+            detailBox
+                .classList
+                .remove(
+                    'scale-95',
+                    'opacity-0'
+                );
+
+
+            detailBox
+                .classList
+                .add(
+                    'scale-100',
+                    'opacity-100'
+                );
+
+
+            if (
+                statusPeserta ===
+                'balita'
+            ) {
+
+                renderKMSChart(d);
+
+            }
+
+        }, 10);
+
+    }
+
+
+
+    // =========================================================
+    // CLOSE DETAIL
+    // =========================================================
+    window.closeDetailModal = function() {
+
+        const detailModal =
+            document.getElementById(
+                'detailModal'
+            );
+
+
+        const detailBox =
+            document.getElementById(
+                'detailBox'
+            );
+
+
+        detailBox
+            .classList
+            .add(
+                'scale-95',
+                'opacity-0'
+            );
+
+
+        detailBox
+            .classList
+            .remove(
+                'scale-100',
+                'opacity-100'
+            );
+
+
+        setTimeout(() => {
+
+            detailModal
+                .classList
+                .add('hidden');
+
+
+            detailModal
+                .classList
+                .remove('flex');
+
+        }, 200);
+
+    };
+
+
+
+    // =========================================================
+    // IMUNISASI
+    // =========================================================
+    const imunisasiData =
+        {{ imunisasi_json|default_if_none:"{}"|safe }};
+
+
+    window.openImunisasiModal = function(id) {
+
+        id = String(id);
+
+
+        const d =
+            imunisasiData[id];
+
+
+        if (!d) {
+
+            console.error(
+                'Data imunisasi tidak ditemukan untuk:',
+                id
+            );
+
+            return;
+
+        }
+
+
+        document
+            .getElementById(
+                'imunNama'
+            )
+            .textContent =
+                d.nama;
+
+
+        document
+            .getElementById(
+                'imunTanggal'
+            )
+            .textContent =
+                `${d.tgl} • ${d.petugas}`;
+
+
+        let html = '';
+
+
+        d.vaksin.forEach(v => {
+
+            html += `
+
+                <div class="
+                    rounded-lg
+                    border border-slate-200
+                    bg-slate-50
+                    p-3
+
+                    dark:border-white/10
+                    dark:bg-background-dark/50
+                ">
+
+                    <div class="
+                        flex
+                        items-center
+                        gap-3
+                    ">
+
+                        <div class="
+                            flex
+                            h-9 w-9
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[18px]
+                            ">
+                                vaccines
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="
+                                text-sm
+                                font-bold
+                                text-slate-800
+                                dark:text-white
+                            ">
+                                ${v.nama}
+                            </p>
+
+                            <p class="
+                                mt-0.5
+                                text-xs
+                                text-slate-400
+                            ">
+                                Dosis ${v.dosis}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        v.keterangan
+                        ? `
+
+                            <p class="
+                                mt-3
+                                border-t
+                                border-slate-200
+                                pt-3
+                                text-xs
+                                leading-5
+                                text-slate-500
+
+                                dark:border-white/10
+                                dark:text-slate-400
+                            ">
+                                ${v.keterangan}
+                            </p>
+
+                        `
+                        : ''
+                    }
+
+                </div>
+
+            `;
+
+        });
+
+
+        document
+            .getElementById(
+                'imunList'
+            )
+            .innerHTML =
+                html;
+
+
+        const imunModal =
+            document.getElementById(
+                'imunModal'
+            );
+
+
+        imunModal
+            .classList
+            .remove('hidden');
+
+
+        imunModal
+            .classList
+            .add('flex');
+
+    };
+
+
+    window.closeImunisasiModal = function() {
+
+        const imunModal =
+            document.getElementById(
+                'imunModal'
+            );
+
+
+        imunModal
+            .classList
+            .add('hidden');
+
+
+        imunModal
+            .classList
+            .remove('flex');
+
+    };
+
+
+
+    // =========================================================
+    // MODAL AKSI PESERTA BALITA
+    // =========================================================
+    const pesertaActionModal = document.getElementById('pesertaActionModal');
+    const pesertaActionBox = document.getElementById('pesertaActionBox');
+    const pesertaActionName = document.getElementById('pesertaActionName');
+    const pesertaActionDetail = document.getElementById('pesertaActionDetail');
+    const pesertaActionEdit = document.getElementById('pesertaActionEdit');
+    const pesertaActionStunting = document.getElementById('pesertaActionStunting');
+    const pesertaActionKms = document.getElementById('pesertaActionKms');
+
+    function openPesertaActionModal(button) {
+        if (!pesertaActionModal || !pesertaActionBox) return;
+
+        const nama = button.dataset.pesertaName || 'Peserta';
+        const detailId = button.dataset.actionDetailId || '';
+        const editUrl = button.dataset.actionEditUrl || '#';
+        const stuntingUrl = button.dataset.actionStuntingUrl || '#';
+        const kmsUrl = button.dataset.actionKmsUrl || '#';
+
+        if (pesertaActionName) pesertaActionName.textContent = nama;
+        if (pesertaActionDetail) pesertaActionDetail.dataset.targetDetailId = detailId;
+        if (pesertaActionEdit) pesertaActionEdit.href = editUrl;
+        if (pesertaActionStunting) pesertaActionStunting.href = stuntingUrl;
+        if (pesertaActionKms) pesertaActionKms.href = kmsUrl;
+
+        pesertaActionModal.classList.remove('hidden');
+        pesertaActionModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+
+        requestAnimationFrame(() => {
+            pesertaActionBox.classList.remove('scale-95', 'opacity-0');
+            pesertaActionBox.classList.add('scale-100', 'opacity-100');
+        });
+    }
+
+    window.closePesertaActionModal = function() {
+        if (!pesertaActionModal || !pesertaActionBox) return;
+
+        pesertaActionBox.classList.remove('scale-100', 'opacity-100');
+        pesertaActionBox.classList.add('scale-95', 'opacity-0');
+
+        setTimeout(() => {
+            pesertaActionModal.classList.add('hidden');
+            pesertaActionModal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }, 150);
+    };
+
+    document.querySelectorAll('[data-peserta-action]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openPesertaActionModal(this);
+        });
+    });
+
+    if (pesertaActionDetail) {
+        pesertaActionDetail.addEventListener('click', function() {
+            const detailId = this.dataset.targetDetailId;
+            closePesertaActionModal();
+            if (detailId) {
+                setTimeout(() => openDetailModal(detailId), 160);
+            }
+        });
+    }
+
+    if (pesertaActionModal) {
+        pesertaActionModal.addEventListener('click', function(event) {
+            if (event.target === pesertaActionModal) {
+                closePesertaActionModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (
+            event.key === 'Escape' &&
+            pesertaActionModal &&
+            !pesertaActionModal.classList.contains('hidden')
+        ) {
+            closePesertaActionModal();
+        }
+    });
+
+    // =========================================================
+    // EVENT LISTENER
+    // =========================================================
+    document
+        .querySelectorAll(
+            '[data-detail-id]'
+        )
+        .forEach(btn => {
+
+            btn.addEventListener(
+                'click',
+                function() {
+
+                    openDetailModal(
+                        this.dataset.detailId
+                    );
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(
+            '[data-imunisasi-id]'
+        )
+        .forEach(btn => {
+
+            btn.addEventListener(
+                'click',
+                function() {
+
+                    openImunisasiModal(
+                        this.dataset.imunisasiId
+                    );
+
+                }
+            );
+
+        });
+
+
+}); // DOMContentLoaded
+</script>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="
+    min-h-screen
+    bg-background-light
+    font-display
+    text-slate-800
+
+    dark:bg-background-dark
+    dark:text-slate-100
+">
+
+    <div class="
+        mx-auto
+        w-full
+        max-w-[1600px]
+        space-y-6
+        px-4 py-6
+        sm:px-6
+        lg:px-8
+    ">
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div class="
+            relative
+            overflow-hidden
+            rounded-xl
+            bg-primary
+            p-5
+            text-white
+            shadow-sm
+            sm:p-6
+        ">
+
+            <div class="
+                pointer-events-none
+                absolute
+                -right-16
+                -top-20
+                h-56
+                w-56
+                rounded-full
+                bg-primary-dark/30
+                blur-3xl
+            ">
+            </div>
+
+
+            <div class="
+                relative
+                flex
+                flex-col
+                gap-4
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+            ">
+
+
+                <div class="flex items-start gap-4">
+
+                    <div class="
+                        flex
+                        h-12 w-12
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        bg-white/10
+                        text-white
+                        ring-1
+                        ring-inset
+                        ring-white/10
+                    ">
+
+                        <span class="
+                            material-symbols-outlined
+                            text-2xl
+                        ">
+
+                            {% if status_peserta == "balita" %}
+                                child_care
+                            {% else %}
+                                pregnant_woman
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="
+                            mb-1
+                            text-xs
+                            font-bold
+                            uppercase
+                            tracking-[0.18em]
+                            text-blue-200
+                        ">
+                            Data Peserta
+                        </p>
+
+
+                        <h1 class="
+                            text-2xl
+                            font-black
+                            tracking-tight
+                            sm:text-3xl
+                        ">
+                            List Peserta {{ status_peserta|title }}
+                        </h1>
+
+
+                        <p class="
+                            mt-2
+                            text-sm
+                            text-slate-300
+                        ">
+                            Kelola dan lihat seluruh data
+                            {{ status_peserta }}
+                            yang terdaftar di sistem.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="
+                    inline-flex
+                    w-fit
+                    items-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-white/10
+                    bg-white/10
+                    px-3 py-2
+                    text-xs
+                    font-semibold
+                    text-slate-200
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[16px]
+                        text-blue-200
+                    ">
+                        event_note
+                    </span>
+
+                    {{ jenis_kegiatan }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             MAIN CARD
+        ====================================================== -->
+        <div class="
+            overflow-hidden
+            rounded-xl
+            border
+            border-slate-200
+            bg-white
+            shadow-sm
+
+            dark:border-white/10
+            dark:bg-primary
+        ">
+
+
+            <!-- =================================================
+                 TOOLBAR
+            ================================================== -->
+            <div class="
+                border-b
+                border-slate-200
+                px-4 py-4
+
+                dark:border-white/10
+                sm:px-5
+            ">
+
+                <form
+                    method="GET"
+                    class="
+                        flex
+                        flex-col
+                        gap-3
+                        xl:flex-row
+                        xl:items-center
+                        xl:justify-between
+                    "
+                >
+
+
+                    <!-- SEARCH -->
+                    <div class="
+                        relative
+                        w-full
+                        xl:max-w-md
+                    ">
+
+                        <span class="
+                            material-symbols-outlined
+                            absolute
+                            left-3.5
+                            top-1/2
+                            -translate-y-1/2
+                            text-[20px]
+                            text-slate-400
+                        ">
+                            search
+                        </span>
+
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ request.GET.search|default:'' }}"
+                            placeholder="Cari {{ status_peserta }}..."
+
+                            class="
+                                h-11
+                                w-full
+                                rounded-lg
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                pl-11 pr-4
+                                text-sm
+                                text-slate-800
+                                outline-none
+                                transition
+                                placeholder:text-slate-400
+
+                                focus:border-primary-dark
+                                focus:bg-white
+                                focus:ring-2
+                                focus:ring-primary-dark/10
+
+                                dark:border-white/10
+                                dark:bg-background-dark/50
+                                dark:text-white
+                                dark:placeholder:text-slate-500
+                                dark:focus:bg-background-dark
+                            "
+                        >
+
+                    </div>
+
+
+
+                    <!-- FILTER -->
+                    <div class="
+                        grid
+                        w-full
+                        grid-cols-1
+                        gap-2
+                        sm:grid-cols-2
+                        xl:flex
+                        xl:w-auto
+                    ">
+
+
+                        {% if status_peserta == "balita" %}
+                        <!-- GENDER -->
+                        <div class="
+                            relative
+                            w-full
+                            xl:w-48
+                        ">
+
+                            <select
+                                name="gender"
+                                onchange="this.form.submit()"
+
+                                class="
+                                    h-11
+                                    w-full
+                                    appearance-none
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    pl-4 pr-10
+                                    text-sm
+                                    font-medium
+                                    text-slate-700
+                                    outline-none
+                                    transition
+                                    cursor-pointer
+
+                                    focus:border-primary-dark
+                                    focus:bg-white
+                                    focus:ring-2
+                                    focus:ring-primary-dark/10
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                    dark:text-slate-200
+                                    dark:focus:bg-background-dark
+                                "
+                            >
+
+                                <option value="">
+                                    Semua Gender
+                                </option>
+
+
+                                <option
+                                    value="L"
+                                    {% if request.GET.gender == "L" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Laki-laki
+                                </option>
+
+
+                                <option
+                                    value="P"
+                                    {% if request.GET.gender == "P" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Perempuan
+                                </option>
+
+                            </select>
+
+
+                            <span class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                text-[18px]
+                                text-slate-400
+                            ">
+                                expand_more
+                            </span>
+
+                        </div>
+
+
+                        {% endif %}
+
+                        {% if status_peserta == "balita" %}
+
+                        <!-- USIA -->
+                        <div class="
+                            relative
+                            w-full
+                            xl:w-48
+                        ">
+
+                            <select
+                                name="age"
+                                onchange="this.form.submit()"
+
+                                class="
+                                    h-11
+                                    w-full
+                                    appearance-none
+                                    rounded-lg
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    pl-4 pr-10
+                                    text-sm
+                                    font-medium
+                                    text-slate-700
+                                    outline-none
+                                    transition
+                                    cursor-pointer
+
+                                    focus:border-primary-dark
+                                    focus:bg-white
+                                    focus:ring-2
+                                    focus:ring-primary-dark/10
+
+                                    dark:border-white/10
+                                    dark:bg-background-dark/50
+                                    dark:text-slate-200
+                                    dark:focus:bg-background-dark
+                                "
+                            >
+
+                                <option value="">
+                                    Semua Usia
+                                </option>
+
+
+                                <option
+                                    value="0-1"
+                                    {% if request.GET.age == "0-1" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    0 - 1 Tahun
+                                </option>
+
+
+                                <option
+                                    value="1-3"
+                                    {% if request.GET.age == "1-3" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    1 - 3 Tahun
+                                </option>
+
+
+                                <option
+                                    value="3-5"
+                                    {% if request.GET.age == "3-5" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    3 - 5 Tahun
+                                </option>
+
+                            </select>
+
+
+                            <span class="
+                                material-symbols-outlined
+                                pointer-events-none
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                text-[18px]
+                                text-slate-400
+                            ">
+                                expand_more
+                            </span>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="relative w-full xl:w-48">
+                            <select name="age" onchange="this.form.submit()"
+                                class="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 pl-4 pr-10 text-sm font-medium text-slate-700 outline-none transition cursor-pointer focus:border-primary-dark focus:bg-white focus:ring-2 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark/50 dark:text-slate-200 dark:focus:bg-background-dark">
+                                <option value="">Semua Usia</option>
+                                <option value="under-20" {% if request.GET.age == "under-20" %}selected{% endif %}>&lt; 20 Tahun</option>
+                                <option value="20-35" {% if request.GET.age == "20-35" %}selected{% endif %}>20 - 35 Tahun</option>
+                                <option value="over-35" {% if request.GET.age == "over-35" %}selected{% endif %}>&gt; 35 Tahun</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">expand_more</span>
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MOBILE
+            ================================================== -->
+            <div class="
+                space-y-3
+                bg-slate-50/70
+                p-3
+                dark:bg-background-dark/30
+                md:hidden
+            ">
+
+                {% for peserta in page_obj %}
+
+                <div class="
+                    rounded-xl
+                    border
+                    border-slate-200
+                    bg-white
+                    p-4
+                    shadow-sm
+
+                    dark:border-white/10
+                    dark:bg-primary
+                ">
+
+
+                    <!-- TOP -->
+                    <div class="
+                        flex
+                        items-start
+                        gap-3
+                    ">
+
+
+                        <!-- ICON -->
+                        <div class="
+                            flex
+                            h-11 w-11
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[21px]
+                            ">
+
+                                {% if status_peserta == "balita" %}
+                                    child_care
+                                {% else %}
+                                    pregnant_woman
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- INFO -->
+                        <div class="
+                            min-w-0
+                            flex-1
+                        ">
+
+                            <h3 class="
+                                truncate
+                                text-sm
+                                font-bold
+                                text-slate-900
+                                dark:text-white
+                            ">
+                                {{ peserta.nama_peserta }}
+                            </h3>
+
+
+                            <!-- GENDER -->
+                            <div class="mt-1.5">
+
+                                {% if peserta.jenis_kelamin == "Laki-Laki" or peserta.jenis_kelamin == "L" %}
+
+                                <span class="
+                                    inline-flex
+                                    items-center
+                                    gap-1
+                                    rounded-full
+                                    bg-blue-100
+                                    px-2 py-1
+                                    text-[10px]
+                                    font-bold
+                                    text-blue-700
+
+                                    dark:bg-blue-500/10
+                                    dark:text-blue-300
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[12px]
+                                    ">
+                                        male
+                                    </span>
+
+                                    Laki-laki
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="
+                                    inline-flex
+                                    items-center
+                                    gap-1
+                                    rounded-full
+                                    bg-pink-100
+                                    px-2 py-1
+                                    text-[10px]
+                                    font-bold
+                                    text-pink-700
+
+                                    dark:bg-pink-500/10
+                                    dark:text-pink-300
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[12px]
+                                    ">
+                                        female
+                                    </span>
+
+                                    Perempuan
+
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+
+                            <!-- META -->
+                            <div class="
+                                mt-3
+                                space-y-1.5
+                                text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            ">
+
+
+                                {% if status_peserta == "balita" %}
+
+                                <div class="
+                                    flex
+                                    items-center
+                                    gap-2
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[15px]
+                                        text-slate-400
+                                    ">
+                                        person
+                                    </span>
+
+                                    <span>
+                                        {{ peserta.nama_ibu }}
+                                    </span>
+
+                                </div>
+
+                                {% endif %}
+
+
+                                <div class="
+                                    flex
+                                    items-center
+                                    gap-2
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[15px]
+                                        text-slate-400
+                                    ">
+                                        cake
+                                    </span>
+
+                                    <span>
+                                        {{ peserta.usia }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- STATUS -->
+                    <div class="
+                        mt-4
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-2
+                    ">
+
+
+                        {% if peserta.sudah %}
+
+                        <span class="
+                            inline-flex
+                            items-center
+                            gap-1
+                            rounded-full
+                            bg-emerald-100
+                            px-2.5 py-1
+                            text-[10px]
+                            font-bold
+                            text-emerald-700
+
+                            dark:bg-emerald-500/10
+                            dark:text-emerald-400
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[13px]
+                            ">
+                                check_circle
+                            </span>
+
+
+                            {% if jenis_kegiatan == "Imunisasi" %}
+                                Sudah Divaksin
+                            {% else %}
+                                Sudah Diperiksa
+                            {% endif %}
+
+                        </span>
+
+
+                        {% else %}
+
+                        <span class="
+                            inline-flex
+                            items-center
+                            gap-1
+                            rounded-full
+                            bg-amber-100
+                            px-2.5 py-1
+                            text-[10px]
+                            font-bold
+                            text-amber-700
+
+                            dark:bg-amber-500/10
+                            dark:text-amber-400
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[13px]
+                            ">
+                                pending
+                            </span>
+
+
+                            {% if jenis_kegiatan == "Imunisasi" %}
+                                Belum Divaksin
+                            {% else %}
+                                Belum Diperiksa
+                            {% endif %}
+
+                        </span>
+
+                        {% endif %}
+
+
+
+                        {% if jenis_kegiatan == "Imunisasi" and peserta.sudah %}
+
+                        <span class="
+                            inline-flex
+                            items-center
+                            gap-1
+                            rounded-full
+                            bg-primary-dark/10
+                            px-2.5 py-1
+                            text-[10px]
+                            font-bold
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        ">
+
+                            <span class="
+                                material-symbols-outlined
+                                text-[13px]
+                            ">
+                                vaccines
+                            </span>
+
+                            {{ peserta.vaksin_sudah|length }}
+                            Vaksin
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- ACTION -->
+                    <div class="
+                        mt-4
+                        border-t
+                        border-slate-100
+                        pt-3
+
+                        dark:border-white/10
+                    ">
+
+
+                        {% if jenis_kegiatan == "Imunisasi" %}
+
+
+                            {% if peserta.sudah %}
+
+                            <div class="
+                                grid
+                                grid-cols-2
+                                gap-2
+                            ">
+
+                                <button
+                                    type="button"
+                                    data-imunisasi-id="{{ peserta.id }}"
+
+                                    class="
+                                        flex
+                                        h-10
+                                        items-center
+                                        justify-center
+                                        gap-1.5
+                                        rounded-lg
+                                        border
+                                        border-primary-dark/20
+                                        bg-primary-dark/10
+                                        px-3
+                                        text-xs
+                                        font-bold
+                                        text-primary-dark
+                                        transition
+
+                                        hover:bg-primary-dark
+                                        hover:text-white
+
+                                        dark:bg-primary-dark/20
+                                        dark:text-blue-300
+                                        dark:hover:bg-primary-dark
+                                        dark:hover:text-white
+                                    "
+                                >
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[16px]
+                                    ">
+                                        visibility
+                                    </span>
+
+                                    Detail
+
+                                </button>
+
+
+                                <a
+                                    href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+
+                                    class="
+                                        flex
+                                        h-10
+                                        items-center
+                                        justify-center
+                                        gap-1.5
+                                        rounded-lg
+                                        bg-primary-dark
+                                        px-3
+                                        text-xs
+                                        font-bold
+                                        text-white
+                                        transition
+
+                                        hover:bg-primary
+                                    "
+                                >
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[16px]
+                                    ">
+                                        vaccines
+                                    </span>
+
+                                    Tambah
+
+                                </a>
+
+                            </div>
+
+
+                            {% else %}
+
+
+                            <a
+                                href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+
+                                class="
+                                    flex
+                                    h-10
+                                    w-full
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-lg
+                                    bg-primary-dark
+                                    px-4
+                                    text-xs
+                                    font-bold
+                                    text-white
+                                    transition
+
+                                    hover:bg-primary
+                                "
+                            >
+
+                                <span class="
+                                    material-symbols-outlined
+                                    text-[17px]
+                                ">
+                                    vaccines
+                                </span>
+
+                                Input Vaksin
+
+                            </a>
+
+                            {% endif %}
+
+
+                        {% else %}
+
+
+                            {% if peserta.sudah %}
+
+                            {% if status_peserta == "balita" %}
+
+                            <button
+                                type="button"
+                                data-peserta-action
+                                data-peserta-name="{{ peserta.nama_peserta|escape }}"
+                                data-action-detail-id="{{ peserta.data_periksa.id_periksa }}"
+                                data-action-stunting-url="{% url 'pemeriksaan:detail_deteksi_stunting' peserta.data_periksa.id_periksa %}"
+                                data-action-kms-url="{% url 'laporan:laporan_kms' peserta.id %}"
+                                class="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary-dark px-4 text-xs font-bold text-white transition hover:bg-primary"
+                            >
+                                <span class="material-symbols-outlined text-[17px]">more_horiz</span>
+                                Aksi
+                            </button>
+
+                            {% else %}
+
+                            <button
+                                type="button"
+                                data-detail-id="{{ peserta.data_periksa.id_periksa }}"
+                                class="flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-primary-dark/20 bg-primary-dark/10 px-3 text-xs font-bold text-primary-dark transition hover:bg-primary-dark hover:text-white dark:bg-primary-dark/20 dark:text-blue-300 dark:hover:bg-primary-dark dark:hover:text-white"
+                            >
+                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                Detail
+                            </button>
+
+                            {% endif %}
+
+
+                            {% else %}
+
+                            <a
+                                href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+
+                                class="
+                                    flex
+                                    h-10
+                                    w-full
+                                    items-center
+                                    justify-center
+                                    gap-2
+                                    rounded-lg
+                                    bg-primary-dark
+                                    px-4
+                                    text-xs
+                                    font-bold
+                                    text-white
+                                    transition
+
+                                    hover:bg-primary
+                                "
+                            >
+
+                                <span class="
+                                    material-symbols-outlined
+                                    text-[17px]
+                                ">
+                                    stethoscope
+                                </span>
+
+                                Periksa
+
+                            </a>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+
+                {% empty %}
+
+                <div class="
+                    flex
+                    flex-col
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-dashed
+                    border-slate-300
+                    bg-white
+                    px-6 py-12
+                    text-center
+
+                    dark:border-white/10
+                    dark:bg-primary
+                ">
+
+                    <div class="
+                        flex
+                        h-12 w-12
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-slate-100
+                        text-slate-400
+
+                        dark:bg-white/10
+                    ">
+
+                        <span class="
+                            material-symbols-outlined
+                            text-2xl
+                        ">
+                            inbox
+                        </span>
+
+                    </div>
+
+
+                    <h3 class="
+                        mt-3
+                        text-sm
+                        font-bold
+                        text-slate-600
+                        dark:text-slate-300
+                    ">
+                        Tidak ada data peserta
+                    </h3>
+
+
+                    <p class="
+                        mt-1
+                        text-xs
+                        text-slate-400
+                    ">
+                        Belum ada data
+                        {{ status_peserta }}
+                        tersedia.
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div class="
+                hidden
+                overflow-x-auto
+                md:block
+            ">
+
+                <table class="
+                    w-full
+                    text-sm
+                ">
+
+
+                    <!-- TABLE HEADER -->
+                    <thead class="
+                        bg-slate-50
+                        dark:bg-background-dark/50
+                    ">
+
+                        <tr class="
+                            border-b
+                            border-slate-200
+
+                            dark:border-white/10
+                        ">
+
+
+                            <th class="
+                                px-5 py-3.5
+                                text-left
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+                            ">
+                                Nama
+                            </th>
+
+
+                            <th class="
+                                px-5 py-3.5
+                                text-left
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+                            ">
+                                Gender
+                            </th>
+
+
+                            <th class="
+                                px-5 py-3.5
+                                text-left
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+                            ">
+                                Usia
+                            </th>
+
+
+
+                            {% if status_peserta == "balita" %}
+
+
+                                {% if jenis_kegiatan == "Imunisasi" %}
+
+                                <th class="
+                                    px-5 py-3.5
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                ">
+                                    Orang Tua
+                                </th>
+
+
+                                <th class="
+                                    px-5 py-3.5
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                ">
+                                    Anak Ke
+                                </th>
+
+
+                                {% else %}
+
+
+                                <th class="
+                                    px-5 py-3.5
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                ">
+                                    Nama Ibu
+                                </th>
+
+
+                                <th class="
+                                    px-5 py-3.5
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                ">
+                                    Nama Ayah
+                                </th>
+
+
+                                <th class="
+                                    px-5 py-3.5
+                                    text-center
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-wider
+                                    text-slate-400
+                                ">
+                                    Anak Ke
+                                </th>
+
+                                {% endif %}
+
+                            {% endif %}
+
+
+
+                            <th class="
+                                px-5 py-3.5
+                                text-center
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-400
+                            ">
+                                Status
+                            </th>
+
+
+                            <th
+                                class="px-3 py-3.5 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                                style="width: 118px; min-width: 118px;"
+                            >
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+
+                    <!-- BODY -->
+                    <tbody class="
+                        divide-y
+                        divide-slate-100
+                        dark:divide-white/10
+                    ">
+
+                        {% for peserta in page_obj %}
+
+                        <tr class="
+                            transition
+                            hover:bg-primary-dark/[0.035]
+                            dark:hover:bg-white/[0.03]
+                        ">
+
+
+                            <!-- NAMA -->
+                            <td class="
+                                max-w-[180px]
+                                px-5 py-4
+                            ">
+
+                                <div class="
+                                    flex
+                                    items-center
+                                    gap-3
+                                ">
+
+                                    <div class="
+                                        flex
+                                        h-9 w-9
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-lg
+                                        bg-primary-dark/10
+                                        text-primary-dark
+
+                                        dark:bg-primary-dark/20
+                                        dark:text-blue-300
+                                    ">
+
+                                        <span class="
+                                            material-symbols-outlined
+                                            text-[18px]
+                                        ">
+
+                                            {% if status_peserta == "balita" %}
+                                                child_care
+                                            {% else %}
+                                                pregnant_woman
+                                            {% endif %}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <span
+                                        class="
+                                            truncate
+                                            font-bold
+                                            text-slate-800
+                                            dark:text-white
+                                        "
+
+                                        title="{{ peserta.nama_peserta }}"
+                                    >
+                                        {{ peserta.nama_peserta }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- GENDER -->
+                            <td class="
+                                px-5 py-4
+                            ">
+
+                                {% if peserta.jenis_kelamin == "Laki-Laki" or peserta.jenis_kelamin == "L" %}
+
+                                <span class="
+                                    inline-flex
+                                    items-center
+                                    gap-1
+                                    rounded-full
+                                    bg-blue-100
+                                    px-2.5 py-1
+                                    text-[10px]
+                                    font-bold
+                                    text-blue-700
+
+                                    dark:bg-blue-500/10
+                                    dark:text-blue-300
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[12px]
+                                    ">
+                                        male
+                                    </span>
+
+                                    Laki-laki
+
+                                </span>
+
+
+                                {% else %}
+
+                                <span class="
+                                    inline-flex
+                                    items-center
+                                    gap-1
+                                    rounded-full
+                                    bg-pink-100
+                                    px-2.5 py-1
+                                    text-[10px]
+                                    font-bold
+                                    text-pink-700
+
+                                    dark:bg-pink-500/10
+                                    dark:text-pink-300
+                                ">
+
+                                    <span class="
+                                        material-symbols-outlined
+                                        text-[12px]
+                                    ">
+                                        female
+                                    </span>
+
+                                    Perempuan
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+
+                            <!-- USIA -->
+                            <td class="
+                                whitespace-nowrap
+                                px-5 py-4
+                                text-xs
+                                font-semibold
+                                text-slate-500
+                                dark:text-slate-400
+                            ">
+                                {{ peserta.usia }}
+                            </td>
+
+
+
+                            {% if status_peserta == "balita" %}
+
+
+                                {% if jenis_kegiatan == "Imunisasi" %}
+
+
+                                <!-- ORANG TUA -->
+                                <td class="
+                                    max-w-[180px]
+                                    px-5 py-4
+                                ">
+
+                                    <div class="
+                                        flex
+                                        flex-col
+                                        gap-1
+                                    ">
+
+                                        <div class="
+                                            flex
+                                            min-w-0
+                                            items-center
+                                            gap-1.5
+                                        ">
+
+                                            <span class="
+                                                material-symbols-outlined
+                                                shrink-0
+                                                text-[13px]
+                                                text-pink-400
+                                            ">
+                                                woman
+                                            </span>
+
+                                            <span
+                                                class="
+                                                    truncate
+                                                    text-xs
+                                                    text-slate-600
+                                                    dark:text-slate-300
+                                                "
+                                                title="{{ peserta.nama_ibu }}"
+                                            >
+                                                {{ peserta.nama_ibu }}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="
+                                            flex
+                                            min-w-0
+                                            items-center
+                                            gap-1.5
+                                        ">
+
+                                            <span class="
+                                                material-symbols-outlined
+                                                shrink-0
+                                                text-[13px]
+                                                text-blue-400
+                                            ">
+                                                man
+                                            </span>
+
+                                            <span
+                                                class="
+                                                    truncate
+                                                    text-xs
+                                                    text-slate-400
+                                                "
+                                                title="{{ peserta.nama_ayah }}"
+                                            >
+                                                {{ peserta.nama_ayah }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- ANAK KE -->
+                                <td class="
+                                    px-5 py-4
+                                    text-center
+                                    text-xs
+                                    font-semibold
+                                    text-slate-500
+                                    dark:text-slate-400
+                                ">
+                                    {{ peserta.anak_ke }}
+                                </td>
+
+
+
+                                {% else %}
+
+
+                                <!-- IBU -->
+                                <td class="
+                                    max-w-[150px]
+                                    px-5 py-4
+                                ">
+
+                                    <span
+                                        class="
+                                            block
+                                            truncate
+                                            text-xs
+                                            text-slate-500
+                                            dark:text-slate-400
+                                        "
+                                        title="{{ peserta.nama_ibu }}"
+                                    >
+                                        {{ peserta.nama_ibu }}
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- AYAH -->
+                                <td class="
+                                    max-w-[150px]
+                                    px-5 py-4
+                                ">
+
+                                    <span
+                                        class="
+                                            block
+                                            truncate
+                                            text-xs
+                                            text-slate-500
+                                            dark:text-slate-400
+                                        "
+                                        title="{{ peserta.nama_ayah }}"
+                                    >
+                                        {{ peserta.nama_ayah }}
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- ANAK KE -->
+                                <td class="
+                                    px-5 py-4
+                                    text-center
+                                    text-xs
+                                    font-semibold
+                                    text-slate-500
+                                    dark:text-slate-400
+                                ">
+                                    {{ peserta.anak_ke }}
+                                </td>
+
+                                {% endif %}
+
+                            {% endif %}
+
+
+
+                            <!-- STATUS -->
+                            <td class="
+                                px-5 py-4
+                            ">
+
+                                <div class="
+                                    flex
+                                    flex-col
+                                    items-center
+                                    gap-1.5
+                                ">
+
+
+                                    {% if peserta.sudah %}
+
+                                    <span class="
+                                        inline-flex
+                                        items-center
+                                        gap-1
+                                        whitespace-nowrap
+                                        rounded-full
+                                        bg-emerald-100
+                                        px-2.5 py-1
+                                        text-[10px]
+                                        font-bold
+                                        text-emerald-700
+
+                                        dark:bg-emerald-500/10
+                                        dark:text-emerald-400
+                                    ">
+
+                                        <span class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                        ">
+                                            check_circle
+                                        </span>
+
+
+                                        {% if jenis_kegiatan == "Imunisasi" %}
+                                            Sudah Divaksin
+                                        {% else %}
+                                            Sudah Diperiksa
+                                        {% endif %}
+
+                                    </span>
+
+
+                                    {% else %}
+
+
+                                    <span class="
+                                        inline-flex
+                                        items-center
+                                        gap-1
+                                        whitespace-nowrap
+                                        rounded-full
+                                        bg-amber-100
+                                        px-2.5 py-1
+                                        text-[10px]
+                                        font-bold
+                                        text-amber-700
+
+                                        dark:bg-amber-500/10
+                                        dark:text-amber-400
+                                    ">
+
+                                        <span class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                        ">
+                                            pending
+                                        </span>
+
+
+                                        {% if jenis_kegiatan == "Imunisasi" %}
+                                            Belum Divaksin
+                                        {% else %}
+                                            Belum Diperiksa
+                                        {% endif %}
+
+                                    </span>
+
+                                    {% endif %}
+
+
+
+                                    {% if jenis_kegiatan == "Imunisasi" and peserta.sudah %}
+
+                                    <span class="
+                                        inline-flex
+                                        items-center
+                                        gap-1
+                                        whitespace-nowrap
+                                        rounded-full
+                                        bg-primary-dark/10
+                                        px-2.5 py-1
+                                        text-[10px]
+                                        font-bold
+                                        text-primary-dark
+
+                                        dark:bg-primary-dark/20
+                                        dark:text-blue-300
+                                    ">
+
+                                        <span class="
+                                            material-symbols-outlined
+                                            text-[13px]
+                                        ">
+                                            vaccines
+                                        </span>
+
+                                        {{ peserta.vaksin_sudah|length }}
+                                        Vaksin
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- ACTION -->
+                            <td
+                                class="px-3 py-4 align-top"
+                                style="width: 118px; min-width: 118px;"
+                            >
+
+                                <div class="flex justify-center">
+
+                                    {% if jenis_kegiatan == "Imunisasi" %}
+
+                                        {% if peserta.sudah %}
+
+                                        <!--
+                                            Aksi imunisasi diringkas menjadi satu menu vertikal
+                                            agar kolom aksi tidak memperlebar tabel.
+                                        -->
+                                        <details class="w-full">
+
+                                            <summary
+                                                class="flex cursor-pointer items-center justify-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1.5 text-xs font-bold text-primary-dark transition hover:bg-primary-dark hover:text-white dark:bg-primary-dark/20 dark:text-blue-300 dark:hover:bg-primary-dark dark:hover:text-white"
+                                                style="list-style: none;"
+                                            >
+                                                <span class="material-symbols-outlined text-[16px]">
+                                                    more_horiz
+                                                </span>
+                                                Aksi
+                                            </summary>
+
+                                            <div class="mt-2 flex flex-col gap-1.5 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm dark:border-white/10 dark:bg-primary">
+
+                                                <button
+                                                    type="button"
+                                                    data-imunisasi-id="{{ peserta.id }}"
+                                                    class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[11px] font-bold text-primary-dark transition hover:bg-primary-dark/10 dark:text-blue-300 dark:hover:bg-white/10"
+                                                >
+                                                    <span class="material-symbols-outlined text-[15px]">
+                                                        visibility
+                                                    </span>
+                                                    Detail
+                                                </button>
+
+                                                <a
+                                                    href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+                                                    class="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-[11px] font-bold text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10"
+                                                >
+                                                    <span class="material-symbols-outlined text-[15px]">
+                                                        vaccines
+                                                    </span>
+                                                    Tambah
+                                                </a>
+
+                                            </div>
+
+                                        </details>
+
+                                        {% else %}
+
+                                        <a
+                                            href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+                                            class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-bold text-white transition hover:bg-primary"
+                                        >
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                vaccines
+                                            </span>
+                                            Input
+                                        </a>
+
+                                        {% endif %}
+
+                                    {% else %}
+
+                                        {% if peserta.sudah %}
+
+                                        {% if status_peserta == "balita" %}
+
+                                        <!--
+                                            Aksi pemeriksaan balita dibuka melalui satu modal popup.
+                                            Kolom tabel tetap ringkas dan seluruh aksi tetap tersedia.
+                                        -->
+                                        <button
+                                            type="button"
+                                            data-peserta-action
+                                            data-peserta-name="{{ peserta.nama_peserta|escape }}"
+                                            data-action-detail-id="{{ peserta.data_periksa.id_periksa }}"
+                                            data-action-edit-url="{% url 'pemeriksaan:edit_pemeriksaan' status_peserta jadwal.id_jadwal peserta.id peserta.data_periksa.id_periksa %}"
+                                            data-action-stunting-url="{% url 'pemeriksaan:detail_deteksi_stunting' peserta.data_periksa.id_periksa %}"
+                                            data-action-kms-url="{% url 'laporan:laporan_kms' peserta.id %}"
+                                            class="flex w-full items-center justify-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1.5 text-xs font-bold text-primary-dark transition hover:bg-primary-dark hover:text-white dark:bg-primary-dark/20 dark:text-blue-300 dark:hover:bg-primary-dark dark:hover:text-white"
+                                        >
+                                            <span class="material-symbols-outlined text-[16px]">
+                                                more_horiz
+                                            </span>
+                                            Aksi
+                                        </button>
+
+                                        {% else %}
+
+                                        <div class="flex w-full items-center justify-center gap-2">
+                                            <button
+                                                type="button"
+                                                data-detail-id="{{ peserta.data_periksa.id_periksa }}"
+                                                class="inline-flex items-center justify-center gap-1 rounded-lg bg-primary-dark/10 px-2.5 py-1.5 text-xs font-bold text-primary-dark transition hover:bg-primary-dark hover:text-white dark:bg-primary-dark/20 dark:text-blue-300 dark:hover:bg-primary-dark dark:hover:text-white"
+                                            >
+                                                <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                                Detail
+                                            </button>
+                                            <a
+                                                href="{% url 'pemeriksaan:edit_pemeriksaan' status_peserta jadwal.id_jadwal peserta.id peserta.data_periksa.id_periksa %}"
+                                                class="inline-flex items-center justify-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-700 transition hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                                            >
+                                                <span class="material-symbols-outlined text-[15px]">edit</span>
+                                                Edit
+                                            </a>
+                                        </div>
+
+                                        {% endif %}
+
+                                        {% else %}
+
+                                        <a
+                                            href="{% url 'pemeriksaan:periksa_peserta' status_peserta jadwal.id_jadwal peserta.id %}"
+                                            class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-bold text-white transition hover:bg-primary"
+                                        >
+                                            <span class="material-symbols-outlined text-[15px]">
+                                                stethoscope
+                                            </span>
+                                            Periksa
+                                        </a>
+
+                                        {% endif %}
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if status_peserta == 'balita' %}{% if jenis_kegiatan == 'Imunisasi' %}7{% else %}8{% endif %}{% else %}5{% endif %}"
+
+                                class="
+                                    px-6 py-16
+                                    text-center
+                                "
+                            >
+
+                                <div class="
+                                    flex
+                                    flex-col
+                                    items-center
+                                ">
+
+                                    <div class="
+                                        flex
+                                        h-12 w-12
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        bg-slate-100
+                                        text-slate-400
+
+                                        dark:bg-white/10
+                                    ">
+
+                                        <span class="
+                                            material-symbols-outlined
+                                            text-2xl
+                                        ">
+                                            inbox
+                                        </span>
+
+                                    </div>
+
+
+                                    <p class="
+                                        mt-3
+                                        text-sm
+                                        font-semibold
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    ">
+                                        Tidak ada data peserta
+                                    </p>
+
+
+                                    <p class="
+                                        mt-1
+                                        text-xs
+                                        text-slate-400
+                                    ">
+                                        Belum ada data
+                                        {{ status_peserta }}
+                                        tersedia.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 PAGINATION
+            ================================================== -->
+            <div class="
+                flex
+                flex-col
+                gap-3
+                border-t
+                border-slate-200
+                bg-slate-50
+                px-4 py-4
+
+                dark:border-white/10
+                dark:bg-background-dark/40
+
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+            ">
+
+                <p class="
+                    text-center
+                    text-xs
+                    text-slate-500
+
+                    dark:text-slate-400
+                    sm:text-left
+                ">
+
+                    Menampilkan
+
+                    <span class="
+                        font-bold
+                        text-slate-800
+                        dark:text-white
+                    ">
+                        {{ page_obj.start_index }}
+                        -
+                        {{ page_obj.end_index }}
+                    </span>
+
+                    dari
+
+                    <span class="
+                        font-bold
+                        text-slate-800
+                        dark:text-white
+                    ">
+                        {{ page_obj.paginator.count }}
+                    </span>
+
+                    data
+
+                </p>
+
+
+
+                <div class="
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+                ">
+
+
+                    {% if page_obj.has_previous %}
+
+                    <a
+                        href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.age %}&age={{ request.GET.age }}{% endif %}{% if request.GET.jns_kegiatan %}&jns_kegiatan={{ request.GET.jns_kegiatan }}{% endif %}"
+
+                        class="
+                            flex
+                            h-9 w-9
+                            items-center
+                            justify-center
+                            rounded-lg
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-500
+                            transition
+
+                            hover:border-primary-dark
+                            hover:bg-primary-dark
+                            hover:text-white
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:text-slate-300
+                            dark:hover:bg-primary-dark
+                            dark:hover:text-white
+                        "
+                    >
+
+                        <span class="
+                            material-symbols-outlined
+                            text-[19px]
+                        ">
+                            chevron_left
+                        </span>
+
+                    </a>
+
+                    {% endif %}
+
+
+
+                    {% mapping_pages %}
+
+
+
+                    {% if page_obj.has_next %}
+
+                    <a
+                        href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.age %}&age={{ request.GET.age }}{% endif %}{% if request.GET.jns_kegiatan %}&jns_kegiatan={{ request.GET.jns_kegiatan }}{% endif %}"
+
+                        class="
+                            flex
+                            h-9 w-9
+                            items-center
+                            justify-center
+                            rounded-lg
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-500
+                            transition
+
+                            hover:border-primary-dark
+                            hover:bg-primary-dark
+                            hover:text-white
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:text-slate-300
+                            dark:hover:bg-primary-dark
+                            dark:hover:text-white
+                        "
+                    >
+
+                        <span class="
+                            material-symbols-outlined
+                            text-[19px]
+                        ">
+                            chevron_right
+                        </span>
+
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             BACK
+        ====================================================== -->
+        <div class="flex justify-end">
+
+            <a
+                href="javascript:history.back()"
+
+                class="
+                    inline-flex
+                    h-10
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    text-xs
+                    font-bold
+                    text-slate-600
+                    shadow-sm
+                    transition
+
+                    hover:border-primary-dark/30
+                    hover:bg-primary-dark/5
+                    hover:text-primary-dark
+
+                    dark:border-white/10
+                    dark:bg-primary
+                    dark:text-slate-300
+                    dark:hover:bg-primary-dark/10
+                    dark:hover:text-blue-300
+                "
+            >
+
+                <span class="
+                    material-symbols-outlined
+                    text-[17px]
+                ">
+                    arrow_back
+                </span>
+
+                Kembali
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL AKSI PESERTA BALITA
+========================================================= -->
+<div
+    id="pesertaActionModal"
+    class="fixed inset-0 z-[115] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="pesertaActionTitle"
+>
+    <div
+        id="pesertaActionBox"
+        style="width:min(22.5rem, calc(100vw - 1.5rem)); max-width:22.5rem;"
+        class="app-action-dialog admin-action-dialog scale-95 overflow-hidden rounded-2xl border border-slate-200 bg-white opacity-0 shadow-2xl transition-all duration-150 dark:border-white/10 dark:bg-primary"
+    >
+        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-white/10">
+            <div class="min-w-0">
+                <p class="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                    Pemeriksaan Balita
+                </p>
+                <h3 id="pesertaActionTitle" class="text-base font-bold text-slate-900 dark:text-white">
+                    Pilih Aksi
+                </h3>
+                <p id="pesertaActionName" class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                    Peserta
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onclick="closePesertaActionModal()"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
+                aria-label="Tutup modal aksi"
+            >
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <div class="space-y-2 p-4">
+            <button
+                id="pesertaActionDetail"
+                type="button"
+                class="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left transition hover:border-primary-dark/30 hover:bg-primary-dark/5 dark:border-white/10 dark:bg-background-dark/30 dark:hover:bg-white/5"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-bold text-slate-800 dark:text-white">Detail Pemeriksaan</span>
+                    <span class="block text-[11px] text-slate-400">Lihat hasil pemeriksaan lengkap</span>
+                </span>
+                <span class="material-symbols-outlined text-[18px] text-slate-300">chevron_right</span>
+            </button>
+
+            <a
+                id="pesertaActionEdit"
+                href="#"
+                class="flex w-full items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3.5 text-left transition hover:bg-amber-50 dark:border-amber-500/20 dark:bg-amber-500/10 dark:hover:bg-amber-500/15"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-bold text-amber-700 dark:text-amber-300">Edit Pemeriksaan</span>
+                    <span class="block text-[11px] text-amber-600/70 dark:text-amber-300/70">Perbarui data pemeriksaan yang sudah tersimpan</span>
+                </span>
+                <span class="material-symbols-outlined text-[18px] text-amber-300">chevron_right</span>
+            </a>
+
+            <a
+                id="pesertaActionStunting"
+                href="#"
+                class="flex w-full items-center gap-3 rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-3.5 text-left transition hover:bg-rose-50 dark:border-rose-500/20 dark:bg-rose-500/10 dark:hover:bg-rose-500/15"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400">
+                    <span class="material-symbols-outlined text-[20px]">analytics</span>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-bold text-rose-700 dark:text-rose-300">Detail Stunting</span>
+                    <span class="block text-[11px] text-rose-500/70 dark:text-rose-400/70">Lihat hasil deteksi Random Forest</span>
+                </span>
+                <span class="material-symbols-outlined text-[18px] text-rose-300">chevron_right</span>
+            </a>
+
+            <a
+                id="pesertaActionKms"
+                href="#"
+                class="flex w-full items-center gap-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3.5 text-left transition hover:bg-blue-50 dark:border-blue-500/20 dark:bg-blue-500/10 dark:hover:bg-blue-500/15"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
+                    <span class="material-symbols-outlined text-[20px]">show_chart</span>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-bold text-blue-700 dark:text-blue-300">KMS</span>
+                    <span class="block text-[11px] text-blue-500/70 dark:text-blue-300/70">Buka grafik pertumbuhan balita</span>
+                </span>
+                <span class="material-symbols-outlined text-[18px] text-blue-300">chevron_right</span>
+            </a>
+        </div>
+
+        <div class="border-t border-slate-100 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-background-dark/30">
+            <button
+                type="button"
+                onclick="closePesertaActionModal()"
+                class="flex h-9 w-full items-center justify-center rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:bg-primary dark:text-slate-300 dark:hover:bg-white/10"
+            >
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     MODAL DETAIL PEMERIKSAAN
+========================================================= -->
+<div
+    id="detailModal"
+
+    class="
+        fixed
+        inset-0
+        z-[120]
+        hidden
+        items-center
+        justify-center
+        bg-black/60
+        p-4
+        backdrop-blur-sm
+    "
+>
+
+    <div
+        id="detailBox"
+
+        class="
+            flex
+            max-h-[90vh]
+            w-full
+            max-w-lg
+            scale-95
+            flex-col
+            overflow-hidden
+            rounded-xl
+            border
+            border-slate-200
+            bg-white
+            opacity-0
+            shadow-2xl
+            transition-all
+            duration-200
+
+            dark:border-white/10
+            dark:bg-primary
+        "
+    >
+
+
+        <!-- HEADER -->
+        <div class="
+            flex
+            shrink-0
+            items-center
+            justify-between
+            border-b
+            border-slate-200
+            px-5 py-4
+
+            dark:border-white/10
+        ">
+
+
+            <div class="
+                flex
+                items-center
+                gap-3
+            ">
+
+                <div class="
+                    flex
+                    h-9 w-9
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    bg-primary-dark/10
+                    text-primary-dark
+
+                    dark:bg-primary-dark/20
+                    dark:text-blue-300
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[18px]
+                    ">
+                        clinical_notes
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="
+                        text-sm
+                        font-bold
+                        text-slate-900
+                        dark:text-white
+                    ">
+                        Detail Pemeriksaan
+                    </h2>
+
+
+                    <p
+                        id="detailSubtitle"
+                        class="
+                            mt-0.5
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="closeDetailModal()"
+
+                class="
+                    flex
+                    h-8 w-8
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-slate-400
+                    transition
+
+                    hover:bg-slate-100
+                    hover:text-slate-700
+
+                    dark:hover:bg-white/10
+                    dark:hover:text-white
+                "
+            >
+
+                <span class="
+                    material-symbols-outlined
+                    text-[19px]
+                ">
+                    close
+                </span>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- INFO PESERTA -->
+        <div class="
+            shrink-0
+            px-5
+            pt-4
+        ">
+
+            <div class="
+                flex
+                items-center
+                gap-3
+                rounded-lg
+                bg-slate-50
+                p-3
+
+                dark:bg-background-dark/50
+            ">
+
+                <div class="
+                    flex
+                    h-12 w-12
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    bg-primary-dark/10
+                    text-primary-dark
+
+                    dark:bg-primary-dark/20
+                    dark:text-blue-300
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[22px]
+                    ">
+
+                        {% if status_peserta == "balita" %}
+                            child_care
+                        {% else %}
+                            pregnant_woman
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <h3
+                        id="detailNama"
+
+                        class="
+                            truncate
+                            text-sm
+                            font-bold
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                    </h3>
+
+
+                    <p
+                        id="detailMeta"
+
+                        class="
+                            mt-0.5
+                            text-xs
+                            text-slate-400
+                        "
+                    >
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             TAB SWITCHER
+        ====================================================== -->
+        <div
+            id="btnGrafikKMS"
+
+            class="
+                hidden
+                shrink-0
+                px-5
+                pt-4
+            "
+        >
+
+            <div class="
+                flex
+                gap-1
+                rounded-lg
+                bg-slate-100
+                p-1
+
+                dark:bg-background-dark/60
+            ">
+
+
+                <button
+                    id="tabBtnData"
+                    type="button"
+                    onclick="showTab('tab-data')"
+
+                    class="
+                        flex
+                        flex-1
+                        items-center
+                        justify-center
+                        gap-1.5
+                        rounded-md
+                        bg-white
+                        px-3 py-2
+                        text-xs
+                        font-bold
+                        text-slate-900
+                        shadow-sm
+                        transition-all
+
+                        dark:bg-primary
+                        dark:text-white
+                    "
+                >
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[15px]
+                    ">
+                        monitor_weight
+                    </span>
+
+                    Data Pemeriksaan
+
+                </button>
+
+
+
+                <button
+                    id="tabBtnGrafik"
+                    type="button"
+                    onclick="showTab('tab-grafik')"
+
+                    class="
+                        flex
+                        flex-1
+                        items-center
+                        justify-center
+                        gap-1.5
+                        rounded-md
+                        px-3 py-2
+                        text-xs
+                        font-bold
+                        text-slate-400
+                        transition-all
+                    "
+                >
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[15px]
+                    ">
+                        show_chart
+                    </span>
+
+                    Grafik KMS
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             PANEL DATA
+        ====================================================== -->
+        <div
+            id="panelData"
+
+            class="
+                flex-1
+                space-y-5
+                overflow-y-auto
+                p-5
+            "
+        >
+
+
+            <!-- ANTROPOMETRI -->
+            <div>
+
+                <div class="
+                    mb-3
+                    flex
+                    items-center
+                    gap-2
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[16px]
+                        text-primary-dark
+                        dark:text-blue-300
+                    ">
+                        monitor_weight
+                    </span>
+
+                    <p class="
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-widest
+                        text-slate-400
+                    ">
+                        Data Antropometri
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="detailGrid"
+                    class="
+                        grid
+                        grid-cols-2
+                        gap-3
+                    "
+                >
+                </div>
+
+            </div>
+
+
+            <hr class="
+                border-slate-100
+                dark:border-white/10
+            ">
+
+
+
+            <!-- DETEKSI -->
+            <div id="detailDeteksiSection">
+
+                <div class="
+                    mb-3
+                    flex
+                    items-center
+                    gap-2
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[16px]
+                        text-primary-dark
+                        dark:text-blue-300
+                    ">
+                        biotech
+                    </span>
+
+                    <p class="
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-widest
+                        text-slate-400
+                    ">
+                        Hasil Deteksi
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="detailStatusWrap"
+                    class="mb-3"
+                >
+                </div>
+
+
+                <div id="detailHasil">
+                </div>
+
+            </div>
+
+
+
+            <!-- CATATAN -->
+            <div
+                id="detailCatatanWrap"
+
+                class="
+                    hidden
+                    rounded-lg
+                    border
+                    border-amber-200
+                    bg-amber-50
+                    p-3
+
+                    dark:border-amber-900/50
+                    dark:bg-amber-950/20
+                "
+            >
+
+                <div class="
+                    mb-1
+                    flex
+                    items-center
+                    gap-1.5
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[15px]
+                        text-amber-500
+                    ">
+                        edit_note
+                    </span>
+
+                    <p class="
+                        text-xs
+                        font-bold
+                        text-amber-700
+                        dark:text-amber-400
+                    ">
+                        Catatan / Keluhan
+                    </p>
+
+                </div>
+
+
+                <p
+                    id="detailCatatan"
+
+                    class="
+                        text-sm
+                        leading-5
+                        text-amber-800
+                        dark:text-amber-300
+                    "
+                >
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             PANEL KMS LENGKAP
+        ====================================================== -->
+        <div id="panelGrafik" class="hidden flex-1 space-y-5 overflow-y-auto p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-primary-dark dark:text-blue-300">show_chart</span>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grafik KMS</p>
+                    </div>
+                    <p class="mt-1 text-[10px] leading-5 text-slate-400">BB/U, PB/U atau TB/U, dan IMT/U usia 0–60 bulan.</p>
+                </div>
+                <a id="kmsFullLink" href="#"
+                   class="inline-flex w-fit items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-2 text-xs font-bold text-white transition hover:bg-primary">
+                    <span class="material-symbols-outlined text-[15px]">open_in_new</span>
+                    Buka KMS Lengkap
+                </a>
+            </div>
+
+            <div>
+                <h4 class="mb-2 text-xs font-extrabold text-slate-800 dark:text-white">Berat Badan menurut Umur (BB/U)</h4>
+                <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                    <canvas id="kmsModalBBU" aria-label="Grafik BB/U"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="mb-2 text-xs font-extrabold text-slate-800 dark:text-white">Panjang/Tinggi Badan menurut Umur (PB/U atau TB/U)</h4>
+                <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                    <canvas id="kmsModalTBU" aria-label="Grafik PB/U atau TB/U"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="mb-2 text-xs font-extrabold text-slate-800 dark:text-white">Indeks Massa Tubuh menurut Umur (IMT/U)</h4>
+                <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                    <canvas id="kmsModalIMTU" aria-label="Grafik IMT/U"></canvas>
+                </div>
+            </div>
+
+            <p class="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[10px] leading-5 text-slate-500 dark:border-blue-500/10 dark:bg-blue-500/5 dark:text-slate-400">
+                Kurva standar tetap ditampilkan meskipun riwayat pemeriksaan anak belum tersedia.
+            </p>
+        </div>
+
+
+        <!-- FOOTER -->
+        <div class="
+            shrink-0
+            border-t
+            border-slate-200
+            bg-slate-50
+            px-5 py-4
+
+            dark:border-white/10
+            dark:bg-background-dark/40
+        ">
+
+            <button
+                type="button"
+                onclick="closeDetailModal()"
+
+                class="
+                    w-full
+                    rounded-lg
+                    bg-primary-dark
+                    py-2.5
+                    text-sm
+                    font-bold
+                    text-white
+                    transition
+
+                    hover:bg-primary
+                "
+            >
+                Tutup
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MODAL DETAIL IMUNISASI
+========================================================= -->
+<div
+    id="imunModal"
+
+    class="
+        fixed
+        inset-0
+        z-[130]
+        hidden
+        items-center
+        justify-center
+        bg-black/60
+        p-4
+        backdrop-blur-sm
+    "
+>
+
+    <div class="
+        w-full
+        max-w-lg
+        overflow-hidden
+        rounded-xl
+        border
+        border-slate-200
+        bg-white
+        shadow-2xl
+
+        dark:border-white/10
+        dark:bg-primary
+    ">
+
+
+        <!-- HEADER -->
+        <div class="
+            flex
+            items-center
+            justify-between
+            border-b
+            border-slate-200
+            px-5 py-4
+
+            dark:border-white/10
+        ">
+
+
+            <div class="
+                flex
+                items-center
+                gap-3
+            ">
+
+                <div class="
+                    flex
+                    h-9 w-9
+                    items-center
+                    justify-center
+                    rounded-lg
+                    bg-primary-dark/10
+                    text-primary-dark
+
+                    dark:bg-primary-dark/20
+                    dark:text-blue-300
+                ">
+
+                    <span class="
+                        material-symbols-outlined
+                        text-[18px]
+                    ">
+                        vaccines
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <h2 class="
+                        text-sm
+                        font-bold
+                        text-slate-900
+                        dark:text-white
+                    ">
+                        Detail Imunisasi
+                    </h2>
+
+
+                    <p
+                        id="imunTanggal"
+
+                        class="
+                            mt-0.5
+                            text-[10px]
+                            text-slate-400
+                        "
+                    >
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <button
+                type="button"
+                onclick="closeImunisasiModal()"
+
+                class="
+                    flex
+                    h-8 w-8
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-slate-400
+                    transition
+
+                    hover:bg-slate-100
+                    hover:text-slate-700
+
+                    dark:hover:bg-white/10
+                    dark:hover:text-white
+                "
+            >
+
+                <span class="
+                    material-symbols-outlined
+                    text-[19px]
+                ">
+                    close
+                </span>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- PESERTA -->
+        <div class="
+            border-b
+            border-slate-100
+            px-5 py-4
+
+            dark:border-white/10
+        ">
+
+            <p class="
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-wider
+                text-slate-400
+            ">
+                Nama Peserta
+            </p>
+
+
+            <h3
+                id="imunNama"
+
+                class="
+                    mt-1
+                    text-base
+                    font-bold
+                    text-slate-900
+                    dark:text-white
+                "
+            >
+            </h3>
+
+        </div>
+
+
+
+        <!-- LIST -->
+        <div
+            id="imunList"
+
+            class="
+                max-h-[50vh]
+                space-y-3
+                overflow-y-auto
+                px-5 py-4
+            "
+        >
+        </div>
+
+
+
+        <!-- FOOTER -->
+        <div class="
+            border-t
+            border-slate-200
+            bg-slate-50
+            px-5 py-4
+
+            dark:border-white/10
+            dark:bg-background-dark/40
+        ">
+
+            <button
+                type="button"
+                onclick="closeImunisasiModal()"
+
+                class="
+                    w-full
+                    rounded-lg
+                    bg-primary-dark
+                    py-2.5
+                    text-sm
+                    font-bold
+                    text-white
+                    transition
+
+                    hover:bg-primary
+                "
+            >
+                Tutup
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

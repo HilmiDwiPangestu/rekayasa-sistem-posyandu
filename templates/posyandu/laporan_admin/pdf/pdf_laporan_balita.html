@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% if status_peserta == 'bumil' %}Laporan Bulanan Pemeriksaan Ibu Hamil{% else %}Laporan Bulanan Pemeriksaan  Balita{% endif %} - Posyandu
+    </title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm 8mm;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #111111;
+            font-size: 8.5pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+        }
+        .title {
+            font-size: 14pt;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            color: #111111;
+            text-transform: uppercase;
+        }
+        
+        .header-container {
+            width: 100%;
+            margin-bottom: 10px;
+            display: table;
+        }
+        .header-left {
+            display: table-cell;
+            width: 75%;
+            vertical-align: middle;
+        }
+
+        .meta-spacer {
+            width: 550px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+        .meta-table td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        .meta-label {
+            width: 100px;
+        }
+        .meta-colon {
+            width: 15px;
+            text-align: center;
+        }
+        .meta-value {
+            font-weight: bold;
+            border-bottom: 1px dotted #666;
+            width: 200px;
+            display: inline-block;
+        }
+        
+        /* Main Data Table Styling */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            font-size: 7.5pt;
+        }
+        .main-table th, .main-table td {
+            border: 1px solid #111111;
+            padding: 4px 2px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .main-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            font-size: 7.5pt;
+        }
+        .text-left {
+            text-align: left !important;
+            padding-left: 4px !important;
+        }
+        
+        /* Column Widths to maintain standard layout */
+        .col-desa { width: 5%; }
+        .col-posy { width: 6%; }
+        .col-no { width: 2.5%; }
+        .col-nama { width: 20%; }
+        .col-nik { width: 12%; }
+        .col-tambahan { width: 5%; } /* Fleksibel untuk Anak Ke- atau Usia Kehamilan */
+        .col-jk { width: 3.5%; }
+        .col-tgl { width: 6.5%; }
+        .col-bb { width: 3.5%; }
+        .col-pb { width: 3.5%; }
+        .col-nikibu { width: 12%; }
+        .col-ortu { width: 20%; }
+        .col-periodic { width: 6%; }
+        
+        .footer {
+            margin-top: 25px;
+            padding-top: 8px;
+            border-top: 1px solid #999999;
+            width: 100%;
+            font-size: 8pt;
+            color: #555555;
+        }
+
+        .footer-table {
+            width: 100%;
+            border-collapse: none;
+        }
+
+        .footer-table td {
+            border: none;
+            padding: 0;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-right {
+            text-align: right;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title">
+        {% if status_peserta == 'bumil' %}LAPORAN BULANAN PEMERIKSAAN IBU HAMIL{% else %}LAPORAN BULANAN PEMERIKSAAN BALITA{% endif %}
+    </div>
+
+    <div class="header-container">
+        <div class="header-left">
+            
+            <table class="meta-table">
+                <tr>
+                    <td class="meta-label">Kecamatan</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">Indramayu</span></td>
+
+                    <td class="meta-spacer"></td>
+
+                    <td class="meta-label">Desa</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">Kel. Lemahmekar</span></td>
+                </tr>
+
+                <tr>
+                    <td class="meta-label">Puskesmas</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">Indramayu</span></td>
+
+                    <td class="meta-spacer"></td>
+
+                    <td class="meta-label">Posyandu</td>
+                    <td class="meta-colon">:</td>
+                    <td><span class="meta-value">{{ posyandu_nama|default:"Semua Posyandu" }}</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <table class="main-table">
+        <thead>
+            <tr>
+                {% comment %} <th rowspan="3" class="col-desa">DESA</th> {% endcomment %}
+                {% comment %} <th rowspan="3" class="col-posy">POSY</th> {% endcomment %}
+                <th rowspan="3" class="col-no">No</th>
+                <th rowspan="3" class="col-nama">
+                    {% if status_peserta == 'bumil' %}
+                        Nama Ibu Hamil
+                    {% else %}
+                        Nama Balita
+                    {% endif %}
+                </th>
+
+                <th rowspan="3" class="col-nik">NIK</th>
+                
+                {% if status_peserta == 'bumil' %}
+                    <th rowspan="3" class="col-tambahan">Usia<br>Bumil</th>
+                    <th rowspan="3" class="col-jk">Gol<br>Darah</th>
+                    <th rowspan="3" class="col-tgl">HPHT</th>
+                    <th rowspan="2" class="col-bb">LILA<br>Awal</th>
+                    <th rowspan="2" class="col-pb">BB<br>Awal</th>
+                {% else %}
+                    <th rowspan="3" class="col-tambahan">Anak<br>Ke-</th>
+                    <th rowspan="3" class="col-jk">JK</th>
+                    <th rowspan="3" class="col-tgl">Tgl Lahir</th>
+                    <th rowspan="3" class="col-bb">BB Lahir<br>(cm)</th>
+                    <th rowspan="3" class="col-pb">PB Lahir<br>(cm)</th>
+                {% endif %}
+                
+                <th rowspan="3" class="col-nikibu">
+                    {% if status_peserta == 'bumil' %}
+                        NIK SUAMI
+                    {% else %}
+                        NIK IBU
+                    {% endif %}
+                </th>
+
+                <th rowspan="3" class="col-ortu">
+                    {% if status_peserta == 'bumil' %}
+                        NAMA SUAMI
+                    {% else %}
+                        NAMA ORANG TUA
+                    {% endif %}
+                </th>
+                
+                <th colspan="4" style="font-weight: bold; font-size: 7pt;">{{ periode_label }}</th>
+            </tr>
+
+            <tr>
+                {% if status_peserta == 'bumil' %}
+                    <th class="col-periodic">Usia K</th><th class="col-periodic">BB</th><th class="col-periodic">Tensi</th><th class="col-periodic">LILA</th>
+                {% else %}
+                    <th class="col-periodic">Umur</th>
+                    <th class="col-periodic">BB </th>
+                    <th class="col-periodic">TB</th>
+                    <th class="col-periodic">LK</th>
+                {% endif %}
+            </tr>
+
+            <tr>
+                {% if status_peserta == 'bumil' %}
+                    <th style="font-weight: normal; font-size: 6.5pt;">(cm)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(kg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(mg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(kg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(mmHg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(cm)</th>
+                    
+                {% else %}
+                    {% comment %} <th style="font-weight: normal; font-size: 6.5pt;">Lahir<br>(kg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">Lahir<br>(cm)</th> {% endcomment %}
+                    <th style="font-weight: normal; font-size: 6.5pt;">(bln)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(kg)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(cm)</th>
+                    <th style="font-weight: normal; font-size: 6.5pt;">(cm)</th>
+                {% endif %}
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for peserta in data_peserta %}
+            <tr>
+                {% comment %} <td>{{ peserta.posko.desa|default:"-" }}</td>
+                <td>{{ peserta.posko.nama_posyandu|default:"-" }}</td> {% endcomment %}
+                <td>{{ forloop.counter }}</td>
+                <td class="text-left">{{ peserta.nama_peserta }}</td>
+                <td>{{ peserta.no_nik|default:"-" }}</td>
+                
+                {% if status_peserta == 'bumil' %}
+                    <td>{{ peserta.usia|default:"-" }}</td>
+                    <td>{{ peserta.golongan_darah|default:"-" }}</td>
+                    <td>{{ peserta.hpht|date:"d/m/Y"|default:"-" }}</td>
+                    <td>{{ peserta.lila_awal|default:"-" }}</td>
+                    <td>{{ peserta.bb_awal|default:"-" }}</td>
+                    <td>{{ peserta.nik_suami|default:"-" }}</td>
+                    <td class="text-left">{{ peserta.nama_ayah|default:"-" }}</td>
+                {% else %}
+                    <td>{{ peserta.anak_ke|default:"-" }}</td>
+                    <td>{% if peserta.jenis_kelamin == 'Laki-Laki' %}L{% elif peserta.jenis_kelamin == 'Perempuan' %}P{% else %}-{% endif %}</td>
+                    <td>{{ peserta.tgl_lahir|date:"d/m/Y" }}</td>
+                    <td>{{ peserta.bb_lahir|default:"-" }}</td>
+                    <td>{{ peserta.tb_lahir|default:"-" }}</td>
+                    <td>{{ peserta.nik_ibu|default:"-" }}</td>
+                    <td class="text-left">{{ peserta.nama_ibu|default:"-" }}</td>
+                {% endif %}
+                
+                {% with list_periksa=peserta.riwayat_periksa %}
+                    {% if list_periksa %}
+                        {% if status_peserta == 'bumil' %}
+                            <td>{{ list_periksa.0.usia_kehamilan|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.berat_badan|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.tekanan_darah|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.lila_bumil|default:"&nbsp;" }}</td>
+                        {% else %}
+                            <td>{{ list_periksa.0.usia_bulan|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.berat_badan|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.tinggi_badan|default:"&nbsp;" }}</td>
+                            <td>{{ list_periksa.0.lingkar_kepala|default:"&nbsp;" }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td colspan="4" style="font-weight:bold;">
+                            Tidak Hadir
+                        </td>                    
+                    {% endif %}
+                {% endwith %}
+            </tr>
+            {% empty %}
+                <tr>
+                    {% if status_peserta == 'bumil' %}
+                        <td colspan="12" style="text-align:center; padding:12px;">
+                            Tidak ada data pemeriksaan ibu hamil
+                        </td>
+                    {% else %}
+                        <td colspan="14" style="text-align:center; padding:12px;">
+                            Tidak ada data pemeriksaan balita
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="height:25px;"></div>
+
+    <div class="footer">
+        <table class="footer-table">
+            <tr>
+                <td class="footer-left">
+                    Sistem Informasi Manajemen Pelayanan Kesehatan Komunitas (Log Manifest)
+                </td>
+
+                <td class="footer-right">
+                    Dicetak otomatis pada: {% now "d F Y H:i" %} WIB
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

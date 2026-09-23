@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block subtitle %}Pengaturan Akun{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-100">
+
+    <div class="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div class="relative mb-4 overflow-hidden rounded-xl bg-primary p-4 text-white shadow-sm sm:mb-6 sm:p-6">
+
+            <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+
+            <div class="relative flex items-start gap-4">
+
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10 sm:h-12 sm:w-12">
+                    <span class="material-symbols-outlined text-2xl">
+                        manage_accounts
+                    </span>
+                </div>
+
+                <div>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                        Profil Pengguna
+                    </p>
+
+                    <h1 class="text-xl font-black tracking-tight sm:text-3xl">
+                        Pengaturan Akun
+                    </h1>
+
+                    <p class="mt-1.5 max-w-2xl text-xs leading-5 text-slate-300 sm:mt-2 sm:text-sm sm:leading-6">
+                        Kelola informasi profil, kontak, penempatan, dan keamanan akun Anda.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =====================================================
+             MAIN CARD
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <form action="{% url 'accounts:updateSetting' %}" method="POST">
+                {% csrf_token %}
+
+                <!-- =================================================
+                     PROFILE SUMMARY
+                ================================================== -->
+                <div class="border-b border-slate-200 p-4 dark:border-white/10 sm:p-6">
+
+                    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div class="flex items-center gap-4">
+
+                            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark ring-1 ring-inset ring-primary-dark/10 dark:bg-primary-dark/20 dark:text-blue-300 dark:ring-primary-dark/20 sm:h-20 sm:w-20">
+                                <span class="material-symbols-outlined text-4xl">
+                                    account_circle
+                                </span>
+                            </div>
+
+                            <div class="min-w-0">
+
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    Akun Petugas
+                                </p>
+
+                                <h2 class="mt-1 truncate text-lg font-black text-slate-900 dark:text-white sm:text-xl">
+                                    {{ petugas.nama }}
+                                </h2>
+
+                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    @{{ petugas.user.username }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                            Akun Aktif
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     FORM BODY
+                ================================================== -->
+                <div class="space-y-6 p-4 sm:space-y-8 sm:p-6">
+
+                    <!-- Informasi Dasar -->
+                    <section>
+
+                        <div class="mb-4 flex items-center gap-3">
+
+                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-lg">
+                                    badge
+                                </span>
+                            </div>
+
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 dark:text-white">
+                                    Informasi Dasar
+                                </h2>
+
+                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                    Perbarui identitas dan kontak petugas.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+
+                            <!-- Nama -->
+                            <div>
+
+                                <label for="nama" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    Nama Lengkap
+                                    <span class="text-rose-500">*</span>
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        person
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        id="nama"
+                                        name="nama"
+                                        value="{{ petugas.nama }}"
+                                        placeholder="Masukkan nama lengkap"
+                                        required
+                                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Username -->
+                            <div>
+
+                                <label for="username" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    Username
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        alternate_email
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        id="username"
+                                        name="username"
+                                        value="{{ petugas.user.username }}"
+                                        required
+                                        autocomplete="username"
+                                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                                    >
+
+                                </div>
+
+                                <p class="mt-2 text-[11px] text-slate-400">
+                                    Username dapat diubah selama belum digunakan oleh akun lain.
+                                </p>
+
+                            </div>
+
+
+                            <!-- Telepon -->
+                            <div>
+
+                                <label for="no_telp" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    No. Telepon / WhatsApp
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        call
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        id="no_telp"
+                                        name="no_telp"
+                                        value="{{ petugas.no_telp }}"
+                                        placeholder="08xxxxxxxxxx"
+                                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Penempatan -->
+                            <div>
+
+                                <label for="posyandu" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    Penempatan Posyandu
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        home_health
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        id="posyandu"
+                                        value="{% if penempatan_saat_ini %}{{ penempatan_saat_ini.posyandu.nama }}{% elif petugas.level == 'admin' %}Admin Kelurahan / Semua Posyandu{% elif petugas.posyandu %}{{ petugas.posyandu.nama }}{% else %}-{% endif %}"
+                                        disabled
+                                        class="h-11 w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 pl-11 pr-4 text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
+                                    >
+
+                                </div>
+                                <p class="mt-2 text-[11px] text-slate-400">
+                                    Penempatan hanya dapat diubah oleh Admin Kelurahan melalui data petugas.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Alamat -->
+                        <div class="mt-4 sm:mt-5">
+
+                            <label for="alamat" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                Alamat
+                            </label>
+
+                            <textarea
+                                id="alamat"
+                                name="alamat"
+                                rows="4"
+                                placeholder="Masukkan alamat lengkap..."
+                                class="w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                            >{{ petugas.alamat }}</textarea>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- Keamanan -->
+                    <section class="border-t border-slate-200 pt-5 dark:border-white/10 sm:pt-6">
+
+                        <div class="mb-4 flex items-center gap-3">
+
+                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-lg">
+                                    lock
+                                </span>
+                            </div>
+
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 dark:text-white">
+                                    Keamanan Akun
+                                </h2>
+
+                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                    Kosongkan kedua kolom password jika tidak ingin mengubah password.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+
+                            <!-- Password Baru -->
+                            <div>
+
+                                <label for="password_baru" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    Password Baru
+                                    <span class="font-medium text-slate-400">(Opsional)</span>
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        password
+                                    </span>
+
+                                    <input
+                                        type="password"
+                                        name="password_baru"
+                                        id="password_baru"
+                                        placeholder="Masukkan password baru"
+                                        autocomplete="new-password"
+                                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        onclick="togglePassword('password_baru', this)"
+                                        aria-label="Tampilkan password baru"
+                                        class="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                                    >
+                                        <span class="material-symbols-outlined text-lg">
+                                            visibility
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Konfirmasi Password -->
+                            <div>
+
+                                <label for="konfirmasi_password" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    Konfirmasi Password Baru
+                                </label>
+
+                                <div class="relative">
+
+                                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                                        lock_reset
+                                    </span>
+
+                                    <input
+                                        type="password"
+                                        name="konfirmasi_password"
+                                        id="konfirmasi_password"
+                                        placeholder="Ulangi password baru"
+                                        autocomplete="new-password"
+                                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        onclick="togglePassword('konfirmasi_password', this)"
+                                        aria-label="Tampilkan konfirmasi password"
+                                        class="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                                    >
+                                        <span class="material-symbols-outlined text-lg">
+                                            visibility
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 dark:border-amber-900/50 dark:bg-amber-950/20 sm:gap-3 sm:px-4">
+
+                            <span class="material-symbols-outlined mt-0.5 text-lg text-amber-600 dark:text-amber-400">
+                                info
+                            </span>
+
+                            <p class="text-xs leading-5 text-amber-700 dark:text-amber-300">
+                                Jika mengubah password, pastikan password baru dan konfirmasi password diisi dengan nilai yang sama.
+                            </p>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <!-- =================================================
+                     ACTION
+                ================================================== -->
+                <div class="flex flex-col-reverse gap-2.5 border-t border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-background-dark/30 sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-6">
+
+                    <button
+                        type="reset"
+                        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-800 dark:border-white/10 dark:bg-primary dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white sm:h-11 sm:px-5 sm:text-sm"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            restart_alt
+                        </span>
+                        Reset
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary-dark px-5 text-xs font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20 active:scale-[0.98] sm:h-11 sm:px-6 sm:text-sm"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            save
+                        </span>
+                        Simpan Perubahan
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- =====================================================
+             INFORMATION
+        ====================================================== -->
+        <div class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:mt-6 sm:p-5">
+
+            <div class="mb-4 flex items-center gap-3">
+
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                    <span class="material-symbols-outlined text-lg">
+                        info
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900 dark:text-white">
+                        Informasi Pengaturan Akun
+                    </h2>
+
+                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        Pastikan informasi akun tetap akurat dan aman.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-3">
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-3.5 dark:border-white/10 dark:bg-background-dark/50 sm:p-4">
+
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-primary-dark dark:text-blue-300">
+                            person
+                        </span>
+
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                            Profil
+                        </p>
+                    </div>
+
+                    <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                        Gunakan nama dan nomor telepon yang aktif agar data petugas mudah dikenali dan dihubungi.
+                    </p>
+
+                </div>
+
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-3.5 dark:border-white/10 dark:bg-background-dark/50 sm:p-4">
+
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-primary-dark dark:text-blue-300">
+                            home_health
+                        </span>
+
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                            Penempatan
+                        </p>
+                    </div>
+
+                    <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                        Pastikan penempatan Posyandu sesuai dengan lokasi tugas aktif petugas.
+                    </p>
+
+                </div>
+
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-3.5 dark:border-white/10 dark:bg-background-dark/50 sm:p-4">
+
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-primary-dark dark:text-blue-300">
+                            shield
+                        </span>
+
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                            Keamanan
+                        </p>
+                    </div>
+
+                    <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                        Gunakan password yang kuat dan jangan membagikan akses akun kepada pengguna lain.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+
+    if (!input || !button) {
+        return;
+    }
+
+    const icon = button.querySelector('.material-symbols-outlined');
+    const isHidden = input.type === 'password';
+
+    input.type = isHidden ? 'text' : 'password';
+
+    if (icon) {
+        icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+    }
+
+    button.setAttribute(
+        'aria-label',
+        isHidden ? 'Sembunyikan password' : 'Tampilkan password'
+    );
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,242 @@
+{% load static %}
+
+{% url 'pemeriksaan:list' 'bumil' as url_pemeriksaan %}
+{% url 'pemeriksaan:list_imunisasi' 'bumil' as url_imunisasi %}
+
+{% comment %} BAGIAN ADMIN {% endcomment %}
+{% url 'dashboard:index' as url_dashboard %}
+{% url 'accounts:setting' as url_setting %}
+
+{% url 'posyandu:daftar_petugas_kader' as url_petugas_kader %}
+{% url 'posyandu:daftar_bidan' as url_petugas_bidan %}
+{% url 'posyandu:jadwal_posyandu_admin' as url_jadwal %}
+{% url 'posyandu:list_posyandu' as url_posyandu %}
+
+{% comment %} LAPORAN ADMIN {% endcomment %}
+{% url 'posyandu:laporan_bumil' as url_laporan_bumil %}
+{% url 'posyandu:laporan_balita' as url_laporan_balita %}
+{% url 'posyandu:laporan_imunisasi' as url_laporan_imunisasi %}
+{% url 'posyandu:laporan_triwulan' as url_laporan_triwulan %}
+{% url 'posyandu:semua_laporan' as url_semua_laporan %}
+{% url 'posyandu:semua_laporan' as url_laporan_list %}
+
+{% with path=request.path %}
+
+{# ═══════════════════════════════ MENU ═══════════════════════════════ #}
+<p class="px-4 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">Menu</p>
+
+<a href="{{ url_dashboard }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_dashboard %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_dashboard %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">home</span>
+  <span class="text-sm font-semibold">Dashboard</span>
+</a>
+
+{% comment %} ═══════════════════════════════ MASTER ══════════════════════════════ {% endcomment %}
+
+{% with current_url=request.resolver_match.url_name %}
+
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">
+    Master
+</p>
+
+<div class="flex flex-col">
+
+  <button
+      type="button"
+      data-dropdown-btn
+      class="group flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 w-full text-left
+      {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' or current_url == 'daftar_petugas_kader' or current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+          bg-white/20 text-white
+      {% else %}
+          text-white/80 hover:text-white hover:bg-white/10
+      {% endif %}">
+
+      <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+          {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' or current_url == 'daftar_petugas_kader' or current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+              text-white
+          {% else %}
+              text-white/60 group-hover:text-white
+          {% endif %}">
+              database
+          </span>
+
+          <span class="text-sm font-semibold">
+              Master Data
+          </span>
+      </div>
+
+      <span
+          data-dropdown-icon
+          class="material-symbols-outlined transition-all duration-200 text-[18px]
+          {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' or current_url == 'daftar_petugas_kader' or current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+              text-white/70 rotate-180
+          {% else %}
+              text-white/40 group-hover:text-white/70
+          {% endif %}">
+          expand_more
+      </span>
+
+  </button>
+
+  <div
+      data-dropdown-menu
+      class="mt-1 ml-3 flex flex-col gap-0.5 pl-4 border-l border-white/20
+      {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' or current_url == 'daftar_petugas_kader' or current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+      {% else %}
+          hidden
+      {% endif %}">
+
+      <a href="{{ url_petugas_bidan }}"
+          class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+          {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' %}
+              text-white bg-white/10
+          {% else %}
+              text-white/70 hover:text-white hover:bg-white/10
+          {% endif %}">
+
+          <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+          {% if current_url == 'daftar_bidan' or current_url == 'atur_cakupan_bidan' %}
+              bg-white
+          {% else %}
+              bg-white/30 group-hover:bg-white
+          {% endif %}">
+          </span>
+
+          <span class="text-sm font-medium">
+              Data Bidan
+          </span>
+      </a>
+
+      <a href="{{ url_petugas_kader }}"
+          class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+          {% if current_url == 'daftar_petugas_kader' %}
+              text-white bg-white/10
+          {% else %}
+              text-white/70 hover:text-white hover:bg-white/10
+          {% endif %}">
+
+          <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+          {% if current_url == 'daftar_petugas_kader' %}
+              bg-white
+          {% else %}
+              bg-white/30 group-hover:bg-white
+          {% endif %}">
+          </span>
+
+          <span class="text-sm font-medium">
+              Data Kader
+          </span>
+      </a>
+
+      <a href="{{ url_posyandu }}"
+          class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+          {% if current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+              text-white bg-white/10
+          {% else %}
+              text-white/70 hover:text-white hover:bg-white/10
+          {% endif %}">
+
+          <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+          {% if current_url == 'list_posyandu' or current_url == 'create_posyandu' or current_url == 'edit_posyandu' or current_url == 'delete_posyandu' %}
+              bg-white
+          {% else %}
+              bg-white/30 group-hover:bg-white
+          {% endif %}">
+          </span>
+
+          <span class="text-sm font-medium">
+              Data Posyandu
+          </span>
+      </a>
+
+  </div>
+
+</div>
+
+{% endwith %}
+
+{# ═══════════════════════════════ TRANSAKSI ═══════════════════════════ #}
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">Monitoring</p>
+
+<a href="{{ url_jadwal }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_jadwal %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_jadwal %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">calendar_month</span>
+  <span class="text-sm font-semibold">Monitoring Jadwal</span>
+</a>
+
+{# ═══════════════════════════════ LAPORAN ════════════════════════════ #}
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">Laporan</p>
+
+<div class="flex flex-col">
+  <button type="button" data-dropdown-btn class="group flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 w-full text-left {% if path == url_laporan_list or path == url_laporan_bumil or path == url_laporan_imunisasi or path == url_laporan_balita or path == url_laporan_triwulan %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+    
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+          {% if path == url_laporan_list or path == url_laporan_bumil or path == url_laporan_imunisasi or path == url_laporan_balita or path == url_laporan_triwulan %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">description</span>
+        <span class="text-sm font-semibold">Laporan</span>
+      </div>
+    
+    <span data-dropdown-icon class="material-symbols-outlined transition-all duration-200 text-[18px]
+      {% if path == url_laporan_list or path == url_laporan_bumil or path == url_laporan_imunisasi or path == url_laporan_balita or path == url_laporan_triwulan %}text-white/70 rotate-180{% else %}text-white/40 group-hover:text-white/70{% endif %}">expand_more</span>
+  </button>
+
+  <div data-dropdown-menu class="mt-1 ml-3 flex flex-col gap-0.5 pl-4 border-l border-white/20 {% if path == url_laporan_list or path == url_laporan_bumil or path == url_laporan_imunisasi or path == url_laporan_balita or path == url_laporan_triwulan %}{% else %}hidden{% endif %}">
+
+    <a href="{{ url_semua_laporan }}" class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 {% if path == url_laporan_list %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+        {% if path == url_semua_laporan %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}"></span>
+      <span class="text-sm font-medium">Semua Laporan</span>
+    </a>
+
+    <a href="{{ url_laporan_bumil }}" class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+        {% if path == url_laporan_bumil %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+        {% if path == url_laporan_bumil %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}">
+      </span>
+      <span class="text-sm font-medium">Laporan Bumil</span>
+    </a>
+
+    <a href="{{ url_laporan_imunisasi }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+        {% if path == url_laporan_imunisasi %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+        {% if path == url_laporan_imunisasi %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}"></span>
+      <span class="text-sm font-medium">Laporan Imunisasi</span>
+    </a>
+
+    <a href="{{ url_laporan_balita }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+        {% if path == url_laporan_balita %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+        {% if path == url_laporan_balita %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}"></span>
+      <span class="text-sm font-medium">Laporan Balita</span>
+    </a>
+
+    <a href="{{ url_laporan_triwulan }}"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+        {% if path == url_laporan_triwulan %}text-white bg-white/10{% else %}text-white/70 hover:text-white hover:bg-white/10{% endif %}">
+      <span class="w-1.5 h-1.5 rounded-full transition-colors duration-200 flex-shrink-0
+        {% if path == url_laporan_triwulan %}bg-white{% else %}bg-white/30 group-hover:bg-white{% endif %}"></span>
+      <span class="text-sm font-medium">Laporan Triwulan</span>
+    </a>
+
+  </div>
+</div>
+
+{# ═══════════════════════════════ SISTEM ═════════════════════════════ #}
+<p class="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">Sistem</p>
+
+<a href="{{ url_setting }}"
+  class="group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
+    {% if path == url_setting %}bg-white/20 text-white{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
+  <span class="material-symbols-outlined transition-colors duration-200 text-[20px]
+    {% if path == url_setting %}text-white{% else %}text-white/60 group-hover:text-white{% endif %}">settings</span>
+  <span class="text-sm font-semibold">Pengaturan</span>
+</a>
+
+{% endwith %}

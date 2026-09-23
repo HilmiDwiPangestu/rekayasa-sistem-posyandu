@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load paginations_tags %}
+
+{% block subtitle %}Jadwal Posyandu{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <section class="relative overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+        <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+
+        <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10">
+                    <span class="material-symbols-outlined text-2xl">calendar_month</span>
+                </div>
+
+                <div class="min-w-0">
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">Monitoring Kegiatan</p>
+                    <h1 class="text-2xl font-black tracking-tight sm:text-3xl">Jadwal Posyandu</h1>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                        Pantau seluruh jadwal kegiatan Posyandu yang terdaftar pada wilayah kelurahan.
+                    </p>
+                </div>
+            </div>
+
+            <div class="inline-flex w-fit shrink-0 items-center gap-2 rounded-lg bg-white/10 px-3.5 py-2.5 text-sm font-bold text-white ring-1 ring-inset ring-white/10">
+                <span class="material-symbols-outlined text-lg">event_note</span>
+                {{ page_obj.paginator.count }} Jadwal
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         RINGKASAN
+    ====================================================== -->
+    <section class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Jadwal</p>
+                    <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">{{ total_semua }}</p>
+                </div>
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="rounded-xl border border-amber-200 bg-amber-50/70 p-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Mendatang</p>
+                    <p class="mt-1 text-2xl font-black text-amber-700 dark:text-amber-400">{{ total_mendatang }}</p>
+                </div>
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                    <span class="material-symbols-outlined">event_upcoming</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Selesai</p>
+                    <p class="mt-1 text-2xl font-black text-emerald-700 dark:text-emerald-400">{{ total_selesai }}</p>
+                </div>
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                    <span class="material-symbols-outlined">task_alt</span>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- =====================================================
+         DATA CARD + FILTER
+    ====================================================== -->
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+        <div class="border-b border-slate-200 p-4 dark:border-white/10 sm:p-5">
+            <form method="GET" class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px_auto] lg:items-center">
+                <input type="hidden" name="status" value="{{ status_filter|default:'mendatang' }}">
+
+                <div class="relative w-full">
+                    <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">search</span>
+                    <input
+                        type="search"
+                        name="search"
+                        value="{{ search|default:'' }}"
+                        placeholder="Cari nama Posyandu atau jenis kegiatan..."
+                        autocomplete="off"
+                        class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                    >
+                </div>
+
+                <select
+                    name="posyandu"
+                    class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-slate-200"
+                >
+                    <option value="">Semua Posyandu</option>
+                    {% for pos in daftar_posyandu %}
+                    <option value="{{ pos.pk }}" {% if selected_posyandu_id == pos.pk %}selected{% endif %}>{{ pos.nama }}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button
+                        type="submit"
+                        class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary-dark px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20"
+                    >
+                        <span class="material-symbols-outlined text-lg">filter_alt</span>
+                        Terapkan
+                    </button>
+                    {% if search or selected_posyandu_id %}
+                    <a
+                        href="{% url 'posyandu:jadwal_posyandu_admin' %}?status={{ status_filter|default:'mendatang' }}"
+                        class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-background-dark dark:text-slate-300 dark:hover:bg-white/5"
+                    >
+                        <span class="material-symbols-outlined text-lg">restart_alt</span>
+                        Reset
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4 dark:border-white/10">
+                <a
+                    href="?status=mendatang{% if search %}&search={{ search|urlencode }}{% endif %}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+                    class="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-xs font-black transition {% if status_filter == 'mendatang' %}bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300{% endif %}"
+                >
+                    <span class="material-symbols-outlined text-base">event_upcoming</span>
+                    Mendatang ({{ total_mendatang }})
+                </a>
+                <a
+                    href="?status=riwayat{% if search %}&search={{ search|urlencode }}{% endif %}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}"
+                    class="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-xs font-black transition {% if status_filter == 'riwayat' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300{% endif %}"
+                >
+                    <span class="material-symbols-outlined text-base">history</span>
+                    Riwayat ({{ total_selesai }})
+                </a>
+            </div>
+        </div>
+
+        <div class="border-b border-slate-200 px-4 py-4 dark:border-white/10 sm:px-5">
+            <h2 class="text-sm font-black text-slate-900 dark:text-white sm:text-base">Daftar Jadwal Kegiatan</h2>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Klik detail untuk melihat informasi kegiatan dan kehadiran peserta.</p>
+        </div>
+
+        <!-- MOBILE -->
+        <div class="space-y-3 bg-slate-50/60 p-4 dark:bg-background-dark/20 md:hidden">
+            {% for jadwal in page_obj %}
+            <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-lg">home_health</span>
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="truncate text-sm font-black text-slate-900 dark:text-white">{{ jadwal.posyandu.nama }}</h3>
+                                <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{{ jadwal.jns_kegiatan }}</p>
+                                {% if jadwal.kader_penerima %}
+                                <p class="mt-1 truncate text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Kader: {{ jadwal.kader_penerima|join:", " }}</p>
+                                {% else %}
+                                <p class="mt-1 truncate text-[11px] font-semibold text-rose-600 dark:text-rose-400">Belum ada Kader yang ditugaskan</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if jadwal.tgl_kegiatan >= today %}
+                    <span class="inline-flex shrink-0 items-center rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">Mendatang</span>
+                    {% else %}
+                    <span class="inline-flex shrink-0 items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">Selesai</span>
+                    {% endif %}
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 text-xs dark:bg-background-dark/50">
+                    <div>
+                        <p class="font-bold uppercase tracking-wider text-slate-400">Tanggal</p>
+                        <p class="mt-1 font-semibold text-slate-700 dark:text-slate-300">{{ jadwal.tgl_kegiatan|date:"d M Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="font-bold uppercase tracking-wider text-slate-400">Waktu</p>
+                        <p class="mt-1 font-semibold text-slate-700 dark:text-slate-300">{{ jadwal.jam_mulai|time:"H:i" }} - {{ jadwal.jam_selesai|time:"H:i" }}</p>
+                    </div>
+                </div>
+
+                <a
+                    href="{% url 'posyandu:detail_jadwal_admin' jadwal.id_jadwal %}"
+                    class="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary-dark px-4 text-sm font-bold text-white transition hover:bg-primary-dark/90"
+                >
+                    <span class="material-symbols-outlined text-lg">visibility</span>
+                    Detail Jadwal
+                </a>
+            </article>
+            {% empty %}
+            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-white/10 dark:bg-primary">
+                <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">event_busy</span>
+                <p class="mt-2 text-sm font-bold text-slate-600 dark:text-slate-300">Tidak ada jadwal ditemukan</p>
+                {% if search %}<p class="mt-1 text-xs text-slate-400">Coba gunakan kata kunci yang berbeda.</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- DESKTOP -->
+        <div class="hidden overflow-x-auto md:block">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-background-dark/40 dark:text-slate-400">
+                        <th class="whitespace-nowrap px-5 py-4 text-center">No</th>
+                        <th class="min-w-[190px] px-5 py-4 text-left">Posyandu</th>
+                        <th class="min-w-[180px] px-5 py-4 text-left">Jenis Kegiatan</th>
+                        <th class="whitespace-nowrap px-5 py-4 text-left">Tanggal</th>
+                        <th class="whitespace-nowrap px-5 py-4 text-left">Waktu</th>
+                        <th class="whitespace-nowrap px-5 py-4 text-center">Status</th>
+                        <th class="whitespace-nowrap px-5 py-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-white/10">
+                    {% for jadwal in page_obj %}
+                    <tr class="transition hover:bg-primary-dark/[0.035] dark:hover:bg-white/[0.03]">
+                        <td class="px-5 py-4 text-center text-slate-500">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                    <span class="material-symbols-outlined text-lg">home_health</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="font-bold text-slate-900 dark:text-white">{{ jadwal.posyandu.nama }}</span>
+                                    {% if jadwal.kader_penerima %}
+                                    <p class="mt-1 max-w-[230px] truncate text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Kader: {{ jadwal.kader_penerima|join:", " }}</p>
+                                    {% else %}
+                                    <p class="mt-1 max-w-[230px] truncate text-[11px] font-semibold text-rose-600 dark:text-rose-400">Belum ada Kader yang ditugaskan</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 text-slate-700 dark:text-slate-300">{{ jadwal.jns_kegiatan }}</td>
+                        <td class="px-5 py-4 text-slate-600 dark:text-slate-400">{{ jadwal.tgl_kegiatan|date:"d M Y" }}</td>
+                        <td class="px-5 py-4 font-mono text-slate-600 dark:text-slate-400">{{ jadwal.jam_mulai|time:"H:i" }} - {{ jadwal.jam_selesai|time:"H:i" }}</td>
+                        <td class="px-5 py-4 text-center">
+                            {% if jadwal.tgl_kegiatan >= today %}
+                            <span class="inline-flex rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">Mendatang</span>
+                            {% else %}
+                            <span class="inline-flex rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">Selesai</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-4 text-center">
+                            <a
+                                href="{% url 'posyandu:detail_jadwal_admin' jadwal.id_jadwal %}"
+                                class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary-dark px-3 text-xs font-bold text-white transition hover:bg-primary-dark/90"
+                            >
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                                Detail
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-5 py-12 text-center text-sm text-slate-400">Tidak ada data jadwal yang sesuai dengan pencarian.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/50 px-4 py-4 dark:border-white/10 dark:bg-background-dark/30 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-center text-sm text-slate-500 sm:text-left">
+                Menampilkan
+                <span class="font-bold text-slate-900 dark:text-white">{{ page_obj.start_index }} - {{ page_obj.end_index }}</span>
+                dari
+                <span class="font-bold text-slate-900 dark:text-white">{{ page_obj.paginator.count }}</span>
+                data
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-1.5">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter|default:'mendatang' }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}" class="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-primary-dark/30 hover:text-primary-dark dark:border-white/10 dark:bg-background-dark dark:text-slate-300">
+                    <span class="material-symbols-outlined text-lg">chevron_left</span>
+                </a>
+                {% endif %}
+
+                {% mapping_pages %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter|default:'mendatang' }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if selected_posyandu_id %}&posyandu={{ selected_posyandu_id }}{% endif %}" class="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-primary-dark/30 hover:text-primary-dark dark:border-white/10 dark:bg-background-dark dark:text-slate-300">
+                    <span class="material-symbols-outlined text-lg">chevron_right</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- INFO -->
+    <section class="rounded-xl border border-primary-dark/15 bg-primary-dark/5 p-4 dark:border-primary-dark/30 dark:bg-primary-dark/10 sm:p-5">
+        <div class="flex items-start gap-3">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                <span class="material-symbols-outlined text-lg">info</span>
+            </div>
+            <div class="min-w-0">
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">Informasi Jadwal Posyandu</h3>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                    Admin Kelurahan memantau jadwal dari seluruh Posyandu. Status, urutan tanggal, dan filter jadwal menggunakan aturan yang sama dengan halaman Kader. Nama Kader penerima ditampilkan agar jadwal yang belum memiliki penugasan dapat segera diketahui.
+                </p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

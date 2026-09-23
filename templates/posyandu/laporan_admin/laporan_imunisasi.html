@@ -1,0 +1,887 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}Laporan Imunisasi{% endblock %}
+
+{% block content %}
+
+<div class="font-display text-slate-800 dark:text-slate-100">
+
+    <div class="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div class="relative overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+
+            <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-white/5 blur-3xl"></div>
+
+            <div class="relative flex items-center gap-4">
+
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10">
+                    <span class="material-symbols-outlined text-2xl">
+                        vaccines
+                    </span>
+                </div>
+
+                <div>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-white/60">
+                        Laporan Pelayanan
+                    </p>
+
+                    <h1 class="text-2xl font-black tracking-tight sm:text-3xl">
+                        Laporan Imunisasi
+                    </h1>
+
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-white/60">
+                        Daftar laporan imunisasi berdasarkan jadwal kegiatan Posyandu.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             FILTER PERIODE DAN POSYANDU
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-white">Filter Laporan</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Pilih bulan, tahun, dan Posyandu yang ingin ditampilkan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="get" class="p-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-[180px_180px_minmax(240px,1fr)_auto] xl:items-end">
+
+                    <div>
+                        <label for="bulan" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Bulan
+                        </label>
+                        <select id="bulan" name="bulan"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/15 dark:bg-slate-950 dark:text-white">
+                            {% for value, label in bulan_options %}
+                                <option value="{{ value }}" {% if value == bulan %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="tahun" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Tahun
+                        </label>
+                        <select id="tahun" name="tahun"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/15 dark:bg-slate-950 dark:text-white">
+                            {% for item in tahun_options %}
+                                <option value="{{ item }}" {% if item == tahun %}selected{% endif %}>{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="posyandu" class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Posyandu
+                        </label>
+                        <select id="posyandu" name="posyandu"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/15 dark:bg-slate-950 dark:text-white">
+                            <option value="">Semua Posyandu</option>
+                            {% for item in daftar_posyandu %}
+                                <option value="{{ item.id }}" {% if item.id == selected_posyandu_id %}selected{% endif %}>
+                                    {{ item.nama }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 md:col-span-3 xl:col-span-1 xl:flex-nowrap">
+                        <button type="submit"
+                                class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-dark px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:ring-4 focus:ring-primary-dark/20 xl:flex-none">
+                            <span class="material-symbols-outlined text-lg">search</span>
+                            Tampilkan
+                        </button>
+                        <a href="{% url 'posyandu:laporan_imunisasi' %}"
+                           class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/15 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-white/5 xl:flex-none">
+                            <span class="material-symbols-outlined text-lg">restart_alt</span>
+                            Reset
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- FILTER AKTIF -->
+        <div class="flex flex-wrap items-center gap-2 rounded-xl border border-primary-dark/20 bg-primary-dark/5 px-4 py-3 text-sm text-primary-dark dark:border-primary-dark/40 dark:bg-primary-dark/10 dark:text-blue-200">
+            <span class="material-symbols-outlined text-xl">info</span>
+            <span class="font-semibold">Periode:</span>
+            <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-bold shadow-sm dark:bg-primary">{{ periode_label }}</span>
+            <span class="text-slate-400">•</span>
+            <span class="font-semibold">Posyandu:</span>
+            <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-bold shadow-sm dark:bg-primary">{{ posyandu_label }}</span>
+        </div>
+
+        <!-- =====================================================
+             DOWNLOAD PDF
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+            <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+                        <span class="material-symbols-outlined">picture_as_pdf</span>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-white">Download Laporan Imunisasi</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Unduh Posyandu terpilih atau seluruh Posyandu dalam satu file PDF.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-4 p-5 sm:p-6 lg:grid-cols-2">
+                <div class="rounded-xl border border-slate-200 p-4 dark:border-white/10">
+                    <div class="mb-3">
+                        <p class="font-bold text-slate-900 dark:text-white">Posyandu Terpilih</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            {% if selected_posyandu %}{{ selected_posyandu.nama }} · {{ periode_label }}{% else %}Pilih Posyandu pada filter terlebih dahulu.{% endif %}
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        {% if selected_posyandu %}
+                            <a href="{% url 'posyandu:cetak_imunisasi_pdf' %}?scope=selected&status_peserta=balita&bulan={{ bulan }}&tahun={{ tahun }}&posyandu={{ selected_posyandu_id }}"
+                               class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-dark/90">
+                                <span class="material-symbols-outlined text-lg">child_care</span>
+                                PDF Balita
+                            </a>
+                            <a href="{% url 'posyandu:cetak_imunisasi_pdf' %}?scope=selected&status_peserta=bumil&bulan={{ bulan }}&tahun={{ tahun }}&posyandu={{ selected_posyandu_id }}"
+                               class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-white/5">
+                                <span class="material-symbols-outlined text-lg">pregnant_woman</span>
+                                PDF Ibu Hamil
+                            </a>
+                        {% else %}
+                            <span class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400 dark:bg-white/5 dark:text-slate-500">
+                                <span class="material-symbols-outlined text-lg">lock</span>
+                                Pilih Posyandu
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-primary-dark/20 bg-primary-dark/5 p-4 dark:border-primary-dark/30 dark:bg-primary-dark/10">
+                    <div class="mb-3">
+                        <p class="font-bold text-slate-900 dark:text-white">Semua Posyandu · 1 PDF</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            Setiap Posyandu dimulai pada halaman baru sampai Posyandu terakhir.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{% url 'posyandu:cetak_imunisasi_pdf' %}?scope=all&status_peserta=balita&bulan={{ bulan }}&tahun={{ tahun }}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-dark/90">
+                            <span class="material-symbols-outlined text-lg">download</span>
+                            Semua Balita
+                        </a>
+                        <a href="{% url 'posyandu:cetak_imunisasi_pdf' %}?scope=all&status_peserta=bumil&bulan={{ bulan }}&tahun={{ tahun }}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl border border-primary-dark/20 bg-white px-4 py-2.5 text-sm font-bold text-primary-dark transition hover:bg-primary-dark/5 dark:border-primary-dark/30 dark:bg-primary dark:text-blue-200 dark:hover:bg-primary-dark/10">
+                            <span class="material-symbols-outlined text-lg">download</span>
+                            Semua Ibu Hamil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             STATISTIK
+        ====================================================== -->
+        <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+
+            <!-- Total jadwal -->
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:p-5">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-sm">
+                            Total Jadwal
+                        </p>
+
+                        <p class="mt-2 text-2xl font-black tabular-nums text-slate-900 dark:text-white sm:text-3xl">
+                            {{ total_jadwal }}
+                        </p>
+                    </div>
+
+                    <div class="hidden h-11 w-11 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200 sm:flex">
+                        <span class="material-symbols-outlined">
+                            calendar_month
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="absolute bottom-0 left-0 h-1 w-full bg-primary-dark"></div>
+
+            </div>
+
+
+            <!-- Sudah ada data -->
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:p-5">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-sm">
+                            Sudah Ada Data
+                        </p>
+
+                        <p class="mt-2 text-2xl font-black tabular-nums text-slate-900 dark:text-white sm:text-3xl">
+                            {{ total_jadwal_berisi }}
+                        </p>
+                    </div>
+
+                    <div class="hidden h-11 w-11 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200 sm:flex">
+                        <span class="material-symbols-outlined">
+                            check_circle
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="absolute bottom-0 left-0 h-1 w-full bg-primary-dark"></div>
+
+            </div>
+
+
+            <!-- Belum ada data -->
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:p-5">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-sm">
+                            Belum Ada Data
+                        </p>
+
+                        <p class="mt-2 text-2xl font-black tabular-nums text-slate-900 dark:text-white sm:text-3xl">
+                            {{ total_jadwal_kosong }}
+                        </p>
+                    </div>
+
+                    <div class="hidden h-11 w-11 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200 sm:flex">
+                        <span class="material-symbols-outlined">
+                            pending
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="absolute bottom-0 left-0 h-1 w-full bg-primary-dark"></div>
+
+            </div>
+
+
+            <!-- Total pemberian -->
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:p-5">
+
+                <div class="flex items-center justify-between gap-3">
+
+                    <div>
+                        <p class="text-xs font-semibold text-primary-dark dark:text-blue-200 sm:text-sm">
+                            Total Pemberian
+                        </p>
+
+                        <p class="mt-2 text-2xl font-black tabular-nums text-slate-900 dark:text-white sm:text-3xl">
+                            {{ total_pemberian }}
+                        </p>
+                    </div>
+
+                    <div class="hidden h-11 w-11 items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200 sm:flex">
+                        <span class="material-symbols-outlined">
+                            vaccines
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="absolute bottom-0 left-0 h-1 w-full bg-primary-dark"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DAFTAR JADWAL
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <!-- Header daftar -->
+            <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+
+                <div>
+                    <h2 class="font-bold text-slate-900 dark:text-white">
+                        Daftar Jadwal Kegiatan
+                    </h2>
+
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Buka detail untuk melihat peserta dan vaksin yang diberikan.
+                    </p>
+                </div>
+
+                <span class="inline-flex w-fit items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+
+                    <span class="material-symbols-outlined text-base">
+                        event_note
+                    </span>
+
+                    {{ total_jadwal }} Jadwal
+
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div class="hidden overflow-x-auto lg:block">
+
+                <table class="w-full min-w-[1050px] text-sm">
+
+                    <thead>
+                        <tr class="border-b border-slate-200 bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/10 dark:bg-black/10 dark:text-slate-400">
+
+                            <th class="w-16 px-5 py-4 text-center">
+                                No.
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Jadwal Kegiatan
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Posyandu
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Status
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                Peserta
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                Balita
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                Ibu Hamil
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                Pemberian
+                            </th>
+
+                            <th class="px-5 py-4 text-center">
+                                Aksi
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100 dark:divide-white/10">
+
+                        {% for jadwal in data %}
+
+                            <tr class="transition hover:bg-primary-dark/5 dark:hover:bg-primary-dark/10">
+
+                                <!-- Nomor -->
+                                <td class="px-5 py-4 text-center text-slate-400 dark:text-slate-500">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <!-- Tanggal kegiatan -->
+                                <td class="px-4 py-4">
+
+                                    <div class="flex min-w-[190px] items-center gap-3">
+
+                                        <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+
+                                            <span class="text-base font-black leading-none">
+                                                {{ jadwal.tgl_kegiatan|date:"d" }}
+                                            </span>
+
+                                            <span class="mt-1 text-[9px] font-bold uppercase">
+                                                {{ jadwal.tgl_kegiatan|date:"M" }}
+                                            </span>
+
+                                        </div>
+
+                                        <div>
+
+                                            <p class="font-bold text-slate-900 dark:text-white">
+                                                {{ jadwal.tgl_kegiatan|date:"d F Y" }}
+                                            </p>
+
+                                            <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+
+                                                {% if jadwal.jam_mulai %}
+
+                                                    <span class="inline-flex items-center gap-1">
+
+                                                        <span class="material-symbols-outlined text-sm">
+                                                            schedule
+                                                        </span>
+
+                                                        {{ jadwal.jam_mulai|time:"H:i" }}
+
+                                                    </span>
+
+                                                {% endif %}
+
+                                                {% if jadwal.jam_selesai %}
+
+                                                    <span>
+                                                        -
+                                                        {{ jadwal.jam_selesai|time:"H:i" }}
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- Posyandu -->
+                                <td class="px-4 py-4">
+
+                                    <div class="min-w-[160px]">
+
+                                        <p class="font-semibold text-slate-800 dark:text-slate-200">
+                                            {{ jadwal.posyandu.nama|default:"-" }}
+                                        </p>
+
+                                        {% if jadwal.lokasi %}
+
+                                            <p class="mt-1 flex items-start gap-1 text-xs text-slate-500 dark:text-slate-400">
+
+                                                <span class="material-symbols-outlined text-sm">
+                                                    location_on
+                                                </span>
+
+                                                <span>
+                                                    {{ jadwal.lokasi }}
+                                                </span>
+
+                                            </p>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+                                <!-- Status -->
+                                <td class="px-4 py-4">
+
+                                    {% if jadwal.status_laporan == "mendatang" %}
+
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-dark/10 px-2.5 py-1 text-xs font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+
+                                            <span class="h-1.5 w-1.5 rounded-full bg-primary-dark"></span>
+
+                                            Mendatang
+                                        </span>
+
+                                    {% elif jadwal.status_laporan == "hari_ini" %}
+
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+
+                                            Hari Ini
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+
+                                            <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+
+                                            Selesai
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <!-- Peserta -->
+                                <td class="px-4 py-4 text-center">
+
+                                    <span class="inline-flex min-w-10 items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1.5 font-black text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                        {{ jadwal.total_peserta_divaksin }}
+                                    </span>
+
+                                </td>
+
+                                <!-- Balita -->
+                                <td class="px-4 py-4 text-center">
+
+                                    <span class="inline-flex min-w-10 items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1.5 font-black text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                        {{ jadwal.total_balita_divaksin }}
+                                    </span>
+
+                                </td>
+
+                                <!-- Ibu hamil -->
+                                <td class="px-4 py-4 text-center">
+
+                                    <span class="inline-flex min-w-10 items-center justify-center rounded-lg bg-slate-100 px-2.5 py-1.5 font-black text-slate-700 dark:bg-white/10 dark:text-slate-300">
+                                        {{ jadwal.total_bumil_divaksin }}
+                                    </span>
+
+                                </td>
+
+                                <!-- Total pemberian -->
+                                <td class="px-4 py-4 text-center">
+
+                                    <span class="inline-flex min-w-10 items-center justify-center rounded-lg bg-primary-dark/5 px-2.5 py-1.5 font-black text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+                                        {{ jadwal.total_pemberian }}
+                                    </span>
+
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-5 py-4">
+
+                                    <div class="flex items-center justify-center gap-2">
+
+                                        <a
+                                            href="{% url 'posyandu:detail_laporan_imunisasi' jadwal.id_jadwal %}"
+                                            title="Lihat detail laporan"
+                                            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary-dark px-3 text-xs font-bold text-white transition hover:bg-primary-dark/90">
+
+                                            <span class="material-symbols-outlined text-base">
+                                                visibility
+                                            </span>
+
+                                            Detail
+                                        </a>
+
+                                        <a
+                                            href="{% url 'posyandu:cetak_imunisasi_pdf' %}?id_jadwal={{ jadwal.id_jadwal }}"
+                                            target="_blank"
+                                            title="Unduh laporan PDF"
+                                            class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-white/5">
+
+                                            <span class="material-symbols-outlined text-base">
+                                                download
+                                            </span>
+
+                                            Unduh
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="9" class="px-6 py-20 text-center">
+
+                                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10 dark:text-slate-500">
+
+                                        <span class="material-symbols-outlined text-3xl">
+                                            event_busy
+                                        </span>
+
+                                    </div>
+
+                                    <h3 class="mt-4 font-bold text-slate-700 dark:text-slate-300">
+                                        Jadwal kegiatan tidak ditemukan
+                                    </h3>
+
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Belum terdapat jadwal atau jadwal tidak sesuai dengan filter periode.
+                                    </p>
+
+                                    <a
+                                        href="{% url 'posyandu:laporan_imunisasi' %}"
+                                        class="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-dark/90">
+
+                                        <span class="material-symbols-outlined text-lg">
+                                            restart_alt
+                                        </span>
+
+                                        Reset Filter
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 MOBILE LIST
+            ================================================== -->
+            <div class="divide-y divide-slate-100 dark:divide-white/10 lg:hidden">
+
+                {% for jadwal in data %}
+
+                    <article class="p-4 sm:p-5">
+
+                        <!-- Header jadwal -->
+                        <div class="flex items-start gap-3">
+
+                            <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+
+                                <span class="text-base font-black leading-none">
+                                    {{ jadwal.tgl_kegiatan|date:"d" }}
+                                </span>
+
+                                <span class="mt-1 text-[9px] font-bold uppercase">
+                                    {{ jadwal.tgl_kegiatan|date:"M" }}
+                                </span>
+
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+
+                                <div class="flex items-start justify-between gap-2">
+
+                                    <div class="min-w-0">
+
+                                        <h3 class="truncate font-black text-slate-900 dark:text-white">
+                                            {{ jadwal.posyandu.nama|default:"Posyandu" }}
+                                        </h3>
+
+                                        <p class="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                            {{ jadwal.tgl_kegiatan|date:"d F Y" }}
+                                        </p>
+
+                                    </div>
+
+                                    {% if jadwal.status_laporan == "mendatang" %}
+
+                                        <span class="shrink-0 rounded-full bg-primary-dark/10 px-2.5 py-1 text-[10px] font-bold text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+                                            Mendatang
+                                        </span>
+
+                                    {% elif jadwal.status_laporan == "hari_ini" %}
+
+                                        <span class="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Hari Ini
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                                            Selesai
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+
+                                    {% if jadwal.jam_mulai %}
+
+                                        <span class="inline-flex items-center gap-1">
+
+                                            <span class="material-symbols-outlined text-sm">
+                                                schedule
+                                            </span>
+
+                                            {{ jadwal.jam_mulai|time:"H:i" }}
+
+                                            {% if jadwal.jam_selesai %}
+                                                - {{ jadwal.jam_selesai|time:"H:i" }}
+                                            {% endif %}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                    {% if jadwal.lokasi %}
+
+                                        <span class="inline-flex items-center gap-1">
+
+                                            <span class="material-symbols-outlined text-sm">
+                                                location_on
+                                            </span>
+
+                                            {{ jadwal.lokasi }}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Ringkasan -->
+                        <div class="mt-4 grid grid-cols-4 gap-2">
+
+                            <div class="rounded-xl bg-slate-50 px-2 py-2.5 text-center dark:bg-black/10">
+
+                                <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                                    Peserta
+                                </p>
+
+                                <p class="mt-1 text-base font-black text-slate-800 dark:text-white">
+                                    {{ jadwal.total_peserta_divaksin }}
+                                </p>
+
+                            </div>
+
+                            <div class="rounded-xl bg-slate-50 px-2 py-2.5 text-center dark:bg-black/10">
+
+                                <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                                    Balita
+                                </p>
+
+                                <p class="mt-1 text-base font-black text-slate-800 dark:text-white">
+                                    {{ jadwal.total_balita_divaksin }}
+                                </p>
+
+                            </div>
+
+                            <div class="rounded-xl bg-slate-50 px-2 py-2.5 text-center dark:bg-black/10">
+
+                                <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                                    Bumil
+                                </p>
+
+                                <p class="mt-1 text-base font-black text-slate-800 dark:text-white">
+                                    {{ jadwal.total_bumil_divaksin }}
+                                </p>
+
+                            </div>
+
+                            <div class="rounded-xl bg-primary-dark/5 px-2 py-2.5 text-center dark:bg-primary-dark/10">
+
+                                <p class="text-[9px] font-bold uppercase tracking-wide text-primary-dark dark:text-blue-200">
+                                    Vaksin
+                                </p>
+
+                                <p class="mt-1 text-base font-black text-primary-dark dark:text-blue-200">
+                                    {{ jadwal.total_pemberian }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Peringatan jika belum ada data -->
+                        {% if jadwal.total_pemberian == 0 %}
+
+                            <div class="mt-3 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-xs font-medium text-amber-700 dark:bg-amber-950/20 dark:text-amber-400">
+
+                                <span class="material-symbols-outlined text-base">
+                                    info
+                                </span>
+
+                                Belum ada data imunisasi.
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- Aksi -->
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+
+                            <a
+                                href="{% url 'posyandu:detail_laporan_imunisasi' jadwal.id_jadwal %}"
+                                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary-dark px-4 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20">
+
+                                <span class="material-symbols-outlined text-lg">
+                                    visibility
+                                </span>
+
+                                Detail
+                            </a>
+
+                            <a
+                                href="{% url 'posyandu:cetak_imunisasi_pdf' %}?id_jadwal={{ jadwal.id_jadwal }}"
+                                target="_blank"
+                                title="Unduh laporan PDF"
+                                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-white/5">
+
+                                <span class="material-symbols-outlined text-base">
+                                    download
+                                </span>
+
+                                Unduh
+                            </a>
+
+                        </div>
+
+                    </article>
+
+                {% empty %}
+
+                    <div class="px-6 py-16 text-center">
+
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10 dark:text-slate-500">
+
+                            <span class="material-symbols-outlined text-3xl">
+                                event_busy
+                            </span>
+
+                        </div>
+
+                        <h3 class="mt-4 font-bold text-slate-700 dark:text-slate-300">
+                            Jadwal kegiatan tidak ditemukan
+                        </h3>
+
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Silakan ubah atau reset filter periode.
+                        </p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}

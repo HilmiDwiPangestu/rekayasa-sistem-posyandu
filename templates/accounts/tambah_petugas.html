@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
+    <div class="container mx-auto max-w-5xl">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mb-4 select-none">
+            <span class="material-symbols-outlined text-[16px]">group</span>
+
+            <a href="{% url 'posyandu:daftar_petugas_kader' %}"
+               class="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                Data {{ level_petugas|title }}
+            </a>
+
+            <span class="text-[10px] font-bold text-slate-300 dark:text-slate-700">/</span>
+
+            <span class="text-slate-600 dark:text-slate-300 font-medium">
+                Tambah {{ level_petugas|title }}
+            </span>
+        </nav>
+
+        <!-- Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+                <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">
+                    Tambah Data {{ level_petugas|title }}
+                </h1>
+
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Sistem Skripsi Posyandu — Tambahkan data {{ level_petugas }} dan tentukan wilayah tugasnya.
+                </p>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" class="p-6">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/30">
+                    <p class="text-xs font-semibold text-red-600 dark:text-red-400">
+                        Terdapat kesalahan pada data yang diinput. Silakan periksa kembali form berikut.
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Section -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
+
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-5">
+                        Informasi {{ level_petugas|title }}
+                    </h3>
+
+                    <!-- Nama -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                            Nama Lengkap
+                        </label>
+
+                        {{ form.nama }}
+
+                        {% if form.nama.errors %}
+                        <p class="mt-1 text-xs text-red-500">
+                            {{ form.nama.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+
+                        <!-- Posyandu / Cakupan Bidan -->
+                        <div class="{% if level_petugas == 'bidan' %}md:col-span-2{% endif %}">
+                            {% if level_petugas == 'bidan' %}
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                                    Cakupan Wilayah Kerja <span class="text-rose-500">*</span>
+                                </label>
+                                <p class="mb-3 text-[11px] leading-5 text-slate-400">
+                                    Pilih seluruh Posyandu yang menjadi tanggung jawab Bidan. Data Bidan tidak dibuatkan akun login; akses sistem hanya untuk Admin Kelurahan dan Kader.
+                                </p>
+                                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    {% for checkbox in form.cakupan_posyandu %}
+                                        <label class="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-primary-dark/30 hover:bg-blue-50/40 dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-white/5">
+                                            {{ checkbox.tag }}
+                                            <span class="min-w-0 truncate">{{ checkbox.choice_label }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                                {% if form.cakupan_posyandu.errors %}
+                                    <p class="mt-2 text-xs font-semibold text-red-500">{{ form.cakupan_posyandu.errors.0 }}</p>
+                                {% endif %}
+                            {% else %}
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                                    Penempatan Posyandu
+                                </label>
+                                {{ form.posyandu }}
+                                {% if form.posyandu.errors %}
+                                    <p class="mt-1 text-xs text-red-500">{{ form.posyandu.errors.0 }}</p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Telepon -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                                Nomor Telepon
+                            </label>
+
+                            {{ form.no_telp }}
+
+                            {% if form.no_telp.errors %}
+                            <p class="mt-1 text-xs text-red-500">
+                                {{ form.no_telp.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <!-- Alamat -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                            Alamat Lengkap
+                        </label>
+
+                        {{ form.alamat }}
+
+                        {% if form.alamat.errors %}
+                        <p class="mt-1 text-xs text-red-500">
+                            {{ form.alamat.errors.0 }}
+                        </p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-end gap-3">
+
+                    <a href="{% url 'posyandu:daftar_petugas_kader' %}"
+                       class="px-4 py-2.5 text-xs font-medium text-slate-500 dark:text-slate-400
+                              hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl
+                              border border-slate-200 dark:border-slate-700 transition text-center">
+
+                        Batal
+
+                    </a>
+
+                    <button type="submit"
+                            class="px-5 py-2.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition">
+
+                        Simpan Data {{ level_petugas }}
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

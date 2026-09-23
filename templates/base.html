@@ -1,0 +1,317 @@
+{% load static %}
+{% load tailwind_tags %}
+
+
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+    <title>{% block title %}Rekayasa Posyandu{% endblock %}</title>
+
+    {% tailwind_css %}
+    <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    {% block extra_css %}
+    {% endblock %}
+
+    {% block head_script %}
+    {% endblock %}
+
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200">
+    <div id="appShell" class="flex h-screen w-full overflow-hidden">
+
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-40 w-72
+            bg-primary dark:bg-slate-900
+            border-r border-slate-200 dark:border-slate-700
+            transform -translate-x-full lg:translate-x-0
+            transition-transform duration-300 ease-in-out
+            lg:static lg:flex
+            overflow-hidden  ">
+            <div class="sidebar-inner flex flex-col h-full p-6 overflow-hidden">
+                <div class="sidebar-brand flex items-center gap-3 mb-10">
+                        <div class="bg-center bg-no-repeat bg-cover rounded-full size-12 shadow-sm border border-slate-100 dark:border-slate-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCdSm0Et9JmRRsvTvkssOSTncYGBnfR3GwMzkEIvYBEJTltQOUBMVnKw-WYMS9hSXQJYJII7XS58Hy22RzHoG14xMTlynbXk6RH9Qg9dYtq37BJ4lg3EwqpF7nZt-0z9c9UkcDp1igG52s8xabRbkCI8OKNJ1DBrBmByJS0NxA7Dm_k5rqQfIyenIAUtlPAm3iWuxB6EvfZ1hjANVRzWR-OxZwHmpG1YjSXn5n6qUTbxNBWC9MMG_O7Z0bucYSas88Oy14VX7hd2wRR");'></div>
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <h1 class="truncate text-white text-lg font-bold leading-tight">Rekayasa Posyandu</h1>
+                            <p class="truncate text-white/70 text-xs font-medium">{% if request.user.is_authenticated and request.user.petugas %}{% if request.user.petugas.level == 'admin' %}Admin Kelurahan{% else %}Kader{% endif %} Panel{% else %}Panel Sistem{% endif %}</p>
+                        </div>
+                        <button id="sidebarClose" type="button" class="lg:hidden ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/80 hover:bg-white/10 hover:text-white" aria-label="Tutup menu">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                <div class="sidebar-nav-scroll flex-1 flex flex-col gap-4 overflow-y-auto scroll-smooth pr-2 sidebar-scroll">
+                    <nav class="flex flex-col gap-2">
+                        {% if request.user.is_authenticated %}
+                            {% if request.user.petugas %}
+                                {% with level=request.user.petugas.level %}
+                                    {% if level == "kader" %}
+                                        {% include "partials/sidebar_kader.html" %}
+                                    {% elif level == "admin" %}
+                                        {% include "partials/sidebar_admin.html" %}
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endif %}
+                    </nav>
+                </div>
+
+                <div class="border-t border-slate-100 dark:border-slate-800 pt-6 mt-auto">
+                    <form method="post" action="{% url 'accounts:logout' %}" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-slate-50 hover:bg-red-50 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 group transition-all">
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-red-500">logout</span>
+                            <span class="text-sm font-medium">Log Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
+
+        <main id="appMain" class="flex min-w-0 flex-1 flex-col h-full overflow-hidden relative">
+
+            <header id="appHeader" class="flex items-center justify-between px-8 py-5 bg-white/90 dark:bg-[#1a2e1a]/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-4">
+                    <button id="hamburger" class="lg:hidden flex items-center p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <h2 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">{% block subtitle %}Dashboard{% endblock %}</h2>
+                </div>
+
+                <div class="header-actions flex items-center gap-6">
+
+
+                    <div class="profile-block flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-700">
+                        <div class="text-right hidden sm:block">
+                            {% if request.user.is_authenticated %}
+                                {% if request.user.petugas %}
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ request.user.petugas.nama }}</p>
+                                    <p class="text-xs font-medium text-primary-dark dark:text-primary">{{ request.user.petugas.level }}</p>
+                                {% else %}
+                                    <p class="text-sm font-bold">User</p>
+                                    <p class="text-xs">No role</p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="profile-avatar bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBvNI6tFrSgtMPeVfSbjYO96DCxzq9sXP3_le8kBx4XURiZKKRP49DS7GR2dnVcbjM8DeHZ0npBoOk0mqp0doOKw20yjJnIk9bAglnawYm_VMIweDP47bowP1d1yK5WUlzLQVGPYuizaUeo4-9iS1a8Kpt__NnnoVwfreC2yoSMP7gxdYk6mwIgOn7pnjYP-6lPeIoOXR9nZv3Ia7A_iLpBZ0vSFVOrMP-mFkgXlAES8ioYBHnREkjSdD28ou2EDn4Mcmyrf_VazOru");'></div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="appScroller" class="flex-1 overflow-y-auto scroll-smooth bg-slate-50 dark:bg-slate-950">
+                <div id="pageContent" class="app-page mx-auto w-full max-w-[1600px] px-3 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5">
+
+                        {% comment %} BREADCRUMB {% endcomment %}
+                        <div class="page-breadcrumb flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3 select-none">
+                            
+                            <nav class="flex text-xs sm:text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
+                                <ol id="dynamic-breadcrumb" class="inline-flex items-center space-x-1 md:space-x-2">
+                                    <li class="inline-flex items-center">
+                                        <a href="/dashboard/" class="inline-flex items-center hover:text-primary dark:hover:text-blue-400 transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] mr-1">dashboard</span>
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                    
+                                    {% for crumb in django_breadcrumbs %}
+                                    <li>
+                                        <div class="flex items-center">
+                                            <span class="material-symbols-outlined text-[16px] text-slate-400">chevron_right</span>
+                                            {% if forloop.last %}
+                                                <span class="ml-1 md:ml-2 font-medium text-slate-800 dark:text-slate-200">
+                                                    {{ crumb.name }}
+                                                </span>
+                                            {% else %}
+                                                {% if crumb.url %}
+                                                    <a href="{{ crumb.url }}" class="ml-1 md:ml-2 hover:text-primary dark:hover:text-blue-400 transition-colors">
+                                                        {{ crumb.name }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="ml-1 md:ml-2 font-medium text-slate-700 dark:text-slate-300">{{ crumb.name }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ol>
+                            </nav>
+                        </div>
+
+                        {% block content %}
+                        
+                        {% endblock %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <button id="scrollTopBtn" type="button" aria-label="Kembali ke atas" title="Kembali ke atas">
+        <span class="material-symbols-outlined">keyboard_arrow_up</span>
+    </button>
+
+    {% if messages %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% for message in messages %}
+            Swal.fire({
+                icon: "{{ message.tags }}",
+                title: "{{ message.tags|title }}",
+                text: "{{ message }}",
+                timer: 2500,
+                showConfirmButton: false
+            });
+            {% endfor %}
+        });
+        </script>
+    {% endif %}
+
+    <script>
+        (function () {
+            function closeSiblingDropdowns(btn) {
+                const ownWrapper = btn.parentElement;
+                const level = ownWrapper ? ownWrapper.parentElement : null;
+                if (!level) return;
+
+                Array.from(level.children).forEach((sibling) => {
+                    if (sibling === ownWrapper) return;
+                    const otherBtn = sibling.querySelector(':scope > [data-dropdown-btn]');
+                    const otherMenu = otherBtn ? otherBtn.nextElementSibling : null;
+                    if (otherBtn && otherMenu && !otherMenu.classList.contains('hidden')) {
+                        otherMenu.classList.add('hidden');
+                        const otherIcon = otherBtn.querySelector('[data-dropdown-icon]');
+                        if (otherIcon) otherIcon.classList.remove('rotate-180');
+                    }
+                });
+            }
+
+            document.querySelectorAll('[data-dropdown-btn]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const menu = btn.nextElementSibling;
+                    const icon = btn.querySelector('[data-dropdown-icon]');
+                    if (!menu) return;
+                    const willOpen = menu.classList.contains('hidden');
+                    if (willOpen) closeSiblingDropdowns(btn);
+                    menu.classList.toggle('hidden');
+                    if (icon) icon.classList.toggle('rotate-180');
+                });
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = document.getElementById('hamburger');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                if (!sidebar || !overlay) return;
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.classList.add('sidebar-open');
+            }
+
+            function closeSidebar() {
+                if (!sidebar || !overlay) return;
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('sidebar-open');
+            }
+
+            if (hamburger) hamburger.addEventListener('click', () => {
+                if (sidebar && sidebar.classList.contains('-translate-x-full')) openSidebar();
+                else closeSidebar();
+            });
+            if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeSidebar();
+            });
+
+            if (sidebar) {
+                sidebar.querySelectorAll('a').forEach((link) => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 1024) closeSidebar();
+                    });
+                });
+            }
+
+
+
+            function prepareResponsiveTables() {
+                document.querySelectorAll('#pageContent table').forEach((table) => {
+                    if (table.hasAttribute('data-keep-table')) return;
+
+                    const complexHeader = Boolean(table.querySelector('thead [rowspan]:not([rowspan="1"]), thead [colspan]:not([colspan="1"])'));
+                    const complexBody = Array.from(table.querySelectorAll('tbody tr')).some((row) => {
+                        const cells = Array.from(row.children).filter((cell) => cell.tagName === 'TD');
+                        return cells.length > 1 && cells.some((cell) =>
+                            (Number(cell.getAttribute('rowspan') || 1) > 1) ||
+                            (Number(cell.getAttribute('colspan') || 1) > 1)
+                        );
+                    });
+                    const headerCells = Array.from(table.querySelectorAll('thead tr:first-child th'));
+
+                    if (complexHeader || complexBody || headerCells.length === 0) {
+                        table.classList.remove('responsive-card-table');
+                        table.classList.add('responsive-scroll-table');
+                        table.dataset.responsivePrepared = '1';
+                        return;
+                    }
+
+                    const labels = headerCells.map((cell, index) => {
+                        const label = (cell.textContent || '').replace(/\s+/g, ' ').trim();
+                        return label || `Kolom ${index + 1}`;
+                    });
+
+                    table.querySelectorAll('tbody tr').forEach((row) => {
+                        Array.from(row.children).forEach((cell, index) => {
+                            if (cell.tagName !== 'TD') return;
+                            cell.dataset.label = labels[index] || `Data ${index + 1}`;
+                        });
+                    });
+
+                    table.classList.remove('responsive-scroll-table');
+                    table.classList.add('responsive-card-table');
+                    table.dataset.responsivePrepared = '1';
+                });
+            }
+
+            prepareResponsiveTables();
+
+            const pageContent = document.getElementById('pageContent');
+            if (pageContent && 'MutationObserver' in window) {
+                let tableRefreshTimer = null;
+                const tableObserver = new MutationObserver(() => {
+                    window.clearTimeout(tableRefreshTimer);
+                    tableRefreshTimer = window.setTimeout(prepareResponsiveTables, 40);
+                });
+                tableObserver.observe(pageContent, { childList: true, subtree: true });
+            }
+
+            const appScroller = document.getElementById('appScroller');
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            if (appScroller && scrollTopBtn) {
+                const updateScrollButton = () => {
+                    scrollTopBtn.classList.toggle('is-visible', appScroller.scrollTop > 500);
+                };
+                appScroller.addEventListener('scroll', updateScrollButton, { passive: true });
+                scrollTopBtn.addEventListener('click', () => {
+                    appScroller.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                updateScrollButton();
+            }
+        })();
+    </script>
+
+    {% block script %}
+    {% endblock script %}
+</body>
+</html>

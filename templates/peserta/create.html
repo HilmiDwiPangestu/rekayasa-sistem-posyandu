@@ -1,0 +1,1949 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block subtitle %}
+Data {{ status_peserta }}
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    /* =========================================================
+       CHECKBOX PESERTA TAMU
+    ========================================================= */
+    #id_is_tamu {
+        display: inline-block !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 5px !important;
+        box-shadow: none !important;
+        cursor: pointer;
+        accent-color: #2845D6;
+    }
+
+    #id_is_tamu:disabled {
+        cursor: not-allowed;
+        opacity: .55;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div
+    class="
+        min-h-screen
+        bg-background-light
+        font-display
+        text-slate-800
+
+        dark:bg-background-dark
+        dark:text-slate-100
+    "
+>
+
+    <div
+        class="
+            mx-auto
+            w-full
+            max-w-[1600px]
+            space-y-6
+            px-4 py-6
+            sm:px-6
+            lg:px-8
+        "
+    >
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div
+            class="
+                relative
+                overflow-hidden
+                rounded-xl
+                bg-primary
+                p-5
+                text-white
+                shadow-sm
+                sm:p-6
+            "
+        >
+
+            <!-- DECORATION -->
+            <div
+                class="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-20
+                    h-56
+                    w-56
+                    rounded-full
+                    bg-primary-dark/30
+                    blur-3xl
+                "
+            >
+            </div>
+
+
+            <div
+                class="
+                    relative
+                    flex
+                    flex-col
+                    gap-4
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                "
+            >
+
+                <div class="flex items-start gap-4">
+
+                    <!-- ICON -->
+                    <div
+                        class="
+                            flex
+                            h-12 w-12
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-white/10
+                            text-white
+                            ring-1
+                            ring-inset
+                            ring-white/10
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-2xl">
+
+                            {% if status_peserta == "balita" %}
+                                child_care
+                            {% else %}
+                                pregnant_woman
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- TITLE -->
+                    <div>
+
+                        <p
+                            class="
+                                mb-1
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.18em]
+                                text-blue-200
+                            "
+                        >
+                            Data Peserta
+                        </p>
+
+
+                        <h1
+                            class="
+                                text-2xl
+                                font-black
+                                tracking-tight
+                                sm:text-3xl
+                            "
+                        >
+                            Tambah Data {{ status_peserta|title }}
+                        </h1>
+
+
+                        <p
+                            class="
+                                mt-2
+                                max-w-2xl
+                                text-sm
+                                leading-6
+                                text-slate-300
+                            "
+                        >
+                            Masukkan data lengkap {{ status_peserta }}
+                            untuk pencatatan dan pemantauan kesehatan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- HEADER BADGE -->
+                <div
+                    class="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-2
+                        rounded-lg
+                        border
+                        border-white/10
+                        bg-white/10
+                        px-3 py-2
+                        text-xs
+                        font-semibold
+                        text-slate-200
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                            text-[16px]
+                            text-blue-200
+                        "
+                    >
+                        person_add
+                    </span>
+
+                    Peserta Baru
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             ERROR
+        ====================================================== -->
+        {% if form.errors %}
+
+        <div
+            class="
+                rounded-xl
+                border
+                border-rose-200
+                bg-rose-50
+                p-4
+
+                dark:border-rose-900/50
+                dark:bg-rose-950/20
+            "
+        >
+
+            <div class="flex items-start gap-3">
+
+                <div
+                    class="
+                        flex
+                        h-9 w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-rose-100
+                        text-rose-600
+
+                        dark:bg-rose-500/10
+                        dark:text-rose-400
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        error
+                    </span>
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <p
+                        class="
+                            text-sm
+                            font-bold
+                            text-rose-700
+                            dark:text-rose-400
+                        "
+                    >
+                        Data belum dapat disimpan
+                    </p>
+
+
+                    <div
+                        class="
+                            mt-1
+                            text-xs
+                            leading-5
+                            text-rose-600
+
+                            dark:text-rose-300
+
+                            [&_ul]:list-disc
+                            [&_ul]:pl-4
+                        "
+                    >
+                        {{ form.errors }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+
+        <!-- =====================================================
+             FORM
+        ====================================================== -->
+        <form
+            method="POST"
+
+            class="
+                overflow-hidden
+                rounded-xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
+
+                dark:border-white/10
+                dark:bg-primary
+
+
+                [&_input:not([type=checkbox])]:block
+                [&_input:not([type=checkbox])]:w-full
+                [&_input:not([type=checkbox])]:rounded-lg
+                [&_input:not([type=checkbox])]:border
+                [&_input:not([type=checkbox])]:border-solid
+                [&_input:not([type=checkbox])]:border-slate-200
+                [&_input:not([type=checkbox])]:bg-slate-50
+                [&_input:not([type=checkbox])]:px-4
+                [&_input:not([type=checkbox])]:py-2.5
+                [&_input:not([type=checkbox])]:text-sm
+                [&_input:not([type=checkbox])]:text-slate-800
+                [&_input:not([type=checkbox])]:outline-none
+                [&_input:not([type=checkbox])]:transition
+                [&_input:not([type=checkbox])]:placeholder:text-slate-400
+
+                [&_input:not([type=checkbox]):focus]:border-primary-dark
+                [&_input:not([type=checkbox]):focus]:bg-white
+                [&_input:not([type=checkbox]):focus]:ring-2
+                [&_input:not([type=checkbox]):focus]:ring-primary-dark/10
+
+                dark:[&_input:not([type=checkbox])]:border-white/10
+                dark:[&_input:not([type=checkbox])]:bg-background-dark/50
+                dark:[&_input:not([type=checkbox])]:text-white
+                dark:[&_input:not([type=checkbox])]:placeholder:text-slate-500
+                dark:[&_input:not([type=checkbox]):focus]:border-primary-dark
+                dark:[&_input:not([type=checkbox]):focus]:bg-background-dark
+
+
+                [&_select]:block
+                [&_select]:w-full
+                [&_select]:rounded-lg
+                [&_select]:border
+                [&_select]:border-solid
+                [&_select]:border-slate-200
+                [&_select]:bg-slate-50
+                [&_select]:px-4
+                [&_select]:py-2.5
+                [&_select]:text-sm
+                [&_select]:text-slate-800
+                [&_select]:outline-none
+                [&_select]:transition
+
+                [&_select:focus]:border-primary-dark
+                [&_select:focus]:bg-white
+                [&_select:focus]:ring-2
+                [&_select:focus]:ring-primary-dark/10
+
+                dark:[&_select]:border-white/10
+                dark:[&_select]:bg-background-dark/50
+                dark:[&_select]:text-white
+                dark:[&_select:focus]:border-primary-dark
+                dark:[&_select:focus]:bg-background-dark
+
+
+                [&_textarea]:block
+                [&_textarea]:min-h-[100px]
+                [&_textarea]:w-full
+                [&_textarea]:resize-y
+                [&_textarea]:rounded-lg
+                [&_textarea]:border
+                [&_textarea]:border-solid
+                [&_textarea]:border-slate-200
+                [&_textarea]:bg-slate-50
+                [&_textarea]:px-4
+                [&_textarea]:py-3
+                [&_textarea]:text-sm
+                [&_textarea]:text-slate-800
+                [&_textarea]:outline-none
+                [&_textarea]:transition
+                [&_textarea]:placeholder:text-slate-400
+
+                [&_textarea:focus]:border-primary-dark
+                [&_textarea:focus]:bg-white
+                [&_textarea:focus]:ring-2
+                [&_textarea:focus]:ring-primary-dark/10
+
+                dark:[&_textarea]:border-white/10
+                dark:[&_textarea]:bg-background-dark/50
+                dark:[&_textarea]:text-white
+                dark:[&_textarea]:placeholder:text-slate-500
+                dark:[&_textarea:focus]:border-primary-dark
+                dark:[&_textarea:focus]:bg-background-dark
+            "
+        >
+
+            {% csrf_token %}
+
+
+
+            <!-- =================================================
+                 DATA UTAMA
+            ================================================== -->
+            <section
+                class="
+                    border-b
+                    border-slate-200
+                    p-5
+
+                    dark:border-white/10
+                    sm:p-6
+                "
+            >
+
+
+                <!-- SECTION HEADER -->
+                <div class="mb-6 flex items-center gap-3">
+
+                    <div
+                        class="
+                            flex
+                            h-10 w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[20px]">
+                            person
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-900
+                                dark:text-white
+                            "
+                        >
+                            Data {{ status_peserta|title }}
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            "
+                        >
+                            Lengkapi identitas dan informasi peserta.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     IDENTITAS
+                ================================================== -->
+                <div class="mb-8">
+
+                    <div
+                        class="
+                            mb-4
+                            flex
+                            items-center
+                            gap-2
+                            border-b
+                            border-slate-100
+                            pb-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            "
+                        >
+                            badge
+                        </span>
+
+
+                        <h4
+                            class="
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-600
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Identitas {{ status_peserta|title }}
+                        </h4>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            gap-5
+                            md:grid-cols-2
+                        "
+                    >
+
+
+                        <!-- NAMA -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.nama_peserta.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Nama Lengkap
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.nama_peserta }}
+
+                            {% if form.nama_peserta.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.nama_peserta.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- GENDER -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.jenis_kelamin.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Jenis Kelamin
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.jenis_kelamin }}
+
+                            {% if form.jenis_kelamin.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.jenis_kelamin.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- TANGGAL LAHIR -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.tgl_lahir.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Tanggal Lahir
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.tgl_lahir }}
+
+                            {% if form.tgl_lahir.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.tgl_lahir.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- TELEPON -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.no_hp.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                No. HP
+                            </label>
+
+                            {{ form.no_hp }}
+
+                            {% if form.no_hp.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.no_hp.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BALITA
+                ================================================== -->
+                {% if status_peserta == 'balita' %}
+
+
+                <!-- DATA ORANG TUA -->
+                <div class="mb-8">
+
+                    <div
+                        class="
+                            mb-4
+                            flex
+                            items-center
+                            gap-2
+                            border-b
+                            border-slate-100
+                            pb-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            "
+                        >
+                            family_restroom
+                        </span>
+
+
+                        <h4
+                            class="
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-600
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Data Orang Tua
+                        </h4>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            gap-5
+                            md:grid-cols-2
+                        "
+                    >
+
+
+                        <!-- IBU -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.nama_ibu.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Nama Ibu
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.nama_ibu }}
+
+                            {% if form.nama_ibu.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.nama_ibu.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- AYAH -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.nama_ayah.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Nama Ayah
+                            </label>
+
+                            {{ form.nama_ayah }}
+
+                            {% if form.nama_ayah.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.nama_ayah.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- NIK BALITA -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.no_nik.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                NIK Balita
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.no_nik }}
+
+                            {% if form.no_nik.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.no_nik.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- NIK IBU -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.nik_ibu.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                NIK Ibu
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.nik_ibu }}
+
+                            {% if form.nik_ibu.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.nik_ibu.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DATA KELAHIRAN -->
+                <div class="mb-8">
+
+                    <div
+                        class="
+                            mb-4
+                            flex
+                            items-center
+                            gap-2
+                            border-b
+                            border-slate-100
+                            pb-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            "
+                        >
+                            child_care
+                        </span>
+
+
+                        <h4
+                            class="
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-600
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Data Kelahiran
+                        </h4>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            gap-5
+                            sm:grid-cols-2
+                            lg:grid-cols-4
+                        "
+                    >
+
+
+                        <!-- ANAK KE -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.anak_ke.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Anak Ke
+                            </label>
+
+                            {{ form.anak_ke }}
+
+                            {% if form.anak_ke.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.anak_ke.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- BB LAHIR -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.bb_lahir.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                BB Lahir
+                            </label>
+
+
+                            <div class="relative">
+
+                                {{ form.bb_lahir }}
+
+                                <span
+                                    class="
+                                        pointer-events-none
+                                        absolute
+                                        inset-y-0
+                                        right-0
+                                        flex
+                                        items-center
+                                        pr-4
+                                        text-[10px]
+                                        font-semibold
+                                        text-slate-400
+                                    "
+                                >
+                                    Kg
+                                </span>
+
+                            </div>
+
+
+                            {% if form.bb_lahir.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.bb_lahir.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- TB LAHIR -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.tb_lahir.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                PB/TB Lahir
+                            </label>
+
+
+                            <div class="relative">
+
+                                {{ form.tb_lahir }}
+
+                                <span
+                                    class="
+                                        pointer-events-none
+                                        absolute
+                                        inset-y-0
+                                        right-0
+                                        flex
+                                        items-center
+                                        pr-4
+                                        text-[10px]
+                                        font-semibold
+                                        text-slate-400
+                                    "
+                                >
+                                    Cm
+                                </span>
+
+                            </div>
+
+
+                            {% if form.tb_lahir.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.tb_lahir.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- LILA -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.lila_lahir.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                LiLA Lahir
+                            </label>
+
+
+                            <div class="relative">
+
+                                {{ form.lila_lahir }}
+
+                                <span
+                                    class="
+                                        pointer-events-none
+                                        absolute
+                                        inset-y-0
+                                        right-0
+                                        flex
+                                        items-center
+                                        pr-4
+                                        text-[10px]
+                                        font-semibold
+                                        text-slate-400
+                                    "
+                                >
+                                    Cm
+                                </span>
+
+                            </div>
+
+
+                            {% if form.lila_lahir.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.lila_lahir.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- =================================================
+                     BUMIL
+                ================================================== -->
+                {% if status_peserta == 'bumil' %}
+
+                <div class="mb-8">
+
+                    <div
+                        class="
+                            mb-4
+                            flex
+                            items-center
+                            gap-2
+                            border-b
+                            border-slate-100
+                            pb-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            "
+                        >
+                            family_restroom
+                        </span>
+
+
+                        <h4
+                            class="
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-600
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Data Keluarga
+                        </h4>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            gap-5
+                            md:grid-cols-2
+                        "
+                    >
+
+
+                        <!-- SUAMI -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.nama_ayah.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                Nama Suami
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.nama_ayah }}
+
+                            {% if form.nama_ayah.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.nama_ayah.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <!-- NIK -->
+                        <div class="flex flex-col gap-1.5">
+
+                            <label
+                                for="{{ form.no_nik.id_for_label }}"
+                                class="
+                                    text-xs
+                                    font-bold
+                                    text-slate-700
+
+                                    dark:text-slate-300
+                                "
+                            >
+                                NIK Ibu Hamil
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            {{ form.no_nik }}
+
+                            {% if form.no_nik.errors %}
+
+                            <p class="text-xs font-medium text-rose-500">
+                                {{ form.no_nik.errors.0 }}
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- =================================================
+                     ALAMAT
+                ================================================== -->
+                <div>
+
+                    <div
+                        class="
+                            mb-4
+                            flex
+                            items-center
+                            gap-2
+                            border-b
+                            border-slate-100
+                            pb-3
+
+                            dark:border-white/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-[17px]
+                                text-primary-dark
+                                dark:text-blue-300
+                            "
+                        >
+                            location_on
+                        </span>
+
+
+                        <h4
+                            class="
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                text-slate-600
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Alamat
+                        </h4>
+
+                    </div>
+
+
+                    <div class="flex flex-col gap-1.5">
+
+                        <label
+                            for="{{ form.alamat.id_for_label }}"
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+
+                                dark:text-slate-300
+                            "
+                        >
+                            Alamat Lengkap
+                            <span class="text-rose-500">*</span>
+                        </label>
+
+                        {{ form.alamat }}
+
+
+                        {% if form.alamat.errors %}
+
+                        <p class="text-xs font-medium text-rose-500">
+                            {{ form.alamat.errors.0 }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 STATUS PESERTA
+            ================================================== -->
+            <section
+                class="
+                    border-b
+                    border-slate-200
+                    p-5
+
+                    dark:border-white/10
+                    sm:p-6
+                "
+            >
+
+
+                <!-- HEADER -->
+                <div class="mb-5 flex items-center gap-3">
+
+                    <div
+                        class="
+                            flex
+                            h-10 w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-lg
+                            bg-primary-dark/10
+                            text-primary-dark
+
+                            dark:bg-primary-dark/20
+                            dark:text-blue-300
+                        "
+                    >
+
+                        <span class="material-symbols-outlined text-[20px]">
+                            assignment_ind
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            class="
+                                text-sm
+                                font-bold
+                                text-slate-900
+                                dark:text-white
+                            "
+                        >
+                            Status Peserta
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-0.5
+                                text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            "
+                        >
+                            Tentukan Posyandu peserta atau status peserta tamu.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- STATUS CARD -->
+                <div
+                    class="
+                        space-y-5
+                        rounded-xl
+                        border
+                        border-slate-200
+                        bg-slate-50
+                        p-4
+
+                        dark:border-white/10
+                        dark:bg-background-dark/50
+
+                        sm:p-5
+                    "
+                >
+
+
+                    <!-- =================================================
+                         PESERTA TAMU
+                    ================================================== -->
+                    <label
+                        for="{{ form.is_tamu.id_for_label }}"
+
+                        class="
+                            group
+                            flex
+                            cursor-pointer
+                            items-center
+                            justify-between
+                            gap-4
+                            rounded-lg
+                            border
+                            border-slate-200
+                            bg-white
+                            p-4
+                            transition
+
+                            hover:border-primary-dark/30
+                            hover:bg-primary-dark/5
+
+                            has-[:checked]:border-primary-dark/40
+                            has-[:checked]:bg-primary-dark/5
+
+                            dark:border-white/10
+                            dark:bg-primary
+                            dark:hover:bg-primary-dark/10
+                            dark:has-[:checked]:border-primary-dark/50
+                            dark:has-[:checked]:bg-primary-dark/10
+                        "
+                    >
+
+                        <div
+                            class="
+                                flex
+                                min-w-0
+                                items-start
+                                gap-3
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    h-9 w-9
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-primary-dark/10
+                                    text-primary-dark
+
+                                    dark:bg-primary-dark/20
+                                    dark:text-blue-300
+                                "
+                            >
+
+                                <span class="material-symbols-outlined text-[18px]">
+                                    commute
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <p
+                                    class="
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                        dark:text-white
+                                    "
+                                >
+                                    Peserta Tamu
+                                </p>
+
+
+                                <p
+                                    class="
+                                        mt-0.5
+                                        text-xs
+                                        leading-5
+                                        text-slate-500
+
+                                        dark:text-slate-400
+                                    "
+                                >
+                                    Aktifkan apabila peserta berasal
+                                    dari Posyandu lain.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="shrink-0">
+
+                            {{ form.is_tamu }}
+
+                        </div>
+
+                    </label>
+
+
+                    {% if form.is_tamu.errors %}
+
+                    <p class="text-xs font-medium text-rose-500">
+                        {{ form.is_tamu.errors.0 }}
+                    </p>
+
+                    {% endif %}
+
+
+
+                    <!-- =================================================
+                         POSKO
+                    ================================================== -->
+                    <div
+                        id="field-posko"
+                        class="flex flex-col gap-1.5"
+                    >
+
+                        <label
+                            for="{{ form.posko.id_for_label }}"
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+                                dark:text-slate-300
+                            "
+                        >
+                            Posko
+                            <span class="text-rose-500">*</span>
+                        </label>
+
+
+                        {{ form.posko }}
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Pilih Posko tempat peserta terdaftar.
+                        </p>
+
+
+                        {% if form.posko.errors %}
+
+                        <p class="text-xs font-medium text-rose-500">
+                            {{ form.posko.errors.0 }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         ASAL POSYANDU
+                    ================================================== -->
+                    <div
+                        id="field-asal"
+                        class="
+                            hidden
+                            flex-col
+                            gap-1.5
+                        "
+                    >
+
+                        <label
+                            for="{{ form.asal_posyandu.id_for_label }}"
+                            class="
+                                text-xs
+                                font-bold
+                                text-slate-700
+                                dark:text-slate-300
+                            "
+                        >
+                            Asal Posyandu
+                            <span class="text-rose-500">*</span>
+                        </label>
+
+
+                        {{ form.asal_posyandu }}
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-4
+                                text-slate-400
+                            "
+                        >
+                            Masukkan Posyandu asal peserta tamu.
+                        </p>
+
+
+                        {% if form.asal_posyandu.errors %}
+
+                        <p class="text-xs font-medium text-rose-500">
+                            {{ form.asal_posyandu.errors.0 }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- INFO -->
+                    <div
+                        class="
+                            flex
+                            items-start
+                            gap-2
+                            rounded-lg
+                            bg-primary-dark/5
+                            px-3 py-2.5
+
+                            dark:bg-primary-dark/10
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                mt-0.5
+                                shrink-0
+                                text-[15px]
+                                text-primary-dark
+
+                                dark:text-blue-300
+                            "
+                        >
+                            info
+                        </span>
+
+
+                        <p
+                            class="
+                                text-[10px]
+                                leading-5
+                                text-slate-500
+
+                                dark:text-slate-400
+                            "
+                        >
+                            Jika peserta bukan peserta tamu, pilih Posko
+                            tempat peserta terdaftar. Jika peserta tamu,
+                            masukkan asal Posyandu peserta.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ACTION
+            ================================================== -->
+            <div
+                class="
+                    flex
+                    flex-col-reverse
+                    gap-2
+                    bg-slate-50
+                    px-5 py-4
+
+                    dark:bg-background-dark/40
+
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-end
+                    sm:px-6
+                "
+            >
+
+
+                <!-- BATAL -->
+                <a
+                    href="{% url 'peserta:list' status_peserta %}"
+
+                    class="
+                        inline-flex
+                        h-10
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-lg
+                        border
+                        border-slate-200
+                        bg-white
+                        px-5
+                        text-xs
+                        font-bold
+                        text-slate-600
+                        shadow-sm
+                        transition
+
+                        hover:border-primary-dark/30
+                        hover:bg-primary-dark/5
+                        hover:text-primary-dark
+
+                        dark:border-white/10
+                        dark:bg-primary
+                        dark:text-slate-300
+                        dark:hover:bg-primary-dark/10
+                        dark:hover:text-blue-300
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[17px]">
+                        close
+                    </span>
+
+                    Batal
+
+                </a>
+
+
+
+                <!-- SIMPAN -->
+                <button
+                    type="submit"
+
+                    class="
+                        inline-flex
+                        h-10
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-lg
+                        bg-primary-dark
+                        px-6
+                        text-xs
+                        font-bold
+                        text-white
+                        shadow-sm
+                        transition
+
+                        hover:bg-primary
+                        hover:shadow-md
+
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-primary-dark/30
+                        focus:ring-offset-2
+
+                        active:scale-[0.98]
+
+                        dark:focus:ring-offset-primary
+                    "
+                >
+
+                    <span class="material-symbols-outlined text-[18px]">
+                        save
+                    </span>
+
+                    Simpan Data
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        // =====================================================
+        // PESERTA TAMU
+        // =====================================================
+        const checkbox =
+            document.querySelector(
+                "#id_is_tamu"
+            );
+
+
+        const posko =
+            document.querySelector(
+                "#field-posko"
+            );
+
+
+        const asal =
+            document.querySelector(
+                "#field-asal"
+            );
+
+
+
+        function toggleTamu() {
+
+            if (
+                !checkbox ||
+                !posko ||
+                !asal
+            ) {
+                return;
+            }
+
+
+            if (checkbox.checked) {
+
+                // Peserta tamu
+                posko.classList.add(
+                    "hidden"
+                );
+
+
+                asal.classList.remove(
+                    "hidden"
+                );
+
+
+                asal.classList.add(
+                    "flex"
+                );
+
+
+                // Disable field Posko
+                // agar tidak ikut terkirim
+                const poskoInput =
+                    posko.querySelector(
+                        "select, input"
+                    );
+
+
+                const asalInput =
+                    asal.querySelector(
+                        "select, input"
+                    );
+
+
+                if (poskoInput) {
+                    poskoInput.disabled = true;
+                }
+
+
+                if (asalInput) {
+                    asalInput.disabled = false;
+                }
+
+
+            } else {
+
+                // Peserta Posyandu sendiri
+                posko.classList.remove(
+                    "hidden"
+                );
+
+
+                asal.classList.add(
+                    "hidden"
+                );
+
+
+                asal.classList.remove(
+                    "flex"
+                );
+
+
+                const poskoInput =
+                    posko.querySelector(
+                        "select, input"
+                    );
+
+
+                const asalInput =
+                    asal.querySelector(
+                        "select, input"
+                    );
+
+
+                if (poskoInput) {
+                    poskoInput.disabled = false;
+                }
+
+
+                if (asalInput) {
+                    asalInput.disabled = true;
+                }
+
+            }
+
+        }
+
+
+
+        if (checkbox) {
+
+            checkbox.addEventListener(
+                "change",
+                toggleTamu
+            );
+
+
+            // Kondisi awal
+            toggleTamu();
+
+        }
+
+    }
+);
+</script>
+
+{% endblock %}

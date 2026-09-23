@@ -1,0 +1,653 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}Laporan Balita{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-100">
+
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div class="relative mb-6 overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+
+            <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+
+            <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+                <div class="flex items-start gap-4">
+
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10">
+                        <span class="material-symbols-outlined text-2xl">
+                            child_care
+                        </span>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                            Laporan Pemeriksaan
+                        </p>
+
+                        <h1 class="text-2xl font-black tracking-tight sm:text-3xl">
+                            Laporan Pemeriksaan Balita
+                        </h1>
+
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-white/60">
+                            Menampilkan pemeriksaan periode
+                            <span class="font-semibold text-white">{{ periode_label }}</span>
+                            untuk
+                            <span class="font-semibold text-white">{{ posyandu_label }}</span>.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Export -->
+                <div class="export-inline-group flex flex-nowrap items-center gap-2">
+
+                    <a
+                        href="{% url 'posyandu:export_balita_excel' %}?{{ query_string }}"
+                        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/15"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            table_view
+                        </span>
+                        Excel
+                    </a>
+
+                    <a
+                        href="{% url 'posyandu:cetak_balita_pdf' %}?{{ query_string }}"
+                        target="_blank"
+                        class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/15"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            picture_as_pdf
+                        </span>
+                        PDF
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =====================================================
+             FILTER
+        ====================================================== -->
+        <div class="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-200">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-white">Filter Laporan</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            Pilih bulan, tahun, dan Posyandu yang ingin ditampilkan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="get" class="p-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-12 xl:items-end">
+
+                    <div class="xl:col-span-3">
+                        <label for="bulan" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                            Bulan
+                        </label>
+                        <select
+                            id="bulan"
+                            name="bulan"
+                            class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                        >
+                            {% for value, label in bulan_options %}
+                                <option value="{{ value }}" {% if value == bulan %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="xl:col-span-2">
+                        <label for="tahun" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                            Tahun
+                        </label>
+                        <select
+                            id="tahun"
+                            name="tahun"
+                            class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                        >
+                            {% for tahun_item in tahun_options %}
+                                <option value="{{ tahun_item }}" {% if tahun_item == tahun %}selected{% endif %}>{{ tahun_item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2 xl:col-span-4">
+                        <label for="posyandu" class="mb-2 block text-xs font-bold text-slate-600 dark:text-slate-300">
+                            Posyandu
+                        </label>
+                        <select
+                            id="posyandu"
+                            name="posyandu"
+                            class="h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                        >
+                            <option value="">Semua Posyandu</option>
+                            {% for pos in daftar_posyandu %}
+                                <option value="{{ pos.pk }}" {% if pos.pk == selected_posyandu_id %}selected{% endif %}>{{ pos.nama }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:col-span-2 xl:col-span-3 xl:justify-end">
+                        <button
+                            type="submit"
+                            class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary-dark px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20 xl:flex-none"
+                        >
+                            <span class="material-symbols-outlined text-lg">search</span>
+                            Tampilkan
+                        </button>
+                        <a
+                            href="{% url 'posyandu:laporan_balita' %}"
+                            class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:bg-background-dark dark:text-slate-300 dark:hover:bg-white/5 xl:flex-none"
+                        >
+                            <span class="material-symbols-outlined text-lg">restart_alt</span>
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- =====================================================
+             FILTER AKTIF
+        ====================================================== -->
+        <div class="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-primary-dark/15 bg-primary-dark/5 px-4 py-3 text-sm text-slate-700 dark:border-primary-dark/30 dark:bg-primary-dark/10 dark:text-slate-200">
+            <span class="material-symbols-outlined text-xl text-primary-dark">info</span>
+            <span class="font-semibold">Periode:</span>
+            <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-bold shadow-sm dark:bg-primary">{{ periode_label }}</span>
+            <span class="text-slate-400">•</span>
+            <span class="font-semibold">Posyandu:</span>
+            <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-bold shadow-sm dark:bg-primary">{{ posyandu_label }}</span>
+        </div>
+
+        <!-- =====================================================
+             STATISTIK
+        ====================================================== -->
+        <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+
+            <!-- Total -->
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary sm:p-5">
+
+                <div class="mb-4 flex items-center justify-between">
+
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                        <span class="material-symbols-outlined">
+                            database
+                        </span>
+                    </div>
+
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Total
+                    </span>
+
+                </div>
+
+                <p class="text-3xl font-black tabular-nums text-slate-900 dark:text-white">
+                    {{ total_data }}
+                </p>
+
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Data pemeriksaan
+                </p>
+
+            </div>
+
+
+            <!-- Normal -->
+            <div class="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900/50 dark:bg-primary sm:p-5">
+
+                <div class="mb-4 flex items-center justify-between">
+
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                        <span class="material-symbols-outlined">
+                            check_circle
+                        </span>
+                    </div>
+
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+
+                </div>
+
+                <p class="text-3xl font-black tabular-nums text-slate-900 dark:text-white">
+                    {{ total_normal }}
+                </p>
+
+                <p class="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    Normal
+                </p>
+
+            </div>
+
+
+            <!-- Risiko stunting -->
+            <div class="rounded-xl border border-amber-200 bg-white p-4 shadow-sm dark:border-amber-900/50 dark:bg-primary sm:p-5">
+
+                <div class="mb-4 flex items-center justify-between">
+
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                        <span class="material-symbols-outlined">
+                            warning
+                        </span>
+                    </div>
+
+                    <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+
+                </div>
+
+                <p class="text-3xl font-black tabular-nums text-slate-900 dark:text-white">
+                    {{ total_stunting }}
+                </p>
+
+                <p class="mt-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                    Risiko Stunting
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DATA PEMERIKSAAN
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <!-- Header -->
+            <div class="flex flex-col gap-2 border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+
+                <div>
+                    <h2 class="font-bold text-slate-900 dark:text-white">
+                        Data Pemeriksaan Balita
+                    </h2>
+
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Data antropometri dan status gizi balita berdasarkan filter yang dipilih.
+                    </p>
+                </div>
+
+                <span class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                    <span class="material-symbols-outlined text-base">
+                        child_care
+                    </span>
+                    {{ total_data }} Data
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div class="hidden overflow-x-auto md:block">
+
+                <table class="w-full min-w-[1000px] text-left text-sm">
+
+                    <thead>
+                        <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-background-dark/60 dark:text-slate-400">
+
+                            <th class="w-16 px-5 py-4 text-center">
+                                No.
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Nama Balita
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Usia
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                BB
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                TB
+                            </th>
+
+                            <th class="px-4 py-4 text-center">
+                                LiLA
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Status
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Petugas
+                            </th>
+
+                            <th class="px-5 py-4 text-right">
+                                Tanggal
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100 dark:divide-white/10">
+
+                        {% for item in data %}
+                        <tr class="group transition hover:bg-primary-dark/[0.035] dark:hover:bg-white/[0.03]">
+
+                            <!-- Nomor -->
+                            <td class="relative px-5 py-4 text-center text-sm font-semibold text-slate-400">
+
+                                <span class="absolute bottom-0 left-0 top-0 w-1
+                                    {% if item.status_gizi == 'normal' %}
+                                        bg-emerald-500
+                                    {% elif item.status_gizi == 'tinggi' %}
+                                        bg-sky-500
+                                    {% elif item.status_gizi == 'stunting' %}
+                                        bg-orange-500
+                                    {% elif item.status_gizi == 'stunting_berat' %}
+                                        bg-rose-500
+                                    {% else %}
+                                        bg-slate-300 dark:bg-slate-600
+                                    {% endif %}
+                                "></span>
+
+                                {{ forloop.counter }}
+
+                            </td>
+
+                            <!-- Nama -->
+                            <td class="px-4 py-4">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-sm font-black uppercase text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                        {{ item.peserta.nama_peserta|slice:":1" }}
+                                    </div>
+
+                                    <div>
+                                        <p class="font-bold text-slate-800 dark:text-white">
+                                            {{ item.peserta.nama_peserta }}
+                                        </p>
+
+                                        <p class="mt-0.5 text-xs text-slate-400">
+                                            Pemeriksaan balita
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <!-- Usia -->
+                            <td class="whitespace-nowrap px-4 py-4 text-slate-600 dark:text-slate-300">
+                                <span class="font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                                    {{ item.usia_bulan }}
+                                </span>
+                                bulan
+                            </td>
+
+                            <!-- BB -->
+                            <td class="whitespace-nowrap px-4 py-4 text-center text-slate-600 dark:text-slate-300">
+                                {% if item.berat_badan %}
+                                    <span class="font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                                        {{ item.berat_badan }}
+                                    </span>
+                                    kg
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <!-- TB -->
+                            <td class="whitespace-nowrap px-4 py-4 text-center text-slate-600 dark:text-slate-300">
+                                {% if item.tinggi_badan %}
+                                    <span class="font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                                        {{ item.tinggi_badan }}
+                                    </span>
+                                    cm
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <!-- LiLA -->
+                            <td class="whitespace-nowrap px-4 py-4 text-center text-slate-600 dark:text-slate-300">
+                                {% if item.lila_balita %}
+                                    <span class="font-bold tabular-nums text-slate-800 dark:text-slate-100">
+                                        {{ item.lila_balita }}
+                                    </span>
+                                    cm
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <!-- Status -->
+                            <td class="whitespace-nowrap px-4 py-4">
+
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold
+                                    {% if item.status_gizi == 'normal' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                                    {% elif item.status_gizi == 'tinggi' %}bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400
+                                    {% elif item.status_gizi == 'stunting' %}bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400
+                                    {% elif item.status_gizi == 'stunting_berat' %}bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400
+                                    {% else %}bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300{% endif %}">
+                                    {{ item.get_status_gizi_display|default:"Tidak Diketahui" }}
+                                </span>
+
+                            </td>
+
+                            <!-- Petugas -->
+                            <td class="whitespace-nowrap px-4 py-4 text-slate-600 dark:text-slate-300">
+                                {{ item.petugas_nama|default:"-" }}
+                            </td>
+
+                            <!-- Tanggal -->
+                            <td class="whitespace-nowrap px-5 py-4 text-right">
+
+                                <p class="font-bold tabular-nums text-slate-700 dark:text-slate-200">
+                                    {{ item.tgl_pemeriksaan|date:"d-m-Y" }}
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="9" class="px-5 py-20 text-center">
+
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10">
+                                    <span class="material-symbols-outlined text-3xl">
+                                        search_off
+                                    </span>
+                                </div>
+
+                                <p class="mt-4 font-bold text-slate-700 dark:text-slate-200">
+                                    Data tidak ditemukan
+                                </p>
+
+                                <p class="mt-1 text-sm text-slate-400">
+                                    Coba ubah bulan, tahun, atau Posyandu yang dipilih.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 MOBILE CARDS
+            ================================================== -->
+            <div class="space-y-3 p-4 md:hidden">
+
+                {% for item in data %}
+
+                <article class="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 pl-5 dark:border-white/10 dark:bg-background-dark/50">
+
+                    <span class="absolute bottom-0 left-0 top-0 w-1
+                        {% if item.status_gizi == 'normal' %}
+                            bg-emerald-500
+                        {% elif item.status_gizi == 'tinggi' %}
+                            bg-sky-500
+                        {% elif item.status_gizi == 'stunting' %}
+                            bg-orange-500
+                        {% elif item.status_gizi == 'stunting_berat' %}
+                            bg-rose-500
+                        {% else %}
+                            bg-slate-300 dark:bg-slate-600
+                        {% endif %}
+                    "></span>
+
+                    <!-- Header -->
+                    <div class="mb-4 flex items-start justify-between gap-3">
+
+                        <div class="flex min-w-0 items-center gap-3">
+
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 font-black uppercase text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                {{ item.peserta.nama_peserta|slice:":1" }}
+                            </div>
+
+                            <div class="min-w-0">
+                                <p class="truncate font-bold text-slate-900 dark:text-white">
+                                    {{ item.peserta.nama_peserta }}
+                                </p>
+
+                                <p class="mt-0.5 text-xs text-slate-400">
+                                    {{ item.tgl_pemeriksaan|date:"d-m-Y" }}
+                                    &middot;
+                                    {{ item.usia_bulan }} bulan
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold
+                            {% if item.status_gizi == 'normal' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                            {% elif item.status_gizi == 'tinggi' %}bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400
+                            {% elif item.status_gizi == 'stunting' %}bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400
+                            {% elif item.status_gizi == 'stunting_berat' %}bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400
+                            {% else %}bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300{% endif %}">
+                            {{ item.get_status_gizi_display|default:"Tidak Diketahui" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Antropometri -->
+                    <div class="grid grid-cols-3 gap-2">
+
+                        <div class="rounded-lg bg-white p-3 text-center dark:bg-primary">
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                BB
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
+                                {% if item.berat_badan %}
+                                    {{ item.berat_badan }} kg
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="rounded-lg bg-white p-3 text-center dark:bg-primary">
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                TB
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
+                                {% if item.tinggi_badan %}
+                                    {{ item.tinggi_badan }} cm
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="rounded-lg bg-white p-3 text-center dark:bg-primary">
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                LiLA
+                            </p>
+
+                            <p class="mt-1 text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">
+                                {% if item.lila_balita %}
+                                    {{ item.lila_balita }} cm
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Petugas -->
+                    <div class="mt-4 border-t border-slate-200 pt-4 dark:border-white/10">
+
+                        <div class="flex items-center justify-between gap-4 text-sm">
+
+                            <span class="flex items-center gap-2 text-slate-400">
+                                <span class="material-symbols-outlined text-lg">
+                                    badge
+                                </span>
+                                Petugas
+                            </span>
+
+                            <span class="text-right font-semibold text-slate-700 dark:text-slate-200">
+                                {{ item.petugas_nama|default:"-" }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+                {% empty %}
+
+                <div class="py-16 text-center">
+
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10">
+                        <span class="material-symbols-outlined text-3xl">
+                            search_off
+                        </span>
+                    </div>
+
+                    <p class="mt-4 font-bold text-slate-700 dark:text-slate-200">
+                        Data tidak ditemukan
+                    </p>
+
+                    <p class="mt-1 text-sm text-slate-400">
+                        Coba ubah bulan, tahun, atau Posyandu yang dipilih.
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}

@@ -1,0 +1,1312 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}Data {{ level_petugas }}{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-100">
+
+    <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+        <div class="relative mb-6 overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
+
+            <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/30 blur-3xl"></div>
+
+            <div class="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+                <div class="flex items-start gap-4">
+
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/10">
+                        <span class="material-symbols-outlined text-2xl">
+                            manage_accounts
+                        </span>
+                    </div>
+
+                    <div>
+                        <p class="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
+                            Manajemen Petugas
+                        </p>
+
+                        <h1 class="text-2xl font-black tracking-tight sm:text-3xl">
+                            Data {{ level_petugas|title }}
+                        </h1>
+
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                            Kelola dan lihat seluruh data {{ level_petugas }} Posyandu yang terdaftar di sistem.
+                        </p>
+                    </div>
+
+                </div>
+
+                <a
+                    href="{% url 'accounts:tambah_petugas' level_petugas %}"
+                    class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary-dark px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/30 sm:w-auto"
+                >
+                    <span class="material-symbols-outlined text-lg">
+                        add
+                    </span>
+                    Tambah {{ level_petugas|title }}
+                </a>
+
+            </div>
+        </div>
+
+
+        <!-- =====================================================
+             MESSAGES
+        ====================================================== -->
+        {% if messages %}
+
+        <div class="mb-6 space-y-3">
+
+            {% for message in messages %}
+
+            <div class="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm font-semibold
+                {% if message.tags == 'success' %}
+                    border-emerald-200 bg-emerald-50 text-emerald-700
+                    dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400
+                {% else %}
+                    border-rose-200 bg-rose-50 text-rose-700
+                    dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-400
+                {% endif %}
+            ">
+
+                <span class="material-symbols-outlined mt-0.5 text-lg">
+                    {% if message.tags == 'success' %}
+                        check_circle
+                    {% else %}
+                        error
+                    {% endif %}
+                </span>
+
+                <span>
+                    {{ message }}
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        {% if level_petugas == 'bidan' %}
+        <div class="mb-5 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm text-blue-800 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200">
+            <span class="material-symbols-outlined mt-0.5 text-lg">info</span>
+            <div class="min-w-0">
+                <p class="font-bold">Pembagian cakupan wilayah bidan</p>
+                <p class="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">
+                    Bidan dicatat sebagai penanggung jawab wilayah dan tidak memiliki akun login. Untuk contoh 12 Posyandu dan 2 bidan, tetapkan 6 Posyandu untuk masing-masing bidan. Satu Posyandu tidak dapat memiliki dua bidan penanggung jawab aktif.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- =====================================================
+             DATA CARD
+        ====================================================== -->
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+
+            <!-- Toolbar -->
+            <div class="flex flex-col gap-4 border-b border-slate-200 p-4 dark:border-white/10 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+
+                <form method="get" class="flex w-full gap-2 lg:max-w-xl">
+                    <div class="relative min-w-0 flex-1">
+                        <span class="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+                            search
+                        </span>
+                        <input
+                            type="search"
+                            id="searchInput"
+                            name="search"
+                            value="{{ search|default:'' }}"
+                            oninput="applyFilter()"
+                            placeholder="Cari nama {{ level_petugas|title }} atau wilayah..."
+                            autocomplete="off"
+                            class="h-11 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                        >
+                    </div>
+                    <button
+                        type="submit"
+                        title="Terapkan pencarian"
+                        class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary-dark px-4 text-sm font-bold text-white transition hover:bg-primary-dark/90"
+                    >
+                        <span class="material-symbols-outlined text-lg">search</span>
+                        <span class="hidden sm:inline">Cari</span>
+                    </button>
+                    {% if search %}
+                    <a
+                        href="{% if level_petugas == 'bidan' %}{% url 'posyandu:daftar_bidan' %}{% else %}{% url 'posyandu:daftar_petugas_kader' %}{% endif %}"
+                        title="Reset pencarian"
+                        class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:text-primary-dark dark:border-white/10 dark:bg-background-dark"
+                    >
+                        <span class="material-symbols-outlined text-lg">restart_alt</span>
+                    </a>
+                    {% endif %}
+                </form>
+
+                <div class="export-inline-group flex shrink-0 flex-nowrap items-center gap-2 self-start lg:self-auto">
+
+                    <a
+                        href="{% url 'posyandu:export_petugas_pdf' level_petugas %}{% if search %}?search={{ search|urlencode }}{% endif %}"
+                        title="Ekspor PDF"
+                        class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm transition hover:border-primary-dark/20 hover:bg-slate-50 hover:text-primary-dark dark:border-white/10 dark:bg-background-dark dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-blue-300"
+                    >
+                        <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                        <span class="hidden sm:inline">PDF</span>
+                    </a>
+
+                    <a
+                        href="{% url 'posyandu:export_petugas_excel' level_petugas %}{% if search %}?search={{ search|urlencode }}{% endif %}"
+                        title="Ekspor Excel"
+                        class="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm transition hover:border-primary-dark/20 hover:bg-slate-50 hover:text-primary-dark dark:border-white/10 dark:bg-background-dark dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-blue-300"
+                    >
+                        <span class="material-symbols-outlined text-lg">table_view</span>
+                        <span class="hidden sm:inline">Excel</span>
+                    </a>
+
+                    <div class="hidden h-6 w-px shrink-0 bg-slate-200 dark:bg-white/10 sm:block"></div>
+
+                    <span class="export-count-badge inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-slate-100 px-3 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                        <span class="material-symbols-outlined text-base">
+                            groups
+                        </span>
+                        {{ page_obj.paginator.count }} Data
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DESKTOP TABLE
+            ================================================== -->
+            <div class="hidden overflow-x-auto md:block">
+
+                <table class="w-full min-w-[1050px] text-sm" id="petugasTable">
+
+                    <thead>
+                        <tr class="bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-background-dark/60 dark:text-slate-400">
+
+                            <th class="w-16 px-5 py-4 text-center">
+                                No.
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Nama {{ level_petugas|title }}
+                            </th>
+
+                            <th class="px-4 py-4">
+                                Wilayah Kerja
+                            </th>
+
+                            <th class="w-32 px-4 py-4 text-center">
+                                Peran
+                            </th>
+
+                            <th class="w-44 px-4 py-4">
+                                No. Telepon
+                            </th>
+
+                            <th class="w-36 px-5 py-4 text-center">
+                                Aksi
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-white/10">
+
+                        {% for ptg in page_obj %}
+
+                        <tr
+                            class="petugas-item transition hover:bg-primary-dark/[0.035] dark:hover:bg-white/[0.03]"
+                            data-pos="{% if ptg.level == 'bidan' %}{{ ptg.cakupan_search }}{% else %}{{ ptg.posyandu.nama|default:''|lower }}{% endif %}"
+                            data-nama="{{ ptg.nama|lower }}"
+                            data-peran="{{ ptg.level|lower }}"
+                        >
+
+                            <!-- Nomor -->
+                            <td class="px-5 py-4 text-center font-semibold text-slate-400">
+                                {{ page_obj.start_index|add:forloop.counter0 }}
+                            </td>
+
+
+                            <!-- Nama -->
+                            <td class="px-4 py-4">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                        <span class="material-symbols-outlined text-lg">
+                                            person
+                                        </span>
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <p class="truncate font-bold text-slate-800 dark:text-white">
+                                            {{ ptg.nama }}
+                                        </p>
+
+                                        <p class="mt-0.5 text-xs text-slate-400">
+                                            Petugas Posyandu
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Wilayah -->
+                            <td class="px-4 py-4 text-slate-600 dark:text-slate-300">
+                                {% if ptg.level == 'bidan' %}
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            {% for pos in ptg.cakupan_posyandu|slice:":3" %}
+                                                <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                                                    {{ pos.nama }}
+                                                </span>
+                                            {% empty %}
+                                                <span class="text-xs text-rose-500">Belum ada cakupan</span>
+                                            {% endfor %}
+                                            {% if ptg.cakupan_count > 3 %}
+                                                <span class="text-[11px] font-bold text-slate-400">+{{ ptg.cakupan_count|add:"-3" }} lainnya</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <span class="text-[11px] font-semibold text-slate-400">{{ ptg.cakupan_count }} Posyandu</span>
+                                            <a href="{% url 'posyandu:atur_cakupan_bidan' ptg.id %}" class="text-[11px] font-bold text-primary-dark hover:underline dark:text-blue-300">Atur wilayah</a>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-base text-slate-400">location_on</span>
+                                        {{ ptg.posyandu.nama|default:"—" }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+
+                            <!-- Peran -->
+                            <td class="whitespace-nowrap px-4 py-4 text-center">
+
+                                <span class="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold
+                                    {% if ptg.level == 'bidan' %}
+                                        bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400
+                                    {% elif ptg.level == 'kader' %}
+                                        bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                                    {% else %}
+                                        bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400
+                                    {% endif %}
+                                ">
+                                    {{ ptg.get_level_display }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- Telepon -->
+                            <td class="whitespace-nowrap px-4 py-4">
+
+                                <span class="inline-flex items-center gap-2 font-mono text-xs text-slate-600 dark:text-slate-300">
+                                    <span class="material-symbols-outlined text-base text-slate-400">
+                                        call
+                                    </span>
+                                    {{ ptg.no_telp|default:"—" }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- Aksi -->
+                            <td class="px-5 py-4">
+
+                                <div class="flex items-center justify-center gap-1">
+
+                                    {% if ptg.level == 'bidan' %}
+                                    <span
+                                        title="Bidan tidak memiliki akses login"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400"
+                                    >
+                                        <span class="material-symbols-outlined text-[19px]">lock_person</span>
+                                    </span>
+                                    {% elif ptg.user %}
+                                    <button
+                                        type="button"
+                                        title="Akun Kader sudah aktif"
+                                        disabled
+                                        class="inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg text-emerald-500"
+                                    >
+                                        <span class="material-symbols-outlined text-[19px]">verified_user</span>
+                                    </button>
+                                    {% else %}
+                                    <button
+                                        type="button"
+                                        title="Buat akun login Kader"
+                                        onclick="openAccountModal('{% url 'posyandu:buat_akun_petugas' ptg.id %}', '{{ ptg.nama|escapejs }}', '{{ ptg.no_telp|default:''|escapejs }}')"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-primary-dark/10 hover:text-primary-dark dark:hover:bg-primary-dark/20 dark:hover:text-blue-300"
+                                    >
+                                        <span class="material-symbols-outlined text-[19px]">person_add</span>
+                                    </button>
+                                    {% endif %}
+
+
+                                    <a
+                                        href="{% url 'posyandu:edit_petugas' ptg.id %}"
+                                        title="Edit data"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400"
+                                    >
+                                        <span class="material-symbols-outlined text-[19px]">
+                                            edit
+                                        </span>
+                                    </a>
+
+
+                                    <button
+                                        type="button"
+                                        onclick="confirmDelete('{% url 'posyandu:delete_petugas' ptg.id %}', '{{ ptg.nama|escapejs }}')"
+                                        title="Hapus data"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+                                    >
+                                        <span class="material-symbols-outlined text-[19px]">
+                                            delete
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="6" class="px-6 py-20 text-center">
+
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10">
+                                    <span class="material-symbols-outlined text-3xl">
+                                        person_off
+                                    </span>
+                                </div>
+
+                                <p class="mt-4 font-bold text-slate-700 dark:text-slate-200">
+                                    Belum ada data {{ level_petugas|title }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-slate-400">
+                                    Tambahkan petugas baru untuk mulai mengelola data.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 MOBILE CARDS
+            ================================================== -->
+            <div class="space-y-3 bg-slate-50/60 p-4 dark:bg-background-dark/20 md:hidden" id="cardContainer">
+
+                {% for ptg in page_obj %}
+
+                <article
+                    class="petugas-item rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary"
+                    data-pos="{% if ptg.level == 'bidan' %}{{ ptg.cakupan_search }}{% else %}{{ ptg.posyandu.nama|default:''|lower }}{% endif %}"
+                    data-nama="{{ ptg.nama|lower }}"
+                    data-peran="{{ ptg.level|lower }}"
+                >
+
+                    <!-- Header -->
+                    <div class="flex items-start justify-between gap-3">
+
+                        <div class="flex min-w-0 items-center gap-3">
+
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-dark/10 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+                                <span class="material-symbols-outlined text-lg">
+                                    person
+                                </span>
+                            </div>
+
+                            <div class="min-w-0">
+
+                                <h3 class="truncate text-sm font-bold text-slate-900 dark:text-white">
+                                    {{ ptg.nama }}
+                                </h3>
+
+                                <p class="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                    <span class="material-symbols-outlined text-sm">location_on</span>
+                                    <span class="truncate">
+                                        {% if ptg.level == 'bidan' %}
+                                            {{ ptg.cakupan_count }} Posyandu dalam cakupan
+                                        {% else %}
+                                            {{ ptg.posyandu.nama|default:"—" }}
+                                        {% endif %}
+                                    </span>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold
+                            {% if ptg.level == 'bidan' %}
+                                bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400
+                            {% elif ptg.level == 'kader' %}
+                                bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                            {% else %}
+                                bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400
+                            {% endif %}
+                        ">
+                            {{ ptg.get_level_display }}
+                        </span>
+
+                    </div>
+
+
+                    {% if ptg.level == 'bidan' %}
+                    <div class="mt-4 rounded-lg bg-blue-50/70 p-3 dark:bg-blue-500/10">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-xs font-bold text-blue-700 dark:text-blue-300">Cakupan Wilayah</span>
+                            <a href="{% url 'posyandu:atur_cakupan_bidan' ptg.id %}" class="text-xs font-bold text-primary-dark dark:text-blue-300">Atur</a>
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-1.5">
+                            {% for pos in ptg.cakupan_posyandu %}
+                                <span class="rounded-full bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 ring-1 ring-inset ring-blue-100 dark:bg-white/5 dark:text-slate-300 dark:ring-white/10">{{ pos.nama }}</span>
+                            {% empty %}
+                                <span class="text-[11px] text-rose-500">Belum ada wilayah tugas.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Phone -->
+                    <div class="mt-4 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-background-dark/50">
+
+                        <span class="flex items-center gap-2 text-xs text-slate-400">
+                            <span class="material-symbols-outlined text-base">
+                                call
+                            </span>
+                            No. Telepon
+                        </span>
+
+                        <span class="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            {{ ptg.no_telp|default:"—" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Actions -->
+                    <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-200 pt-4 dark:border-white/10">
+
+                        {% if ptg.level == 'bidan' %}
+                        <span class="inline-flex h-9 items-center gap-1.5 rounded-lg bg-slate-100 px-3 text-xs font-bold text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-base">lock_person</span>
+                            Non-login
+                        </span>
+                        {% elif ptg.user %}
+                        <span class="inline-flex h-9 items-center gap-1.5 rounded-lg bg-emerald-50 px-3 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            <span class="material-symbols-outlined text-base">verified_user</span>
+                            Aktif
+                        </span>
+                        {% else %}
+                        <button
+                            type="button"
+                            onclick="openAccountModal('{% url 'posyandu:buat_akun_petugas' ptg.id %}', '{{ ptg.nama|escapejs }}', '{{ ptg.no_telp|default:''|escapejs }}')"
+                            class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition hover:border-primary-dark/30 hover:text-primary-dark dark:border-white/10 dark:text-slate-300 dark:hover:text-blue-300"
+                        >
+                            <span class="material-symbols-outlined text-base">person_add</span>
+                            Buat Akun
+                        </button>
+                        {% endif %}
+
+
+                        <a
+                            href="{% url 'posyandu:edit_petugas' ptg.id %}"
+                            class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-600 dark:border-white/10 dark:text-slate-300 dark:hover:text-amber-400"
+                        >
+                            <span class="material-symbols-outlined text-base">
+                                edit
+                            </span>
+                            Ubah
+                        </a>
+
+
+                        <button
+                            type="button"
+                            onclick="confirmDelete('{% url 'posyandu:delete_petugas' ptg.id %}', '{{ ptg.nama|escapejs }}')"
+                            class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-600 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:text-slate-300 dark:hover:text-rose-400"
+                        >
+                            <span class="material-symbols-outlined text-base">
+                                delete
+                            </span>
+                            Hapus
+                        </button>
+
+                    </div>
+
+                </article>
+
+                {% empty %}
+
+                <div class="rounded-xl border border-slate-200 bg-white px-5 py-12 text-center dark:border-white/10 dark:bg-primary">
+
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10">
+                        <span class="material-symbols-outlined text-3xl">
+                            person_off
+                        </span>
+                    </div>
+
+                    <p class="mt-4 font-bold text-slate-700 dark:text-slate-200">
+                        Belum ada data petugas
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <!-- Empty Search -->
+            <div id="emptyRow" class="hidden px-6 py-16 text-center">
+
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-white/10">
+                    <span class="material-symbols-outlined text-3xl">
+                        search_off
+                    </span>
+                </div>
+
+                <p class="mt-4 font-bold text-slate-700 dark:text-slate-200">
+                    Petugas tidak ditemukan
+                </p>
+
+                <p class="mt-1 text-sm text-slate-400">
+                    Coba gunakan nama atau wilayah kerja yang berbeda.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAGINATION
+            ================================================== -->
+            <div class="flex flex-col gap-3 border-t border-slate-200 bg-white px-5 py-4 dark:border-white/10 dark:bg-primary sm:flex-row sm:items-center sm:justify-between">
+
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400" id="rowCount">
+
+                    {% if page_obj.paginator.count %}
+                        Menampilkan {{ page_obj.start_index }} - {{ page_obj.end_index }} dari {{ page_obj.paginator.count }} data
+                    {% else %}
+                        Belum ada data
+                    {% endif %}
+
+                </span>
+
+
+                {% if page_obj.has_other_pages %}
+
+                <div class="flex items-center gap-1">
+
+                    {% if page_obj.has_previous %}
+
+                    <a
+                        href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-primary-dark/30 hover:text-primary-dark dark:border-white/10 dark:text-slate-400 dark:hover:text-blue-300"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            chevron_left
+                        </span>
+                    </a>
+
+                    {% endif %}
+
+
+                    <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg bg-primary-dark px-2 text-xs font-bold text-white">
+                        {{ page_obj.number }}
+                    </span>
+
+
+                    {% if page_obj.has_next %}
+
+                    <a
+                        href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-primary-dark/30 hover:text-primary-dark dark:border-white/10 dark:text-slate-400 dark:hover:text-blue-300"
+                    >
+                        <span class="material-symbols-outlined text-lg">
+                            chevron_right
+                        </span>
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Back -->
+        <div class="mt-4 flex justify-end">
+
+            <a
+                href="javascript:history.back()"
+                class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-xs font-bold text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 dark:border-white/10 dark:bg-primary dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+            >
+                <span class="material-symbols-outlined text-base">
+                    arrow_back
+                </span>
+                Kembali
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MODAL BUAT AKUN KADER
+====================================================== -->
+<div id="accountModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+
+    <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="accountModalTitle"
+        style="width:min(26rem, calc(100vw - 1rem)); max-width:26rem; max-height:min(92dvh, 760px);"
+        class="app-account-dialog admin-account-dialog flex flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl dark:border-white/10 dark:bg-primary"
+    >
+        <!-- Header -->
+        <div class="shrink-0 border-b border-slate-200 px-5 py-4 sm:px-6 dark:border-white/10">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex min-w-0 items-start gap-3">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-dark/10 text-primary-dark dark:bg-blue-400/10 dark:text-blue-300">
+                        <span class="material-symbols-outlined text-[22px]">manage_accounts</span>
+                    </div>
+                    <div class="min-w-0 pt-0.5">
+                        <h3 id="accountModalTitle" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+                            Buat Akun Kader
+                        </h3>
+                        <p id="accountPetugasName" class="mt-0.5 truncate text-xs font-medium text-slate-500 dark:text-slate-400"></p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onclick="closeAccountModal()"
+                    aria-label="Tutup modal"
+                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary-dark/10 dark:hover:bg-white/10 dark:hover:text-white"
+                >
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+        </div>
+
+        <form id="accountForm" method="post" class="flex min-h-0 flex-1 flex-col">
+            {% csrf_token %}
+
+            <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+                <!-- Pilihan Mode -->
+                <div>
+                    <p class="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
+                        Pilih cara membuat akun
+                    </p>
+
+                    <div class="mt-3 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 dark:bg-black/20" role="group" aria-label="Mode pembuatan akun">
+                        <button
+                            id="accountModeAuto"
+                            type="button"
+                            data-account-mode="auto"
+                            aria-pressed="true"
+                            class="account-mode-btn min-h-12 rounded-xl border border-primary-dark bg-primary-dark px-3 py-2 text-left text-white shadow-sm transition focus:outline-none focus:ring-4 focus:ring-primary-dark/15"
+                        >
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">auto_awesome</span>
+                                <span class="text-xs font-extrabold">Otomatis</span>
+                            </span>
+                            <span class="mt-0.5 block text-[10px] leading-4 text-white/80">Paling cepat</span>
+                        </button>
+
+                        <button
+                            id="accountModeManual"
+                            type="button"
+                            data-account-mode="manual"
+                            aria-pressed="false"
+                            class="account-mode-btn min-h-12 rounded-xl border border-transparent bg-white px-3 py-2 text-left text-slate-600 transition hover:border-slate-200 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-primary-dark/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                        >
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                                <span class="text-xs font-extrabold">Atur Sendiri</span>
+                            </span>
+                            <span class="mt-0.5 block text-[10px] leading-4 text-slate-400">Username & sandi</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mode Otomatis -->
+                <div id="accountAutoPanel" class="mt-5 space-y-3">
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
+                                <span class="material-symbols-outlined text-lg">bolt</span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-extrabold text-emerald-900 dark:text-emerald-200">Akun dibuat otomatis</p>
+                                <p class="mt-1 text-[11px] leading-5 text-emerald-700 dark:text-emerald-300/90">
+                                    Sistem memakai nomor HP Kader sebagai username dan membuat password sementara secara otomatis.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2 sm:grid-cols-2">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div class="flex items-center gap-2 text-slate-400">
+                                <span class="material-symbols-outlined text-base">person</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Username</span>
+                            </div>
+                            <p id="accountAutoUsername" class="mt-2 break-all text-sm font-extrabold text-slate-800 dark:text-white">-</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-white/10 dark:bg-white/5">
+                            <div class="flex items-center gap-2 text-slate-400">
+                                <span class="material-symbols-outlined text-base">key</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Password</span>
+                            </div>
+                            <p class="mt-2 text-sm font-extrabold text-slate-800 dark:text-white">Dibuat otomatis</p>
+                        </div>
+                    </div>
+
+                    <div id="accountAutoWarning" class="hidden rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-[11px] leading-5 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+                        Nomor HP Kader belum tersedia, sehingga username otomatis tidak dapat dibuat. Pilih <strong>Atur Sendiri</strong> dan isi username manual.
+                    </div>
+                </div>
+
+                <!-- Mode Manual -->
+                <div id="accountManualPanel" class="mt-5 hidden space-y-4">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-[11px] leading-5 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
+                        Isi kredensial yang ingin digunakan. Jika salah satu kolom dibiarkan kosong, bagian tersebut tetap dapat dibuat otomatis oleh sistem.
+                    </div>
+
+                    <div>
+                        <label for="accountUsername" class="mb-1.5 flex items-center justify-between gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>Username</span>
+                            <span class="font-medium text-slate-400">Opsional</span>
+                        </label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center text-slate-400">
+                                <span class="material-symbols-outlined text-lg">alternate_email</span>
+                            </span>
+                            <input
+                                id="accountUsername"
+                                name="username"
+                                type="text"
+                                autocomplete="off"
+                                maxlength="150"
+                                placeholder="Contoh: kader.melati"
+                                class="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                            >
+                        </div>
+                        <p id="accountUsernameHint" class="mt-1.5 text-[11px] leading-4 text-slate-400"></p>
+                    </div>
+
+                    <div>
+                        <label for="accountPassword" class="mb-1.5 flex items-center justify-between gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>Password</span>
+                            <span class="font-medium text-slate-400">Opsional</span>
+                        </label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center text-slate-400">
+                                <span class="material-symbols-outlined text-lg">lock</span>
+                            </span>
+                            <input
+                                id="accountPassword"
+                                name="password"
+                                type="password"
+                                autocomplete="new-password"
+                                placeholder="Isi password atau biarkan otomatis"
+                                class="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                            >
+                            <button type="button" data-password-toggle="accountPassword" aria-label="Tampilkan password" class="absolute inset-y-0 right-0 inline-flex w-12 items-center justify-center rounded-r-xl text-slate-400 hover:text-slate-700 focus:outline-none dark:hover:text-white">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                            </button>
+                        </div>
+                        <p class="mt-1.5 text-[11px] leading-4 text-slate-400">Password manual mengikuti aturan keamanan Django.</p>
+                    </div>
+
+                    <div>
+                        <label for="accountPasswordConfirm" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Konfirmasi Password
+                        </label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center text-slate-400">
+                                <span class="material-symbols-outlined text-lg">verified_user</span>
+                            </span>
+                            <input
+                                id="accountPasswordConfirm"
+                                name="password_confirm"
+                                type="password"
+                                autocomplete="new-password"
+                                placeholder="Ulangi password manual"
+                                class="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary-dark focus:ring-4 focus:ring-primary-dark/10 dark:border-white/10 dark:bg-background-dark dark:text-white"
+                            >
+                            <button type="button" data-password-toggle="accountPasswordConfirm" aria-label="Tampilkan konfirmasi password" class="absolute inset-y-0 right-0 inline-flex w-12 items-center justify-center rounded-r-xl text-slate-400 hover:text-slate-700 focus:outline-none dark:hover:text-white">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="shrink-0 border-t border-slate-200 bg-white px-5 py-4 sm:px-6 dark:border-white/10 dark:bg-primary">
+                <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button
+                        type="button"
+                        onclick="closeAccountModal()"
+                        class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200/60 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        id="accountSubmitButton"
+                        type="submit"
+                        class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary-dark px-5 text-xs font-extrabold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20"
+                    >
+                        <span id="accountSubmitIcon" class="material-symbols-outlined text-lg">auto_awesome</span>
+                        <span id="accountSubmitLabel">Buat Otomatis</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- =====================================================
+     DELETE MODAL
+====================================================== -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+
+    <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleteModalTitle"
+        style="width:min(22.5rem, calc(100vw - 1.5rem)); max-width:22.5rem;"
+        class="app-action-dialog admin-action-dialog rounded-xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-primary"
+    >
+
+        <div class="mb-5 flex items-start gap-3">
+
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+                <span class="material-symbols-outlined text-xl">
+                    delete
+                </span>
+            </div>
+
+            <div>
+
+                <h3 id="deleteModalTitle" class="text-sm font-bold text-slate-900 dark:text-white">
+                    Hapus Data Petugas
+                </h3>
+
+                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400" id="deleteMsg">
+                    Yakin ingin menghapus data ini?
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="flex justify-end gap-2">
+
+            <button
+                type="button"
+                onclick="closeDelete()"
+                class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+            >
+                Batal
+            </button>
+
+            <form id="deleteForm" method="POST">
+
+                {% csrf_token %}
+
+                <input type="hidden" name="_method" value="DELETE">
+
+                <button
+                    type="submit"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/20"
+                >
+                    <span class="material-symbols-outlined text-base">
+                        delete
+                    </span>
+                    Ya, Hapus
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+<script>
+function applyFilter() {
+    const input = document.getElementById('searchInput');
+    const emptyRow = document.getElementById('emptyRow');
+    const rowCountEl = document.getElementById('rowCount');
+
+    if (!input) {
+        return;
+    }
+
+    const keyword = input.value.toLowerCase().trim();
+    const items = document.querySelectorAll('.petugas-item');
+
+    let desktopVisible = 0;
+    let mobileVisible = 0;
+    let desktopTotal = 0;
+    let mobileTotal = 0;
+
+    items.forEach((item) => {
+        const nama = (item.dataset.nama || '').toLowerCase();
+        const posyandu = (item.dataset.pos || '').toLowerCase();
+        const peran = (item.dataset.peran || '').toLowerCase();
+
+        const match = !keyword
+            || nama.includes(keyword)
+            || posyandu.includes(keyword)
+            || peran.includes(keyword);
+
+        item.style.display = match ? '' : 'none';
+
+        const isMobileCard = item.closest('#cardContainer') !== null;
+
+        if (isMobileCard) {
+            mobileTotal++;
+            if (match) {
+                mobileVisible++;
+            }
+        } else {
+            desktopTotal++;
+            if (match) {
+                desktopVisible++;
+            }
+        }
+    });
+
+    const actualTotal = Math.max(desktopTotal, mobileTotal);
+    const actualVisible = Math.max(desktopVisible, mobileVisible);
+
+    if (emptyRow) {
+        emptyRow.classList.toggle(
+            'hidden',
+            actualVisible > 0 || actualTotal === 0
+        );
+    }
+
+    if (!rowCountEl) {
+        return;
+    }
+
+    if (!keyword) {
+        rowCountEl.textContent =
+            {% if page_obj.paginator.count %}
+            'Menampilkan {{ page_obj.start_index }} - {{ page_obj.end_index }} dari {{ page_obj.paginator.count }} data';
+            {% else %}
+            'Belum ada data';
+            {% endif %}
+    } else {
+        rowCountEl.textContent =
+            `Menampilkan ${actualVisible} data yang cocok pada halaman ini`;
+    }
+}
+
+
+let accountCurrentMode = 'auto';
+
+
+function normalizePhoneForUsername(phone) {
+    return String(phone || '').replace(/\D/g, '');
+}
+
+
+function setAccountMode(mode, options = {}) {
+    const manualPanel = document.getElementById('accountManualPanel');
+    const autoPanel = document.getElementById('accountAutoPanel');
+    const autoButton = document.getElementById('accountModeAuto');
+    const manualButton = document.getElementById('accountModeManual');
+    const submitLabel = document.getElementById('accountSubmitLabel');
+    const submitIcon = document.getElementById('accountSubmitIcon');
+    const usernameInput = document.getElementById('accountUsername');
+
+    if (!manualPanel || !autoPanel || !autoButton || !manualButton) {
+        return;
+    }
+
+    if (mode === 'auto' && autoButton.disabled) {
+        mode = 'manual';
+    }
+
+    accountCurrentMode = mode === 'manual' ? 'manual' : 'auto';
+    const isAuto = accountCurrentMode === 'auto';
+
+    autoPanel.classList.toggle('hidden', !isAuto);
+    manualPanel.classList.toggle('hidden', isAuto);
+
+    [autoButton, manualButton].forEach((button) => {
+        const active = button.dataset.accountMode === accountCurrentMode;
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+
+        button.classList.toggle('bg-primary-dark', active);
+        button.classList.toggle('border-primary-dark', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('shadow-sm', active);
+
+        button.classList.toggle('bg-white', !active);
+        button.classList.toggle('border-transparent', !active);
+        button.classList.toggle('text-slate-600', !active);
+        button.classList.toggle('dark:bg-white/5', !active);
+        button.classList.toggle('dark:text-slate-300', !active);
+    });
+
+    if (submitLabel) {
+        submitLabel.textContent = isAuto ? 'Buat Otomatis' : 'Buat Akun';
+    }
+
+    if (submitIcon) {
+        submitIcon.textContent = isAuto ? 'auto_awesome' : 'person_add';
+    }
+
+    if (!isAuto && options.focus !== false && usernameInput) {
+        window.setTimeout(() => usernameInput.focus(), 50);
+    }
+}
+
+
+function openAccountModal(url, nama, phone) {
+    const modal = document.getElementById('accountModal');
+    const form = document.getElementById('accountForm');
+    const nameEl = document.getElementById('accountPetugasName');
+    const usernameInput = document.getElementById('accountUsername');
+    const passwordInput = document.getElementById('accountPassword');
+    const confirmInput = document.getElementById('accountPasswordConfirm');
+    const hint = document.getElementById('accountUsernameHint');
+    const autoUsernameEl = document.getElementById('accountAutoUsername');
+    const autoWarning = document.getElementById('accountAutoWarning');
+    const autoButton = document.getElementById('accountModeAuto');
+
+    if (!modal || !form || !usernameInput || !passwordInput || !confirmInput) {
+        return;
+    }
+
+    form.action = url;
+    usernameInput.value = '';
+    passwordInput.value = '';
+    confirmInput.value = '';
+
+    if (nameEl) {
+        nameEl.textContent = nama ? `Kader • ${nama}` : 'Kader';
+    }
+
+    const automaticUsername = normalizePhoneForUsername(phone);
+
+    if (hint) {
+        hint.textContent = automaticUsername
+            ? `Jika dikosongkan, sistem menggunakan ${automaticUsername}.`
+            : 'Nomor HP belum tersedia. Isi username secara manual.';
+    }
+
+    if (autoUsernameEl) {
+        autoUsernameEl.textContent = automaticUsername || 'Tidak tersedia';
+    }
+
+    if (autoWarning) {
+        autoWarning.classList.toggle('hidden', Boolean(automaticUsername));
+    }
+
+    if (autoButton) {
+        autoButton.disabled = !automaticUsername;
+        autoButton.classList.toggle('cursor-not-allowed', !automaticUsername);
+        autoButton.classList.toggle('opacity-50', !automaticUsername);
+    }
+
+    setAccountMode(automaticUsername ? 'auto' : 'manual', { focus: false });
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.classList.add('overflow-hidden');
+
+    if (!automaticUsername) {
+        window.setTimeout(() => usernameInput.focus(), 80);
+    }
+}
+
+
+function closeAccountModal() {
+    const modal = document.getElementById('accountModal');
+    const form = document.getElementById('accountForm');
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.classList.remove('overflow-hidden');
+
+    if (form) {
+        form.reset();
+    }
+
+    accountCurrentMode = 'auto';
+}
+
+
+function confirmDelete(url, nama) {
+    const modal = document.getElementById('deleteModal');
+    const message = document.getElementById('deleteMsg');
+    const form = document.getElementById('deleteForm');
+
+    if (!modal || !message || !form) {
+        return;
+    }
+
+    message.textContent =
+        `Yakin ingin menghapus "${nama}"? Data yang sudah dihapus tidak dapat dikembalikan.`;
+
+    form.action = url;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    document.body.classList.add('overflow-hidden');
+}
+
+
+function closeDelete() {
+    const modal = document.getElementById('deleteModal');
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+
+    document.body.classList.remove('overflow-hidden');
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    applyFilter();
+
+    const deleteModal = document.getElementById('deleteModal');
+    const accountModal = document.getElementById('accountModal');
+    const accountForm = document.getElementById('accountForm');
+
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function (event) {
+            if (event.target === deleteModal) {
+                closeDelete();
+            }
+        });
+    }
+
+    if (accountModal) {
+        accountModal.addEventListener('click', function (event) {
+            if (event.target === accountModal) {
+                closeAccountModal();
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-account-mode]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            if (button.disabled) {
+                return;
+            }
+            setAccountMode(button.dataset.accountMode || 'auto');
+        });
+    });
+
+    if (accountForm) {
+        accountForm.addEventListener('submit', function (event) {
+            const usernameInput = document.getElementById('accountUsername');
+            const passwordInput = document.getElementById('accountPassword');
+            const confirmationInput = document.getElementById('accountPasswordConfirm');
+
+            if (accountCurrentMode === 'auto') {
+                if (usernameInput) usernameInput.value = '';
+                if (passwordInput) passwordInput.value = '';
+                if (confirmationInput) confirmationInput.value = '';
+                return;
+            }
+
+            const password = passwordInput?.value || '';
+            const confirmation = confirmationInput?.value || '';
+
+            if ((password || confirmation) && password !== confirmation) {
+                event.preventDefault();
+                window.alert('Konfirmasi password tidak sama dengan password.');
+                confirmationInput?.focus();
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const targetId = button.dataset.passwordToggle;
+            const input = document.getElementById(targetId);
+            const icon = button.querySelector('.material-symbols-outlined');
+
+            if (!input) {
+                return;
+            }
+
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            button.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+            if (icon) {
+                icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+            }
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeAccountModal();
+            closeDelete();
+        }
+    });
+});
+</script>
+
+{% endblock %}

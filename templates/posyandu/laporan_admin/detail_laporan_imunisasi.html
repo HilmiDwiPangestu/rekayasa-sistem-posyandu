@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block subtitle %}Detail Laporan Imunisasi{% endblock %}
+
+{% block content %}
+
+<div class="px-1 py-2 text-slate-800 dark:text-slate-100 sm:px-2">
+
+    <div class="mx-auto w-full max-w-screen-2xl space-y-6">
+
+        <!-- Header -->
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+            <div>
+
+                <a
+                    href="{% url 'posyandu:laporan_imunisasi' %}"
+                    class="mb-3 inline-flex items-center gap-1 text-sm font-semibold text-slate-500 transition hover:text-primary-dark dark:text-slate-400">
+
+                    <span class="material-symbols-outlined text-lg">
+                        arrow_back
+                    </span>
+
+                    Kembali ke laporan
+                </a>
+
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+                    Detail Imunisasi
+                </h1>
+
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {{ jadwal.posyandu.nama }}
+                    ·
+                    {{ jadwal.tgl_kegiatan|date:"d F Y" }}
+                </p>
+
+            </div>
+
+            <a
+                href="{% url 'posyandu:cetak_imunisasi_pdf' %}?id_jadwal={{ jadwal.id_jadwal }}"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-dark/90 focus:outline-none focus:ring-4 focus:ring-primary-dark/20">
+
+                <span class="material-symbols-outlined text-lg">
+                    download
+                </span>
+
+                Unduh Laporan PDF
+            </a>
+
+        </div>
+
+
+        <!-- Statistik -->
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <p class="text-xs font-semibold text-slate-500">Total Peserta</p>
+                <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">
+                    {{ total_peserta }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Sudah Divaksin</p>
+                <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">
+                    {{ total_sudah }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Belum Divaksin</p>
+                <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">
+                    {{ total_belum }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                <p class="text-xs font-semibold text-primary-dark dark:text-blue-200">Total Pemberian</p>
+                <p class="mt-1 text-2xl font-black text-slate-900 dark:text-white">
+                    {{ total_pemberian }}
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- Tabel peserta -->
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[850px] text-sm">
+
+                    <thead>
+                        <tr class="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-950/50">
+
+                            <th class="px-5 py-4 text-center">No.</th>
+                            <th class="px-4 py-4">Peserta</th>
+                            <th class="px-4 py-4">Kategori</th>
+                            <th class="px-4 py-4">Status</th>
+                            <th class="px-4 py-4">Vaksin Diberikan</th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+
+                        {% for item in daftar_peserta %}
+
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+
+                                <td class="px-5 py-4 text-center text-slate-400">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">
+                                    {{ item.peserta.nama_peserta }}
+                                </td>
+
+                                <td class="px-4 py-4">
+
+                                    {% if item.peserta.status_peserta == "balita" %}
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            Balita
+                                        </span>
+                                    {% else %}
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            Ibu Hamil
+                                        </span>
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="px-4 py-4">
+
+                                    {% if item.sudah_divaksin %}
+
+                                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            Sudah
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                                            Belum
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="px-4 py-4">
+
+                                    {% if item.daftar_vaksin %}
+
+                                        <div class="flex flex-wrap gap-1.5">
+
+                                            {% for vaksin in item.daftar_vaksin %}
+
+                                                <span class="rounded-md border border-primary-dark/15 bg-primary-dark/5 px-2 py-1 text-xs font-semibold text-primary-dark dark:border-primary-dark/30 dark:bg-primary-dark/10 dark:text-blue-200">
+
+                                                    {{ vaksin.get_jenis_vaksin_display }}
+
+                                                    {% if vaksin.is_balita and vaksin.dosis %}
+                                                        · {{ vaksin.get_dosis_display }}
+                                                    {% endif %}
+
+                                                </span>
+
+                                            {% endfor %}
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <span class="text-xs text-slate-400">
+                                            Belum ada vaksin yang diberikan
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="5" class="px-5 py-16 text-center text-slate-400">
+                                    Belum ada peserta pada Posyandu ini.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}
