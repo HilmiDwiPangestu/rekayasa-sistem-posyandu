@@ -18,7 +18,7 @@
         <form method="GET" class="flex flex-wrap items-end gap-4">
             <div class="flex flex-col gap-1.5 min-w-[200px] flex-1 sm:flex-none">
                 <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pilih Periode Bulan</label>
-                <select name="bulan" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                <select name="bulan" class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
                     {% for b_val, b_name in bulan_choices %}
                     <option value="{{ b_val }}" {% if b_val == bulan %}selected{% endif %}>{{ b_name }}</option>
                     {% endfor %}
@@ -26,7 +26,7 @@
             </div>
             <div class="flex flex-col gap-1.5 min-w-[150px] flex-1 sm:flex-none">
                 <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tahun</label>
-                <select name="tahun" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                <select name="tahun" class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
                     {% for t in tahun_choices %}
                     <option value="{{ t }}" {% if t == tahun %}selected{% endif %}>{{ t }}</option>
                     {% endfor %}
@@ -34,7 +34,7 @@
             </div>
             <div class="flex flex-col gap-1.5 min-w-[180px] flex-1 sm:flex-none">
                 <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Jenis Vaksin</label>
-                <select name="vaksin" class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
+                <select name="vaksin" class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium text-slate-800 dark:text-white p-2.5 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition">
                     <option value="">Semua Vaksin</option>
                     {% for v_val, v_name in vaksin_choices %}
                     <option value="{{ v_val }}" {% if v_val == vaksin %}selected{% endif %}>{{ v_name }}</option>

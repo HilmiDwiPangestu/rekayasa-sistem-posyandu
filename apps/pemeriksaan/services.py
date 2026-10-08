@@ -1,5 +1,6 @@
 """Service presentasi/analisis untuk modul pemeriksaan."""
 
+from apps.deteksi.services.who_services import koreksi_panjang_tinggi
 from apps.laporan.helper.kms_standards import bbu_series, imtu_series, pbu_tbu_series
 
 from .models import PemeriksaanBalita
@@ -25,16 +26,32 @@ def build_kms_payload(peserta) -> dict:
             continue
 
         berat = float(row.berat_badan) if row.berat_badan is not None else None
-        tinggi = float(row.tinggi_badan) if row.tinggi_badan is not None else None
+        tinggi_input = float(row.tinggi_badan) if row.tinggi_badan is not None else None
+        tinggi_who = tinggi_input
+
+        # Grafik PB/TB-U dan IMT/U harus memakai nilai antropometri yang sama
+        # dengan perhitungan Z-score WHO. Bila posisi ukur tidak sesuai kelompok
+        # usia, WHO memerlukan koreksi 0,7 cm. Nilai input asli tetap disimpan
+        # pada database dan ikut dikirim sebagai `tinggi_input` untuk audit.
+        if tinggi_input is not None and getattr(row, "jenis_pengukuran", None):
+            tinggi_who = koreksi_panjang_tinggi(
+                nilai=tinggi_input,
+                jenis_pengukuran=row.jenis_pengukuran,
+                umur_hari=row.usia_hari,
+                umur=row.usia_bulan,
+            )
+
         imt = None
-        if berat is not None and tinggi is not None and berat > 0 and tinggi > 0:
-            tinggi_meter = tinggi / 100.0
+        if berat is not None and tinggi_who is not None and berat > 0 and tinggi_who > 0:
+            tinggi_meter = tinggi_who / 100.0
             imt = round(berat / (tinggi_meter ** 2), 2)
 
         points.append({
             "bulan": int(row.usia_bulan),
             "berat": berat,
-            "tinggi": tinggi,
+            "tinggi": round(float(tinggi_who), 2) if tinggi_who is not None else None,
+            "tinggi_input": tinggi_input,
+            "jenis_pengukuran": getattr(row, "jenis_pengukuran", None),
             "imt": imt,
             "tanggal": row.tgl_pemeriksaan.strftime("%d-%m-%Y"),
             "z_score": float(row.z_score) if row.z_score is not None else None,

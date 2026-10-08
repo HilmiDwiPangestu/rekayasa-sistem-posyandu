@@ -677,7 +677,9 @@ body {
 }
 
 
-/* ===== Export toolbar alignment ===== */
+/* ===== Export toolbar alignment =====
+   Mobile: tombol ekspor harus tetap terlihat, mudah disentuh, dan boleh turun baris.
+   Desktop: tetap ringkas dalam satu baris. */
 .export-inline-group {
     display: inline-flex !important;
     align-items: center !important;
@@ -703,6 +705,419 @@ body {
 
 @media (max-width: 639px) {
     .export-inline-group {
+        display: flex !important;
+        width: 100% !important;
         max-width: 100%;
+        flex-wrap: wrap !important;
+    }
+
+    .export-inline-group > a,
+    .export-inline-group > button {
+        flex: 1 1 calc(50% - .25rem) !important;
+        min-width: 0;
+        min-height: 44px;
+    }
+
+    .export-inline-group > .export-count-badge {
+        flex: 1 0 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* ===== Form control safety baseline =====
+   Tailwind's preflight removes the browser border from form controls. Some
+   templates only set a border colour (for example `border-slate-200`) or use
+   legacy Django classes such as `form-control`, so the field can look flat or
+   borderless. This zero-specificity baseline restores a complete control
+   appearance while still allowing every Tailwind utility on the element to
+   override it. */
+:where(
+    #pageContent input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+    #pageContent select,
+    #pageContent textarea
+) {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding: .625rem .8rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(203 213 225);
+    border-radius: .75rem;
+    background-color: #fff;
+    color: rgb(30 41 59);
+    font: inherit;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+:where(#pageContent textarea) {
+    min-height: 6rem;
+    resize: vertical;
+}
+
+:where(
+    #pageContent input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
+    #pageContent select:focus,
+    #pageContent textarea:focus
+) {
+    border-color: rgb(40 69 214);
+    box-shadow: 0 0 0 3px rgb(40 69 214 / .13);
+}
+
+.dark :where(
+    #pageContent input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+    #pageContent select,
+    #pageContent textarea
+) {
+    border-color: rgb(71 85 105);
+    background-color: rgb(15 23 42 / .78);
+    color: rgb(241 245 249);
+}
+
+:where(
+    #pageContent input:disabled,
+    #pageContent select:disabled,
+    #pageContent textarea:disabled,
+    #pageContent input[readonly],
+    #pageContent textarea[readonly]
+) {
+    cursor: not-allowed;
+    background-color: rgb(248 250 252);
+    color: rgb(100 116 139);
+    opacity: 1;
+}
+
+.dark :where(
+    #pageContent input:disabled,
+    #pageContent select:disabled,
+    #pageContent textarea:disabled,
+    #pageContent input[readonly],
+    #pageContent textarea[readonly]
+) {
+    background-color: rgb(30 41 59 / .75);
+    color: rgb(148 163 184);
+}
+
+:where(#pageContent input[type="date"], #pageContent input[type="time"]) {
+    color-scheme: light;
+}
+
+.dark :where(#pageContent input[type="date"], #pageContent input[type="time"]) {
+    color-scheme: dark;
+}
+
+/* ===== Consistent Django form controls =====
+   Several forms use semantic form-* classes that are intentionally kept
+   outside generated Tailwind CSS so they remain styled even when dist CSS
+   has not been rebuilt yet. */
+#pageContent .form-control,
+#pageContent .form-input,
+#pageContent .form-select,
+#pageContent .form-textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    border: 1px solid rgb(203 213 225);
+    border-radius: .75rem;
+    background-color: #fff;
+    color: rgb(30 41 59);
+    font: inherit;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+#pageContent .form-control,
+#pageContent .form-input,
+#pageContent .form-select {
+    min-height: 2.75rem;
+    padding: .625rem .8rem;
+}
+
+#pageContent .form-select {
+    padding-right: 2.25rem;
+}
+
+#pageContent .form-textarea {
+    min-height: 6rem;
+    padding: .7rem .8rem;
+    resize: vertical;
+}
+
+#pageContent textarea.form-control {
+    min-height: 6rem;
+    padding: .7rem .8rem;
+    resize: vertical;
+}
+
+#pageContent .form-input::placeholder,
+#pageContent .form-textarea::placeholder {
+    color: rgb(148 163 184);
+    opacity: 1;
+}
+
+#pageContent .form-control:focus,
+#pageContent .form-input:focus,
+#pageContent .form-select:focus,
+#pageContent .form-textarea:focus {
+    border-color: rgb(40 69 214);
+    box-shadow: 0 0 0 3px rgb(40 69 214 / .13);
+}
+
+#pageContent .form-control:disabled,
+#pageContent .form-input:disabled,
+#pageContent .form-select:disabled,
+#pageContent .form-textarea:disabled,
+#pageContent .form-input[readonly] {
+    cursor: not-allowed;
+    background-color: rgb(248 250 252);
+    color: rgb(100 116 139);
+}
+
+#pageContent .form-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 auto;
+    accent-color: rgb(40 69 214);
+}
+
+.dark #pageContent .form-control,
+.dark #pageContent .form-input,
+.dark #pageContent .form-select,
+.dark #pageContent .form-textarea {
+    border-color: rgb(71 85 105);
+    background-color: rgb(15 23 42 / .78);
+    color: rgb(241 245 249);
+}
+
+.dark #pageContent .form-control:disabled,
+.dark #pageContent .form-input:disabled,
+.dark #pageContent .form-select:disabled,
+.dark #pageContent .form-textarea:disabled,
+.dark #pageContent .form-input[readonly] {
+    background-color: rgb(30 41 59 / .75);
+    color: rgb(148 163 184);
+}
+
+/* 16px input text avoids automatic browser zoom on many mobile browsers. */
+@media (max-width: 639px) {
+    #pageContent .form-control,
+    #pageContent .form-input,
+    #pageContent .form-select,
+    #pageContent .form-textarea {
+        font-size: 16px;
+    }
+}
+
+/* ===== Validation & form UX consistency ===== */
+#pageContent .posyandu-field-invalid,
+.posyandu-field-invalid {
+    border-color: rgb(244 63 94) !important;
+    box-shadow: 0 0 0 3px rgb(244 63 94 / .12) !important;
+}
+
+#pageContent .posyandu-field-invalid:focus,
+.posyandu-field-invalid:focus {
+    border-color: rgb(225 29 72) !important;
+    box-shadow: 0 0 0 3px rgb(244 63 94 / .18) !important;
+}
+
+/* Keep typed values and placeholders clear of decorative/action icons even
+   if a Tailwind utility is missed by a stale build/cache. */
+.posyandu-has-leading-icon > input,
+.posyandu-has-leading-icon > select,
+.posyandu-has-leading-icon > textarea {
+    padding-left: 2.75rem !important;
+}
+
+.posyandu-has-trailing-action > input,
+.posyandu-has-trailing-action > select,
+.posyandu-has-trailing-action > textarea {
+    padding-right: 2.75rem !important;
+}
+
+.posyandu-has-leading-icon.posyandu-has-trailing-action > input {
+    padding-left: 2.75rem !important;
+    padding-right: 2.75rem !important;
+}
+
+/* Raw Django error lists should never look like a framework/debug dump. The
+   same messages are shown through the consistent SweetAlert validation UI. */
+#pageContent ul.errorlist {
+    display: none !important;
+}
+
+.posyandu-swal-validation {
+    width: min(30rem, calc(100vw - 1rem)) !important;
+    padding: 1.35rem 1.25rem 1.2rem !important;
+}
+
+.posyandu-swal-validation .swal2-icon {
+    margin: .15rem auto .85rem !important;
+}
+
+.posyandu-swal-validation-title {
+    padding: 0 .5rem !important;
+    margin: 0 !important;
+    font-size: 1.2rem !important;
+    line-height: 1.35 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
+.posyandu-swal-validation-content {
+    margin: .8rem 0 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.posyandu-validation-alert {
+    width: 100%;
+    text-align: left;
+    color: rgb(71 85 105);
+    font-size: .875rem;
+    line-height: 1.45;
+}
+
+.posyandu-validation-intro {
+    margin: 0 0 .8rem;
+    color: rgb(100 116 139);
+    text-align: center;
+    font-size: .84rem;
+    line-height: 1.5;
+}
+
+.posyandu-validation-list {
+    display: grid;
+    gap: .55rem;
+    margin: 0;
+    padding: 0 .05rem;
+    max-height: min(18rem, 42vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.posyandu-validation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    width: 100%;
+    padding: .7rem .75rem;
+    border: 1px solid rgb(226 232 240);
+    border-radius: .75rem;
+    background: rgb(248 250 252);
+    box-sizing: border-box;
+}
+
+.posyandu-validation-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 1.55rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    margin-top: .05rem;
+    border-radius: 9999px;
+    background: rgb(254 243 199);
+    color: rgb(146 64 14);
+    font-size: .72rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.posyandu-validation-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.posyandu-validation-label {
+    margin: 0;
+    color: rgb(30 41 59);
+    font-size: .86rem;
+    line-height: 1.35;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.posyandu-validation-message {
+    margin-top: .18rem;
+    color: rgb(100 116 139);
+    font-size: .8rem;
+    line-height: 1.45;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.posyandu-swal-validation-actions {
+    width: 100%;
+    margin: 1rem 0 0 !important;
+}
+
+.posyandu-swal-validation-confirm {
+    min-width: 10.5rem;
+    margin: 0 !important;
+    padding: .7rem 1.15rem !important;
+    border-radius: .7rem !important;
+    font-size: .875rem !important;
+    font-weight: 600 !important;
+}
+
+.dark .posyandu-validation-alert,
+.dark .posyandu-validation-intro {
+    color: rgb(203 213 225);
+}
+
+.dark .posyandu-validation-item {
+    border-color: rgb(51 65 85);
+    background: rgb(30 41 59);
+}
+
+.dark .posyandu-validation-label {
+    color: rgb(241 245 249);
+}
+
+.dark .posyandu-validation-message {
+    color: rgb(203 213 225);
+}
+
+@media (max-width: 639px) {
+    .posyandu-swal-validation {
+        width: calc(100vw - 1rem) !important;
+        padding: 1.05rem .9rem 1rem !important;
+    }
+
+    .posyandu-swal-validation-title {
+        font-size: 1.08rem !important;
+    }
+
+    .posyandu-validation-intro {
+        font-size: .8rem;
+    }
+
+    .posyandu-validation-item {
+        gap: .6rem;
+        padding: .65rem;
+    }
+
+    .posyandu-validation-label {
+        font-size: .82rem;
+    }
+
+    .posyandu-validation-message {
+        font-size: .78rem;
+    }
+
+    .posyandu-swal-validation-confirm {
+        width: 100%;
     }
 }

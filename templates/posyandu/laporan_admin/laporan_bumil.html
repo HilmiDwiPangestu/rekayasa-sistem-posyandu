@@ -50,6 +50,7 @@
 
                     <a
                         href="{% url 'posyandu:export_bumil_excel' %}{% if query_string %}?{{ query_string }}{% endif %}"
+                        download
                         class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/10"
                     >
                         <span class="material-symbols-outlined text-lg">
@@ -60,7 +61,7 @@
 
                     <a
                         href="{% url 'posyandu:cetak_bumil_pdf' %}{% if query_string %}?{{ query_string }}{% endif %}"
-                        target="_blank"
+                        download
                         class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/10"
                     >
                         <span class="material-symbols-outlined text-lg">

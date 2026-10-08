@@ -2,38 +2,214 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Laporan Data Peserta</title>
+<title>{{ title|default:"Laporan Data Peserta" }}</title>
 <style>
-@page { size: A4 landscape; margin: 12mm 10mm; }
-body { font-family: Helvetica, Arial, sans-serif; font-size: 8pt; color: #111; }
-h1 { text-align:center; font-size:14pt; margin:0 0 4px; }
-.meta { text-align:center; color:#555; margin-bottom:12px; }
-table { width:100%; border-collapse:collapse; }
-th, td { border:1px solid #333; padding:4px 3px; vertical-align:middle; }
-th { background:#f1f5f9; text-align:center; font-weight:bold; }
-.center { text-align:center; } .left { text-align:left; }
-.footer { margin-top:10px; font-size:7pt; color:#666; }
+    @page {
+        size: A4 landscape;
+        margin: 12mm 9mm 14mm 9mm;
+    }
+
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 7.4pt;
+        line-height: 1.25;
+        color: #1e293b;
+    }
+
+    .header-table {
+        width: 100%;
+        border: 0;
+        margin-bottom: 8px;
+    }
+
+    .header-table td {
+        border: 0;
+        padding: 0;
+        vertical-align: top;
+    }
+
+    .title {
+        font-size: 14pt;
+        font-weight: bold;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+    }
+
+    .subtitle {
+        font-size: 8pt;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .summary {
+        text-align: right;
+        font-size: 7.5pt;
+        color: #475569;
+    }
+
+    .summary strong {
+        color: #0f172a;
+    }
+
+    .filter-box {
+        border: 1px solid #dbe4ee;
+        background: #f8fafc;
+        padding: 6px 8px;
+        margin: 0 0 9px 0;
+        color: #475569;
+    }
+
+    table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .data-table th,
+    .data-table td {
+        border: 0.6px solid #94a3b8;
+        padding: 3.5px 3px;
+        vertical-align: top;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .data-table th {
+        background: #dce6f1;
+        color: #0f172a;
+        text-align: center;
+        font-size: 7pt;
+        font-weight: bold;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .data-table tbody tr:nth-child(even) td {
+        background: #f8fafc;
+    }
+
+    .center { text-align: center; }
+    .left { text-align: left; }
+    .small { font-size: 6.8pt; }
+    .nowrap { white-space: nowrap; }
+
+    .empty {
+        text-align: center;
+        padding: 14px 6px !important;
+        color: #64748b;
+    }
+
+    .footer {
+        margin-top: 8px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 5px;
+        font-size: 6.8pt;
+        color: #64748b;
+        text-align: right;
+    }
 </style>
 </head>
 <body>
-<h1>LAPORAN DATA {% if status_peserta == 'balita' %}BALITA{% else %}IBU HAMIL{% endif %}</h1>
-<div class="meta">Data mengikuti filter pada halaman peserta. Total: {{ data|length }} peserta.</div>
-<table>
-<thead><tr>
-<th>No</th><th>Nama</th><th>NIK</th>
-{% if status_peserta == 'balita' %}<th>JK</th>{% endif %}
-<th>Tanggal Lahir</th><th>Usia</th>
-{% if status_peserta == 'balita' %}<th>Nama Ibu</th><th>NIK Ibu</th><th>Nama Ayah</th>{% endif %}
-<th>No. HP</th><th>Posyandu</th><th>Alamat</th>
-</tr></thead>
-<tbody>
-{% for p in data %}<tr>
-<td class="center">{{ forloop.counter }}</td><td class="left">{{ p.nama_peserta }}</td><td class="center">{{ p.no_nik|default:'-' }}</td>
-{% if status_peserta == 'balita' %}<td class="center">{{ p.jenis_kelamin|default:'-' }}</td>{% endif %}
-<td class="center">{{ p.tgl_lahir|date:'d-m-Y' }}</td><td class="center">{% if status_peserta == 'balita' %}{{ p.usia }}{% else %}{{ p.usia_tahun }} tahun{% endif %}</td>
-{% if status_peserta == 'balita' %}<td class="left">{{ p.nama_ibu|default:'-' }}</td><td class="center">{{ p.nik_ibu|default:'-' }}</td><td class="left">{{ p.nama_ayah|default:'-' }}</td>{% endif %}
-<td class="center">{{ p.no_hp|default:'-' }}</td><td class="left">{% if p.posko %}{{ p.posko.nama }}{% else %}-{% endif %}</td><td class="left">{{ p.alamat|default:'-' }}</td>
-</tr>{% empty %}<tr><td colspan="12" class="center">Tidak ada data sesuai filter.</td></tr>{% endfor %}
-</tbody></table>
-<div class="footer">Dicetak otomatis pada {% now "d-m-Y H:i" %} WIB.</div>
-</body></html>
+
+<table class="header-table">
+    <tr>
+        <td style="width: 70%;">
+            <div class="title">LAPORAN {{ title|upper }}</div>
+            <div class="subtitle">Sistem Informasi Posyandu</div>
+        </td>
+        <td class="summary" style="width: 30%;">
+            <strong>{{ total_data }}</strong> data<br>
+            {{ generated_at|date:"d-m-Y H:i" }} WIB
+        </td>
+    </tr>
+</table>
+
+<div class="filter-box">
+    <strong>Filter:</strong> {{ filter_text }}
+</div>
+
+<table class="data-table" repeat="1">
+    {% if status_peserta == 'balita' %}
+    <colgroup>
+        <col style="width:3%">
+        <col style="width:11%">
+        <col style="width:10%">
+        <col style="width:4%">
+        <col style="width:8%">
+        <col style="width:7%">
+        <col style="width:10%">
+        <col style="width:10%">
+        <col style="width:10%">
+        <col style="width:9%">
+        <col style="width:9%">
+        <col style="width:9%">
+    </colgroup>
+    {% else %}
+    <colgroup>
+        <col style="width:4%">
+        <col style="width:18%">
+        <col style="width:15%">
+        <col style="width:12%">
+        <col style="width:10%">
+        <col style="width:14%">
+        <col style="width:13%">
+        <col style="width:14%">
+    </colgroup>
+    {% endif %}
+
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>NIK</th>
+            {% if status_peserta == 'balita' %}<th>JK</th>{% endif %}
+            <th>Tanggal Lahir</th>
+            <th>Usia</th>
+            {% if status_peserta == 'balita' %}
+                <th>Nama Ibu</th>
+                <th>NIK Ibu</th>
+                <th>Nama Ayah</th>
+            {% endif %}
+            <th>No. HP</th>
+            <th>Posyandu</th>
+            <th>Alamat</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in data %}
+        <tr>
+            <td class="center">{{ forloop.counter }}</td>
+            <td class="left">{{ p.nama_peserta|default:"-" }}</td>
+            <td class="center small">{{ p.no_nik|default:"-" }}</td>
+            {% if status_peserta == 'balita' %}
+            <td class="center">
+                {% if p.jenis_kelamin == 'Laki-Laki' or p.jenis_kelamin == 'Laki-laki' or p.jenis_kelamin == 'L' %}L{% elif p.jenis_kelamin %}P{% else %}-{% endif %}
+            </td>
+            {% endif %}
+            <td class="center nowrap">{{ p.tgl_lahir|date:"d-m-Y" }}</td>
+            <td class="center">{% if status_peserta == 'balita' %}{{ p.usia }}{% else %}{{ p.usia_tahun }} tahun{% endif %}</td>
+            {% if status_peserta == 'balita' %}
+                <td class="left">{{ p.nama_ibu|default:"-" }}</td>
+                <td class="center small">{{ p.nik_ibu|default:"-" }}</td>
+                <td class="left">{{ p.nama_ayah|default:"-" }}</td>
+            {% endif %}
+            <td class="center small">{{ p.no_hp|default:"-" }}</td>
+            <td class="left">{% if p.posko %}{{ p.posko.nama }}{% else %}-{% endif %}</td>
+            <td class="left">{{ p.alamat|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="{% if status_peserta == 'balita' %}12{% else %}8{% endif %}" class="empty">
+                Tidak ada data sesuai filter.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="footer">
+    Dokumen dibuat otomatis oleh Sistem Informasi Posyandu.
+</div>
+
+</body>
+</html>

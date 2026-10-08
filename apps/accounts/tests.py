@@ -422,3 +422,61 @@ class KaderAccountAssignmentRegressionTests(TestCase):
         self.assertTrue(PenugasanPetugas.objects.filter(
             petugas=kader, posyandu=pos
         ).exists())
+
+class PetugasValidationUXTests(TestCase):
+    def setUp(self):
+        self.admin, _ = make_petugas(
+            username="admin-validasi-form",
+            level="admin",
+            posyandu=None,
+        )
+        self.posyandu = make_posyandu("Pos Validasi")
+        self.client.force_login(self.admin)
+
+    def test_tambah_kader_tanpa_posyandu_kembali_ke_form_bukan_error_500(self):
+        response = self.client.post(
+            reverse("accounts:tambah_petugas", args=["kader"]),
+            {
+                "nama": "Kader Tanpa Penempatan",
+                "alamat": "",
+                "no_telp": "",
+                "posyandu": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("posyandu", response.context["form"].errors)
+        self.assertContains(response, "Penempatan Posyandu wajib dipilih untuk Kader")
+        self.assertFalse(Petugas.objects.filter(nama="Kader Tanpa Penempatan").exists())
+
+    def test_tambah_kader_valid_tetap_berhasil(self):
+        response = self.client.post(
+            reverse("accounts:tambah_petugas", args=["kader"]),
+            {
+                "nama": "Kader Valid",
+                "alamat": "Alamat uji",
+                "no_telp": "081234567890",
+                "posyandu": str(self.posyandu.pk),
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            Petugas.objects.filter(
+                nama="Kader Valid",
+                level="kader",
+                posyandu=self.posyandu,
+            ).exists()
+        )
+
+    def test_nomor_telepon_petugas_tidak_valid_ditolak_form(self):
+        response = self.client.post(
+            reverse("accounts:tambah_petugas", args=["kader"]),
+            {
+                "nama": "Kader Telepon Salah",
+                "alamat": "Alamat uji",
+                "no_telp": "abc123",
+                "posyandu": str(self.posyandu.pk),
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no_telp", response.context["form"].errors)
+        self.assertContains(response, "Nomor telepon harus berupa 8–15 digit")

@@ -5,6 +5,8 @@ from . import views
 app_name = "pemeriksaan"
 
 urlpatterns = [
+    path("pemeriksaan/jadwal-pemeriksaan-<str:status_peserta>/export/pdf/", views.export_jadwal_pemeriksaan_pdf, name="export_jadwal_pdf"),
+    path("pemeriksaan/jadwal-pemeriksaan-<str:status_peserta>/export/excel/", views.export_jadwal_pemeriksaan_excel, name="export_jadwal_excel"),
     path("pemeriksaan/jadwal-pemeriksaan-<str:status_peserta>/", views.list_jadwal_pemeriksaan, name="list"),
     path("pemeriksaan/jadwal-pemeriksaan-<str:status_peserta>/list-peserta/<int:id_jadwal>/", views.list_peserta, name="list_peserta"),
     path("pemeriksaan/jadwal-pemeriksaan-<str:status_peserta>/list-peserta/<int:id_jadwal>/peserta/<int:id_peserta>/", views.periksa_peserta, name="periksa_peserta"),

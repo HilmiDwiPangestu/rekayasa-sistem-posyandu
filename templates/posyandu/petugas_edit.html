@@ -20,19 +20,11 @@
             <form method="POST" class="p-6 space-y-5">
                 {% csrf_token %}
                 
-                {% if messages %}
-                    {% for message in messages %}
-                    <div class="p-3 text-xs font-semibold rounded-xl bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400 border border-red-100 dark:border-red-900/30">
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-                {% endif %}
-
                 {% if user_form %}
                 <div class="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-xl border border-slate-100 dark:border-slate-800/60 space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Kredensial Akun (User)</h3>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Username login</label>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Username login <span class="text-rose-500">*</span></label>
                         {{ user_form.username }}
                     </div>
                     {% comment %} <div>
@@ -45,7 +37,7 @@
                 <div class="space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Biodata & Wilayah Tugas</h3>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Nama Lengkap</label>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
                         {{ petugas_form.nama }}
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -56,16 +48,16 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{% if petugas.level == 'bidan' %}Posyandu Utama{% else %}Penempatan Posyandu{% endif %}</label>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{% if petugas.level == 'bidan' %}Posyandu Utama{% else %}Penempatan Posyandu <span class="text-rose-500">*</span>{% endif %}</label>
                             {{ petugas_form.posyandu }}
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">No. Telepon Aktif</label>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">No. Telepon Aktif <span class="font-medium text-slate-400">(Opsional)</span></label>
                         {{ petugas_form.no_telp }}
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alamat Rumah</label>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alamat Rumah <span class="font-medium text-slate-400">(Opsional)</span></label>
                         {{ petugas_form.alamat }}
                     </div>
                 </div>

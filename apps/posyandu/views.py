@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.core.exceptions import ValidationError
+from common.validation import add_validation_error
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
 from common.decorators import kader_required
@@ -454,9 +455,10 @@ def edit_petugas(request, pk):
                     if petugas.level == 'kader' else 'posyandu:daftar_bidan'
                 )
             except BidanCoverageError as error:
-                messages.error(request, str(error))
-            except ValidationError as e:
-                messages.error(request, e.messages[0])
+                target = "posyandu" if "posyandu" in petugas_form.fields else None
+                petugas_form.add_error(target, str(error))
+            except ValidationError as error:
+                add_validation_error(petugas_form, error, fallback_field="posyandu")
     else:
         user_form = UserEditForm(instance=user) if (user and petugas.level in Petugas.LOGIN_LEVELS) else None
         petugas_form = PetugasEditForm(instance=petugas)
@@ -2243,7 +2245,7 @@ def cetak_bumil_pdf(request):
 
     response[
         'Content-Disposition'
-    ] = 'inline; filename="laporan_bumil.pdf"'
+    ] = 'attachment; filename="laporan_bumil.pdf"'
 
     return response
 
@@ -2296,7 +2298,7 @@ def cetak_balita_pdf(request):
         content_type="application/pdf",
     )
     response["Content-Disposition"] = (
-        f'inline; filename="laporan_balita_{filter_state["tahun"]}_'
+        f'attachment; filename="laporan_balita_{filter_state["tahun"]}_'
         f'{filter_state["bulan"]:02d}.pdf"'
     )
     return response

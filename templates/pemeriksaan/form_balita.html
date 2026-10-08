@@ -33,6 +33,75 @@ Pemeriksaan {{ status_peserta }}
         cursor: not-allowed;
         opacity: .55;
     }
+
+
+    /* UI_MOBILE_V5: embedded KMS charts must stay inside their own cards. */
+    .kms-embed-chart-stage {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        border: 1px solid rgb(226 232 240);
+        border-radius: .75rem;
+        background: rgb(248 250 252);
+    }
+
+    .dark .kms-embed-chart-stage {
+        border-color: rgba(255,255,255,.10);
+        background: rgba(15,23,42,.50);
+    }
+
+    .kms-embed-chart-stage > canvas {
+        position: absolute !important;
+        inset: 0 !important;
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+    }
+
+    .kms-embed-legend {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .45rem .55rem;
+        padding: .65rem .7rem;
+        border: 1px solid rgb(226 232 240);
+        border-radius: .75rem;
+        background: rgb(248 250 252);
+        color: rgb(100 116 139);
+        font-size: 9px;
+        line-height: 1.2;
+    }
+
+    .dark .kms-embed-legend {
+        border-color: rgba(255,255,255,.10);
+        background: rgba(255,255,255,.04);
+        color: rgb(203 213 225);
+    }
+
+    .kms-embed-legend-item {
+        display: inline-flex;
+        min-width: 0;
+        align-items: center;
+        gap: .3rem;
+        white-space: nowrap;
+    }
+
+    .kms-embed-legend-line {
+        display: inline-block;
+        width: 14px;
+        flex: 0 0 14px;
+        border-top: 2px dashed currentColor;
+    }
+
+    .kms-embed-legend-line.median,
+    .kms-embed-legend-line.child { border-top-style: solid; }
+    .kms-embed-legend-line.child { border-top-width: 3px; }
+
+    @media (min-width: 640px) {
+        .kms-embed-chart-stage { height: 320px; }
+        .kms-embed-legend { grid-template-columns: repeat(8, minmax(0, 1fr)); font-size: 10px; }
+    }
 </style>
 
 
@@ -614,7 +683,18 @@ Pemeriksaan {{ status_peserta }}
                         </a>
                     </div>
 
-                    <div class="space-y-5 p-4 sm:p-6">
+                    <div class="space-y-7 p-3 sm:p-6">
+                        <!-- UI_MOBILE_V5 -->
+                        <div class="kms-embed-legend" aria-label="Legenda grafik KMS">
+                            <span class="kms-embed-legend-item" style="color:#b91c1c"><i class="kms-embed-legend-line"></i>-3 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#d97706"><i class="kms-embed-legend-line"></i>-2 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#64748b"><i class="kms-embed-legend-line"></i>-1 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#15803d"><i class="kms-embed-legend-line median"></i>Median</span>
+                            <span class="kms-embed-legend-item" style="color:#64748b"><i class="kms-embed-legend-line"></i>+1 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#d97706"><i class="kms-embed-legend-line"></i>+2 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#b91c1c"><i class="kms-embed-legend-line"></i>+3 SD</span>
+                            <span class="kms-embed-legend-item" style="color:#2563eb"><i class="kms-embed-legend-line child"></i>Data anak</span>
+                        </div>
                         <div>
                             <div class="mb-2 flex items-center justify-between gap-3">
                                 <div>
@@ -622,7 +702,7 @@ Pemeriksaan {{ status_peserta }}
                                     <p class="mt-0.5 text-[10px] text-slate-400">Kurva -3 SD sampai +3 SD dan riwayat berat badan anak.</p>
                                 </div>
                             </div>
-                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                            <div class="kms-embed-chart-stage">
                                 <canvas id="kmsFormBBU" aria-label="Grafik BB/U"></canvas>
                             </div>
                         </div>
@@ -632,7 +712,7 @@ Pemeriksaan {{ status_peserta }}
                                 <h4 class="text-xs font-extrabold text-slate-800 dark:text-white">Panjang/Tinggi Badan menurut Umur (PB/U atau TB/U)</h4>
                                 <p class="mt-0.5 text-[10px] text-slate-400">PB/U sampai 24 bulan, selanjutnya TB/U.</p>
                             </div>
-                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                            <div class="kms-embed-chart-stage">
                                 <canvas id="kmsFormTBU" aria-label="Grafik PB/U atau TB/U"></canvas>
                             </div>
                         </div>
@@ -642,7 +722,7 @@ Pemeriksaan {{ status_peserta }}
                                 <h4 class="text-xs font-extrabold text-slate-800 dark:text-white">Indeks Massa Tubuh menurut Umur (IMT/U)</h4>
                                 <p class="mt-0.5 text-[10px] text-slate-400">IMT dihitung dari berat badan dan panjang/tinggi badan pemeriksaan.</p>
                             </div>
-                            <div class="relative h-[300px] w-full rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-white/10 dark:bg-background-dark/50">
+                            <div class="kms-embed-chart-stage">
                                 <canvas id="kmsFormIMTU" aria-label="Grafik IMT/U"></canvas>
                             </div>
                         </div>
@@ -1034,6 +1114,34 @@ Pemeriksaan {{ status_peserta }}
 
                                 {% endif %}
 
+                            </div>
+
+
+
+                            <!-- =========================================
+                                 POSISI PENGUKURAN PANJANG / TINGGI
+                            ========================================== -->
+                            <div>
+                                <label
+                                    for="{{ form.jenis_pengukuran.id_for_label }}"
+                                    class="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-300"
+                                >
+                                    {{ form.jenis_pengukuran.label }}
+                                    <span class="text-rose-500">*</span>
+                                </label>
+
+                                {{ form.jenis_pengukuran }}
+
+                                <p class="mt-1.5 text-[10px] leading-4 text-slate-400">
+                                    {{ form.jenis_pengukuran.help_text }}
+                                </p>
+
+                                {% if form.jenis_pengukuran.errors %}
+                                <div class="mt-2 flex items-start gap-1.5 text-rose-500">
+                                    <span class="material-symbols-outlined mt-0.5 text-[15px]">error</span>
+                                    <small class="text-xs font-medium">{{ form.jenis_pengukuran.errors.0 }}</small>
+                                </div>
+                                {% endif %}
                             </div>
 
 
@@ -2626,7 +2734,7 @@ Pemeriksaan {{ status_peserta }}
 {% block script %}
 
 <!-- Grafik KMS tanpa CDN -->
-<script src="{% static 'js/kms_charts.js' %}"></script>
+<script src="{% static 'js/kms_charts.js' %}?v=5"></script>
 
 
 <script>

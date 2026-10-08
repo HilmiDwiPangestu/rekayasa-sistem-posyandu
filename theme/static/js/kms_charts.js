@@ -55,15 +55,24 @@
     if (!canvas) return;
 
     const parent = canvas.parentElement;
-    const rect = parent ? parent.getBoundingClientRect() : { width: 0, height: 0 };
-    const cssWidth = Math.max(320, Math.floor(rect.width || 0));
-    const cssHeight = Math.max(300, Math.floor(rect.height || 0));
+    if (!parent) return;
+
+    // UI_MOBILE_V5: use the actual chart stage, never force a 320px canvas
+    // inside a narrower mobile card and never include parent padding in the
+    // canvas dimensions. This prevents the canvas from spilling into the next title.
+    const rect = parent.getBoundingClientRect();
+    const style = global.getComputedStyle ? global.getComputedStyle(parent) : null;
+    const padX = style ? (parseFloat(style.paddingLeft || '0') + parseFloat(style.paddingRight || '0')) : 0;
+    const padY = style ? (parseFloat(style.paddingTop || '0') + parseFloat(style.paddingBottom || '0')) : 0;
+    const cssWidth = Math.max(180, Math.floor((parent.clientWidth || rect.width || 0) - padX));
+    const cssHeight = Math.max(220, Math.floor((parent.clientHeight || rect.height || 0) - padY));
     const dpr = Math.max(1, global.devicePixelRatio || 1);
 
     canvas.width = Math.round(cssWidth * dpr);
     canvas.height = Math.round(cssHeight * dpr);
-    canvas.style.width = cssWidth + 'px';
-    canvas.style.height = cssHeight + 'px';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -71,9 +80,12 @@
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
     const theme = themeColors();
-    const margin = { left: 62, right: 18, top: 18, bottom: 76 };
-    const plotW = Math.max(40, cssWidth - margin.left - margin.right);
-    const plotH = Math.max(40, cssHeight - margin.top - margin.bottom);
+    const isMobile = cssWidth < 520;
+    const margin = isMobile
+      ? { left: 42, right: 8, top: 10, bottom: 46 }
+      : { left: 58, right: 16, top: 14, bottom: 52 };
+    const plotW = Math.max(80, cssWidth - margin.left - margin.right);
+    const plotH = Math.max(90, cssHeight - margin.top - margin.bottom);
 
     const allY = [];
     CURVES.forEach(([key]) => standardSeries(standard, key).forEach((p) => allY.push(p.y)));
@@ -101,13 +113,13 @@
     const yPx = (y) => margin.top + ((yMax - y) / (yMax - yMin)) * plotH;
 
     ctx.lineWidth = 1;
-    ctx.font = '10px sans-serif';
+    ctx.font = isMobile ? '9px sans-serif' : '10px sans-serif';
     ctx.fillStyle = theme.text;
     ctx.strokeStyle = theme.grid;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
-    for (let m = 0; m <= 60; m += 6) {
+    for (let m = 0; m <= 60; m += (isMobile ? 12 : 6)) {
       const x = xPx(m);
       ctx.beginPath();
       ctx.moveTo(x, margin.top);
@@ -138,13 +150,13 @@
     ctx.stroke();
 
     ctx.fillStyle = theme.text;
-    ctx.font = '11px sans-serif';
+    ctx.font = isMobile ? '10px sans-serif' : '11px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('Umur (bulan penuh)', margin.left + plotW / 2, cssHeight - 34);
+    ctx.fillText('Umur (bulan penuh)', margin.left + plotW / 2, margin.top + plotH + 30);
 
     ctx.save();
-    ctx.translate(16, margin.top + plotH / 2);
+    ctx.translate(isMobile ? 13 : 16, margin.top + plotH / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -192,30 +204,7 @@
       });
     }
 
-    const legend = [
-      ['-3 SD', '#b91c1c'], ['-2 SD', '#d97706'], ['Median', '#15803d'],
-      ['+2 SD', '#d97706'], ['+3 SD', '#b91c1c'], [childLabel, CHILD]
-    ];
-    const y = cssHeight - 14;
-    ctx.font = '9px sans-serif';
-    ctx.textBaseline = 'middle';
-    let cursor = margin.left;
-    legend.forEach(([label, color]) => {
-      const textW = ctx.measureText(label).width;
-      const itemW = 16 + textW + 12;
-      if (cursor + itemW > cssWidth - margin.right) return;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = label === childLabel ? 3 : 1.5;
-      ctx.setLineDash(label === childLabel || label === 'Median' ? [] : [4, 3]);
-      ctx.beginPath();
-      ctx.moveTo(cursor, y);
-      ctx.lineTo(cursor + 12, y);
-      ctx.stroke();
-      ctx.fillStyle = theme.text;
-      ctx.textAlign = 'left';
-      ctx.fillText(label, cursor + 16, y);
-      cursor += itemW;
-    });
+    // UI_MOBILE_V5: legend is rendered in HTML where needed.
     ctx.setLineDash([]);
   }
 

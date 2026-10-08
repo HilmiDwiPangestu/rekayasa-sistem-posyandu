@@ -4,6 +4,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from django import forms
 
+from common.forms import IndonesianValidationMixin
 from .models import Peserta
 
 
@@ -89,7 +90,7 @@ cursor-pointer
 """
 
 
-class PesertaForm(forms.ModelForm):
+class PesertaForm(IndonesianValidationMixin, forms.ModelForm):
     """Form peserta operasional yang hanya dipakai Kader.
 
     ``status_peserta`` diberikan oleh view agar aturan Balita dan Ibu Hamil
@@ -104,6 +105,14 @@ class PesertaForm(forms.ModelForm):
             self.fields["posko"].queryset = posyandu_queryset
 
         self.fields["tgl_lahir"].input_formats = ["%Y-%m-%d"]
+
+        # Jenis kelamin dan Posyandu pelayanan diperlukan oleh alur pemeriksaan
+        # dan perhitungan antropometri, jadi validasikan sejak form peserta.
+        self.fields["jenis_kelamin"].required = True
+        self.fields["jenis_kelamin"].error_messages["required"] = "Jenis kelamin wajib dipilih."
+        self.fields["posko"].required = True
+        self.fields["posko"].empty_label = "Pilih Posyandu tempat pelayanan"
+        self.fields["posko"].error_messages["required"] = "Posyandu tempat pelayanan wajib dipilih."
 
         if self.status_peserta == "bumil":
             # Ibu hamil pada modul ini selalu peserta perempuan.

@@ -3,7 +3,7 @@
 
 
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="id">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -11,9 +11,10 @@
     <title>{% block title %}Rekayasa Posyandu{% endblock %}</title>
 
     {% tailwind_css %}
-    <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}?v=20261008-validation-2">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="{% static 'js/form-ux.js' %}?v=20261008-validation-2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
@@ -28,7 +29,7 @@
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200">
     <div id="appShell" class="flex h-screen w-full overflow-hidden">
 
-        <aside id="sidebar"
+        <aside id="sidebar" aria-label="Navigasi utama"
             class="fixed inset-y-0 left-0 z-40 w-72
             bg-primary dark:bg-slate-900
             border-r border-slate-200 dark:border-slate-700
@@ -81,7 +82,7 @@
 
             <header id="appHeader" class="flex items-center justify-between px-8 py-5 bg-white/90 dark:bg-[#1a2e1a]/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200 dark:border-slate-700">
                 <div class="flex items-center gap-4">
-                    <button id="hamburger" class="lg:hidden flex items-center p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                    <button id="hamburger" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false" class="lg:hidden flex items-center p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                         <span class="material-symbols-outlined">menu</span>
                     </button>
                     <h2 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">{% block subtitle %}Dashboard{% endblock %}</h2>
@@ -158,17 +159,104 @@
         <span class="material-symbols-outlined">keyboard_arrow_up</span>
     </button>
 
+    <script>
+        window.__posyanduServerValidationErrors = [];
+        {% if form %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    window.__posyanduServerValidationErrors.push({
+                        field: "{{ field.name|escapejs }}",
+                        label: "{{ field.label|escapejs }}",
+                        message: "{{ error|escapejs }}"
+                    });
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                window.__posyanduServerValidationErrors.push({
+                    field: "",
+                    label: "Data",
+                    message: "{{ error|escapejs }}"
+                });
+            {% endfor %}
+        {% endif %}
+
+        {% if petugas_form %}
+            {% for field in petugas_form %}
+                {% for error in field.errors %}
+                    window.__posyanduServerValidationErrors.push({
+                        field: "{{ field.name|escapejs }}",
+                        label: "{{ field.label|escapejs }}",
+                        message: "{{ error|escapejs }}"
+                    });
+                {% endfor %}
+            {% endfor %}
+            {% for error in petugas_form.non_field_errors %}
+                window.__posyanduServerValidationErrors.push({
+                    field: "",
+                    label: "Data Petugas",
+                    message: "{{ error|escapejs }}"
+                });
+            {% endfor %}
+        {% endif %}
+
+        {% if user_form %}
+            {% for field in user_form %}
+                {% for error in field.errors %}
+                    window.__posyanduServerValidationErrors.push({
+                        field: "{{ field.name|escapejs }}",
+                        label: "{{ field.label|escapejs }}",
+                        message: "{{ error|escapejs }}"
+                    });
+                {% endfor %}
+            {% endfor %}
+            {% for error in user_form.non_field_errors %}
+                window.__posyanduServerValidationErrors.push({
+                    field: "",
+                    label: "Akun",
+                    message: "{{ error|escapejs }}"
+                });
+            {% endfor %}
+        {% endif %}
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.__posyanduServerValidationErrors.length && window.PosyanduFormUX) {
+                window.PosyanduFormUX.markServerErrors(window.__posyanduServerValidationErrors);
+                window.PosyanduFormUX.showValidationAlert(
+                    window.__posyanduServerValidationErrors,
+                    { title: 'Data Belum Dapat Disimpan' }
+                );
+            }
+        });
+    </script>
+
     {% if messages %}
         <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const hasValidationErrors = Boolean(
+                window.__posyanduServerValidationErrors &&
+                window.__posyanduServerValidationErrors.length
+            );
             {% for message in messages %}
-            Swal.fire({
-                icon: "{{ message.tags }}",
-                title: "{{ message.tags|title }}",
-                text: "{{ message }}",
-                timer: 2500,
-                showConfirmButton: false
-            });
+            if (!hasValidationErrors) {
+                const rawTag = "{{ message.tags|escapejs }}";
+                const icon = rawTag.includes('error') ? 'error'
+                    : rawTag.includes('warning') ? 'warning'
+                    : rawTag.includes('success') ? 'success'
+                    : 'info';
+                const title = icon === 'error' ? 'Tidak Dapat Diproses'
+                    : icon === 'warning' ? 'Perhatian'
+                    : icon === 'success' ? 'Berhasil'
+                    : 'Informasi';
+                Swal.fire({
+                    icon: icon,
+                    title: title,
+                    text: "{{ message|escapejs }}",
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#059669',
+                    timer: icon === 'success' ? 2200 : undefined,
+                    showConfirmButton: icon !== 'success'
+                });
+            }
             {% endfor %}
         });
         </script>
@@ -215,6 +303,7 @@
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
                 document.body.classList.add('sidebar-open');
+                if (hamburger) hamburger.setAttribute('aria-expanded', 'true');
             }
 
             function closeSidebar() {
@@ -222,6 +311,7 @@
                 sidebar.classList.add('-translate-x-full');
                 overlay.classList.add('hidden');
                 document.body.classList.remove('sidebar-open');
+                if (hamburger) hamburger.setAttribute('aria-expanded', 'false');
             }
 
             if (hamburger) hamburger.addEventListener('click', () => {

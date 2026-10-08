@@ -1,0 +1,14 @@
+{
+  "name": "rekayasa-posyandu-theme",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "tailwindcss -i ./src/styles.css -o ../static/css/dist/styles.css --watch",
+    "build": "tailwindcss -i ./src/styles.css -o ../static/css/dist/styles.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  }
+}

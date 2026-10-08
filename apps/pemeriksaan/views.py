@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.urls import reverse
@@ -12,6 +13,9 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from common.decorators import kader_required
 from common.access import active_posyandu_ids
+from common.validation import add_validation_error
+
+logger = logging.getLogger(__name__)
 
 from .helper.pelayanan_balita import simpan_pelayanan_balita
 
@@ -31,6 +35,7 @@ from apps.pemeriksaan.models import PemeriksaanBalita, PemeriksaanBumil, Imunisa
 from apps.peserta.models import Peserta
 from apps.peserta.services import filter_peserta
 from apps.posyandu.services import bidan_for_posyandu_queryset
+from apps.posyandu.exporters import master_excel_response, master_pdf_response
 
 # FORMS
 from apps.pemeriksaan.forms import PemeriksaanBalitaForm, PemeriksaanBumilForm
@@ -58,6 +63,106 @@ def _bertugas_di(petugas, posyandu_id):
 
 
 
+def _jadwal_pemeriksaan_queryset(request, status_peserta):
+    """Queryset jadwal yang konsisten untuk halaman dan fitur unduh."""
+    petugas = getattr(request.user, "petugas", None)
+    if not petugas or status_peserta not in {"balita", "bumil"}:
+        return JadwalKegiatan.objects.none(), timezone.localdate(), "mendatang", ""
+
+    status_filter = request.GET.get("status", "mendatang")
+    if status_filter not in {"mendatang", "riwayat"}:
+        status_filter = "mendatang"
+    search = request.GET.get("search", "").strip()
+    today = timezone.localdate()
+
+    posyandu_ids = active_posyandu_ids(petugas)
+    has_balita = PemeriksaanBalita.objects.filter(jadwal_id=OuterRef("pk"))
+    has_bumil = PemeriksaanBumil.objects.filter(jadwal_id=OuterRef("pk"))
+
+    queryset = (
+        JadwalKegiatan.objects.filter(
+            posyandu_id__in=posyandu_ids,
+            jns_kegiatan="Pemeriksaan Rutin",
+        )
+        .select_related("posyandu")
+        .annotate(
+            ada_balita=Exists(has_balita),
+            ada_bumil=Exists(has_bumil),
+        )
+    )
+
+    if search:
+        queryset = queryset.filter(
+            Q(posyandu__nama__icontains=search)
+            | Q(jns_kegiatan__icontains=search)
+        )
+
+    if status_filter == "riwayat":
+        queryset = queryset.filter(tgl_kegiatan__lt=today).order_by("-tgl_kegiatan")
+    else:
+        queryset = queryset.filter(tgl_kegiatan__gte=today).order_by("tgl_kegiatan")
+
+    return queryset, today, status_filter, search
+
+
+def _status_pelaksanaan_jadwal(jadwal, today):
+    if jadwal.ada_balita or jadwal.ada_bumil:
+        return "Selesai"
+    if jadwal.tgl_kegiatan < today:
+        return "Belum ada data"
+    return "Belum dilaksanakan"
+
+
+def _jadwal_export_table(request, status_peserta):
+    queryset, today, status_filter, search = _jadwal_pemeriksaan_queryset(request, status_peserta)
+    rows = []
+    for no, jadwal in enumerate(queryset, 1):
+        rows.append([
+            no,
+            jadwal.tgl_kegiatan.strftime("%d-%m-%Y"),
+            f"{jadwal.jam_mulai.strftime('%H:%M')} - {jadwal.jam_selesai.strftime('%H:%M')}",
+            jadwal.jns_kegiatan,
+            jadwal.posyandu.nama if jadwal.posyandu else "-",
+            _status_pelaksanaan_jadwal(jadwal, today),
+        ])
+
+    filter_parts = [
+        "Periode: " + ("Riwayat" if status_filter == "riwayat" else "Mendatang"),
+        "Peserta: " + ("Balita" if status_peserta == "balita" else "Ibu Hamil"),
+    ]
+    if search:
+        filter_parts.append(f'Pencarian: "{search}"')
+
+    return (
+        f"Jadwal Pemeriksaan {'Balita' if status_peserta == 'balita' else 'Ibu Hamil'}",
+        ["No", "Tanggal", "Waktu", "Kegiatan", "Posyandu", "Status"],
+        rows,
+        " | ".join(filter_parts),
+    )
+
+
+@login_required
+@kader_required
+def export_jadwal_pemeriksaan_excel(request, status_peserta):
+    if status_peserta not in {"balita", "bumil"}:
+        return render(request, "403.html", status=403)
+    title, headers, rows, filter_text = _jadwal_export_table(request, status_peserta)
+    return master_excel_response(
+        title=title, headers=headers, rows=rows, filter_text=filter_text
+    )
+
+
+@login_required
+@kader_required
+def export_jadwal_pemeriksaan_pdf(request, status_peserta):
+    if status_peserta not in {"balita", "bumil"}:
+        return render(request, "403.html", status=403)
+    title, headers, rows, filter_text = _jadwal_export_table(request, status_peserta)
+    return master_pdf_response(
+        title=title, headers=headers, rows=rows, filter_text=filter_text
+    )
+
+
 @login_required
 @kader_required
 def list_jadwal_pemeriksaan(request, status_peserta):
@@ -69,49 +174,21 @@ def list_jadwal_pemeriksaan(request, status_peserta):
     if not petugas:
         return render(request, "403.html")
 
-    # ✅ FIX 1 — Baca status_filter dari query param
-    status_filter = request.GET.get('status', 'mendatang')
-    today = timezone.localdate()
-
-    posyandu_ids = active_posyandu_ids(petugas)
-
-    # Subquery annotate — hindari N+1 di loop
-    has_balita = PemeriksaanBalita.objects.filter(jadwal_id=OuterRef('pk'))
-    has_bumil = PemeriksaanBumil.objects.filter(jadwal_id=OuterRef('pk'))
-
-    base_qs = JadwalKegiatan.objects.filter(
-        posyandu_id__in=posyandu_ids,
-        jns_kegiatan="Pemeriksaan Rutin"
-    ).select_related("posyandu").annotate(
-        ada_balita=Exists(has_balita),
-        ada_bumil=Exists(has_bumil),
+    jadwal, today, status_filter, search = _jadwal_pemeriksaan_queryset(
+        request, status_peserta
     )
-
-    search = request.GET.get("search", "").strip()
-    if search:
-        base_qs = base_qs.filter(
-            Q(posyandu__nama__icontains=search)
-            | Q(jns_kegiatan__icontains=search)
-        )
-
-    # Terapkan filter tanggal sesuai status_filter
-    if status_filter == 'riwayat':
-        jadwal = base_qs.filter(tgl_kegiatan__lt=today).order_by('-tgl_kegiatan')
-    else:
-        jadwal = base_qs.filter(tgl_kegiatan__gte=today).order_by('tgl_kegiatan')
 
     paginator = Paginator(jadwal, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
 
     # Loop ringan — tidak ada query DB
     for j in page_obj:
-        has_data = j.ada_balita or j.ada_bumil
-        if has_data:
-            j.status_pelaksanaan = "selesai"
-        elif j.tgl_kegiatan < today:
-            j.status_pelaksanaan = "kosong"
-        else:
-            j.status_pelaksanaan = "belum"
+        status_label = _status_pelaksanaan_jadwal(j, today)
+        j.status_pelaksanaan = {
+            "Selesai": "selesai",
+            "Belum ada data": "kosong",
+            "Belum dilaksanakan": "belum",
+        }[status_label]
 
     return render(request, "pemeriksaan/list.html", {
         "page_obj": page_obj,
@@ -745,6 +822,10 @@ def periksa_peserta(
                             tinggi_badan=(
                                 tinggi_badan
                             ),
+
+                            jenis_pengukuran=(
+                                pemeriksaan.jenis_pengukuran
+                            ),
                         )
                     )
 
@@ -949,14 +1030,12 @@ def periksa_peserta(
                 # ERROR MODEL / SISTEM
                 # =============================================
 
-                except Exception as error:
+                except Exception:
 
+                    logger.exception("Proses deteksi stunting gagal")
                     messages.error(
                         request,
-                        (
-                            "Proses deteksi stunting gagal. "
-                            f"Detail: {error}"
-                        )
+                        "Proses deteksi stunting gagal. Silakan periksa kembali data pemeriksaan atau hubungi administrator."
                     )
 
                     return render(
@@ -1019,12 +1098,7 @@ def periksa_peserta(
 
             except ValidationError as error:
 
-                messages.error(
-                    request,
-                    " ".join(
-                        error.messages
-                    )
-                )
+                add_validation_error(form, error)
 
                 return render(
                     request,
@@ -1037,14 +1111,12 @@ def periksa_peserta(
             # ERROR PENYIMPANAN
             # =================================================
 
-            except Exception as error:
+            except Exception:
 
+                logger.exception("Data pemeriksaan gagal disimpan")
                 messages.error(
                     request,
-                    (
-                        "Data pemeriksaan gagal disimpan. "
-                        f"Detail: {error}"
-                    )
+                    "Data pemeriksaan gagal disimpan. Silakan periksa kembali data yang diisi atau hubungi administrator."
                 )
 
                 return render(

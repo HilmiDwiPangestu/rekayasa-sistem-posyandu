@@ -1,5 +1,7 @@
 from django import forms
+import re
 
+from common.forms import IndonesianValidationMixin
 from apps.posyandu.models import Posyandu
 
 from .models import Petugas
@@ -16,7 +18,7 @@ COMMON_CLASS = """
 """
 
 
-class PetugasForm(forms.ModelForm):
+class PetugasForm(IndonesianValidationMixin, forms.ModelForm):
     cakupan_posyandu = forms.ModelMultipleChoiceField(
         queryset=Posyandu.objects.none(),
         required=False,
@@ -33,8 +35,25 @@ class PetugasForm(forms.ModelForm):
             self.fields.pop("posyandu", None)
             self.fields["cakupan_posyandu"].queryset = Posyandu.objects.all().order_by("desa", "nama")
             self.fields["cakupan_posyandu"].required = True
+            self.fields["cakupan_posyandu"].error_messages["required"] = (
+                "Pilih minimal satu Posyandu untuk cakupan wilayah kerja Bidan."
+            )
         else:
             self.fields.pop("cakupan_posyandu", None)
+            if "posyandu" in self.fields:
+                self.fields["posyandu"].required = True
+                self.fields["posyandu"].empty_label = "Pilih Posyandu penempatan"
+                self.fields["posyandu"].error_messages["required"] = (
+                    "Penempatan Posyandu wajib dipilih untuk Kader."
+                )
+
+    def clean_no_telp(self):
+        value = (self.cleaned_data.get("no_telp") or "").strip().replace(" ", "").replace("-", "")
+        if not value:
+            return None
+        if not re.fullmatch(r"\+?\d{8,15}", value):
+            raise forms.ValidationError("Nomor telepon harus berupa 8–15 digit dan boleh diawali tanda +.")
+        return value
 
     def clean(self):
         cleaned = super().clean()
@@ -59,19 +78,23 @@ class PetugasForm(forms.ModelForm):
         widgets = {
             "nama": forms.TextInput(attrs={
                 "class": COMMON_CLASS,
-                "placeholder": "Masukkan nama lengkap"
+                "placeholder": "Masukkan nama lengkap",
+                "autocomplete": "name",
             }),
             "posyandu": forms.Select(attrs={
                 "class": COMMON_CLASS,
             }),
             "no_telp": forms.TextInput(attrs={
                 "class": COMMON_CLASS,
-                "placeholder": "08xxxxxxxxxx"
+                "placeholder": "08xxxxxxxxxx",
+                "inputmode": "tel",
+                "autocomplete": "tel",
             }),
             "alamat": forms.Textarea(attrs={
                 "class": COMMON_CLASS,
                 "rows": 4,
-                "placeholder": "Masukkan alamat lengkap"
+                "placeholder": "Masukkan alamat lengkap",
+                "autocomplete": "street-address",
             }),
         }
 

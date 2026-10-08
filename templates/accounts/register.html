@@ -9,7 +9,9 @@
     <title>Tambah Akun Kader - Rekayasa Posyandu</title>
 
     {% tailwind_css %}
-    <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}?v=20261008-validation-2">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="{% static 'js/form-ux.js' %}?v=20261008-validation-2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 </head>
@@ -36,20 +38,6 @@
             </div>
 
             <div class="px-5 py-5 sm:px-7 sm:py-6">
-                {% if messages %}
-                    <div class="mb-5 space-y-2">
-                        {% for message in messages %}
-                            <div class="rounded-xl border px-4 py-3 text-sm font-medium
-                                {% if message.tags == 'success' %}
-                                    border-emerald-200 bg-emerald-50 text-emerald-700
-                                {% else %}
-                                    border-rose-200 bg-rose-50 text-rose-700
-                                {% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
 
                 <form method="POST" class="space-y-5">
                     {% csrf_token %}
@@ -106,7 +94,7 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <label for="posyandu" class="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-300">Posyandu</label>
-                                <select id="posyandu" name="posyandu"
+                                <select id="posyandu" name="posyandu" required
                                     class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-slate-950">
                                     <option value="">-- Pilih Posyandu --</option>
                                     {% for p in posyandu_list %}
@@ -132,5 +120,20 @@
             </div>
         </div>
     </main>
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+    Swal.fire({
+        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}",
+        title: "{% if 'error' in message.tags %}Tidak Dapat Diproses{% elif 'warning' in message.tags %}Perhatian{% elif 'success' in message.tags %}Berhasil{% else %}Informasi{% endif %}",
+        text: "{{ message|escapejs }}",
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#059669'
+    });
+    {% endfor %}
+});
+</script>
+{% endif %}
 </body>
 </html>

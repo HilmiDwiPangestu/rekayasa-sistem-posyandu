@@ -617,6 +617,7 @@ class LaporanBalitaAdminFilterTests(TestCase):
             tgl_pemeriksaan=timezone.make_aware(datetime(2026, 9, 5, 9, 0), tz),
             berat_badan=10.0,
             tinggi_badan=80.0,
+            jenis_pengukuran="tinggi",
             status_gizi="normal",
         )
         PemeriksaanBalita.objects.create(
@@ -626,6 +627,7 @@ class LaporanBalitaAdminFilterTests(TestCase):
             tgl_pemeriksaan=timezone.make_aware(datetime(2026, 9, 6, 9, 0), tz),
             berat_badan=9.0,
             tinggi_badan=77.0,
+            jenis_pengukuran="tinggi",
             status_gizi="stunting",
         )
 

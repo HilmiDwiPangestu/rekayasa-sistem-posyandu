@@ -18,6 +18,11 @@ from apps.posyandu.models import JadwalKegiatan
 # =========================================================
 class PemeriksaanBalita(models.Model):
 
+    JENIS_PENGUKURAN = [
+        ('panjang', 'Panjang badan (terlentang)'),
+        ('tinggi', 'Tinggi badan (berdiri)'),
+    ]
+
     # Kategori PB/U atau TB/U. Kode stunting dipertahankan untuk
     # kompatibilitas analisis biner Random Forest, sedangkan label mengikuti
     # kategori antropometri: Sangat Pendek, Pendek, Normal, dan Tinggi.
@@ -91,6 +96,15 @@ class PemeriksaanBalita(models.Model):
         null=True,
         blank=True,
         help_text="Panjang/Tinggi badan dalam sentimeter"
+    )
+
+    jenis_pengukuran = models.CharField(
+        max_length=10,
+        choices=JENIS_PENGUKURAN,
+        help_text=(
+            "Pilih posisi saat panjang/tinggi badan benar-benar diukur. "
+            "Digunakan untuk koreksi WHO 0,7 cm bila posisi ukur tidak sesuai kelompok usia."
+        ),
     )
 
     lila_balita = models.FloatField(

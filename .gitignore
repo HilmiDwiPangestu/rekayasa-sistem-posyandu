@@ -1,17 +1,27 @@
-# environment
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment
 .env
 
-# virtual environment
-venv/
-env/
+# Node / Tailwind
+node_modules/
+theme/static_src/node_modules/
 
-# database
+# Django generated/local files
+staticfiles/
 db.sqlite3
 
-# python cache
-__pycache__/
-*.pyc
+# Backup database
+*.backup
+*.dump
+*.sql
 
-# django media/static
-media/
-staticfiles/
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

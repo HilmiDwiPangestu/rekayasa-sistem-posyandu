@@ -2,87 +2,309 @@
 
 {% block subtitle %}KMS Balita{% endblock %}
 
+{% block extra_css %}
+<style>
+/* UI_MOBILE_V4: KMS chart containment fix. Plain CSS on purpose so it works even before Tailwind rebuild. */
+.kms-chart-card { overflow: hidden; }
+.kms-chart-stage {
+  position: relative;
+  width: 100%;
+  height: 286px;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  background: rgba(248, 250, 252, .72);
+  border: 1px solid rgba(226, 232, 240, .9);
+}
+.dark .kms-chart-stage {
+  background: rgba(15, 23, 42, .2);
+  border-color: rgba(255,255,255,.08);
+}
+.kms-chart-stage > canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+}
+.kms-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem .7rem;
+  margin-top: .7rem;
+  padding: .65rem .75rem;
+  border-radius: .8rem;
+  background: rgba(248,250,252,.82);
+  font-size: 10px;
+  line-height: 1;
+  color: #64748b;
+}
+.dark .kms-chart-legend { background: rgba(255,255,255,.04); color:#cbd5e1; }
+.kms-legend-item { display:inline-flex; align-items:center; gap:.35rem; white-space:nowrap; }
+.kms-legend-line { display:inline-block; width:18px; height:0; border-top:2px dashed currentColor; }
+.kms-legend-line.median, .kms-legend-line.child { border-top-style:solid; }
+.kms-legend-line.child { border-top-width:3px; }
+@media (min-width: 640px) { .kms-chart-stage { height: 350px; } }
+@media (min-width: 1024px) { .kms-chart-stage { height: 390px; } }
+@media (max-width: 480px) {
+  .kms-chart-card header { padding: .8rem .85rem !important; }
+  .kms-chart-card header > div { gap: .6rem !important; }
+  .kms-chart-card header span.flex { width:2rem !important; height:2rem !important; border-radius:.65rem !important; }
+  .kms-chart-card header h2 { font-size:.82rem !important; line-height:1.2rem !important; }
+  .kms-chart-card header p { font-size:.66rem !important; line-height:1rem !important; }
+  .kms-chart-body { padding:.6rem !important; }
+}
+</style>
+{% endblock %}
+
+
 {% block content %}
 <div class="min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-100">
-  <div class="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
 
-    <div class="mb-6 overflow-hidden rounded-xl bg-primary p-5 text-white shadow-sm sm:p-6">
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <!-- Header KMS -->
+    <section class="relative mb-4 overflow-hidden rounded-2xl bg-primary p-4 text-white shadow-sm sm:mb-6 sm:p-6">
+      <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary-dark/35 blur-3xl"></div>
+      <div class="relative">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <button type="button" onclick="history.back()" class="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 text-xs font-bold text-white transition hover:bg-white/15">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Kembali</span>
+          </button>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80">
+            <span class="material-symbols-outlined text-[14px]">monitoring</span>
+            KMS Balita
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div class="min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-200 sm:text-xs">Pemantauan Pertumbuhan</p>
+            <h1 class="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Kartu Menuju Sehat</h1>
+            <p class="mt-2 break-words text-base font-bold text-white sm:text-lg">{{ peserta.nama_peserta }}</p>
+            <div class="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-white/80">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1.5">
+                <span class="material-symbols-outlined text-[14px]">cake</span>
+                {{ peserta.usia|default:'-' }}
+              </span>
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1.5">
+                <span class="material-symbols-outlined text-[14px]">badge</span>
+                {{ peserta.jenis_kelamin|default:'-' }}
+              </span>
+              {% if peserta.posko %}
+              <span class="inline-flex max-w-full items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1.5">
+                <span class="material-symbols-outlined shrink-0 text-[14px]">home_health</span>
+                <span class="truncate">{{ peserta.posko.nama }}</span>
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-white/10 bg-white/10 px-3.5 py-3 text-[11px] leading-5 text-white/75 sm:max-w-md sm:px-4 sm:text-xs">
+            <div class="flex items-start gap-2">
+              <span class="material-symbols-outlined mt-0.5 shrink-0 text-[17px]">info</span>
+              <p>Acuan Permenkes RI No. 2 Tahun 2020 untuk standar antropometri anak usia 0–60 bulan.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ringkasan -->
+    <section class="mb-4 grid grid-cols-2 gap-2.5 sm:mb-6 sm:gap-4 lg:grid-cols-4">
+      <article class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-primary sm:p-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+            <span class="material-symbols-outlined text-[19px]">fact_check</span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Pemeriksaan</span>
+        </div>
+        <p class="mt-3 text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">{{ riwayat|length }}</p>
+        <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">Total kunjungan tercatat</p>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-primary sm:p-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <span class="material-symbols-outlined text-[19px]">monitor_weight</span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">BB Terakhir</span>
+        </div>
+        <p class="mt-3 text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">{% if pemeriksaan_terakhir.berat_badan %}{{ pemeriksaan_terakhir.berat_badan }} <span class="text-xs font-bold text-slate-400">kg</span>{% else %}-{% endif %}</p>
+        <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">Berat badan terbaru</p>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-primary sm:p-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300">
+            <span class="material-symbols-outlined text-[19px]">straighten</span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">PB/TB Terakhir</span>
+        </div>
+        <p class="mt-3 text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">{% if pemeriksaan_terakhir.tinggi_badan %}{{ pemeriksaan_terakhir.tinggi_badan }} <span class="text-xs font-bold text-slate-400">cm</span>{% else %}-{% endif %}</p>
+        <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">Panjang/tinggi terbaru</p>
+      </article>
+
+      <article class="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-primary sm:p-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300">
+            <span class="material-symbols-outlined text-[19px]">calculate</span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">IMT Terakhir</span>
+        </div>
+        <p id="imtTerakhir" class="mt-3 text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">-</p>
+        <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">Indeks massa tubuh</p>
+      </article>
+    </section>
+
+    <!-- Grafik -->
+    <section class="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
+      <article class="kms-chart-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+        <header class="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary-dark dark:bg-primary-dark/20 dark:text-blue-300">
+              <span class="material-symbols-outlined text-[20px]">monitor_weight</span>
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-sm font-extrabold leading-5 text-slate-900 dark:text-white sm:text-base">Berat Badan menurut Umur (BB/U)</h2>
+              <p class="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">Kurva berat badan anak terhadap standar -3 SD sampai +3 SD.</p>
+            </div>
+          </div>
+        </header>
+        <div class="kms-chart-body p-2.5 sm:p-4">
+          <div class="kms-chart-stage">
+            <canvas id="chartBBU" aria-label="Grafik Berat Badan menurut Umur"></canvas>
+          </div>
+          <div class="kms-chart-legend" aria-hidden="true">
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>-3 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>-2 SD</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>-1 SD</span>
+            <span class="kms-legend-item" style="color:#15803d"><i class="kms-legend-line median"></i>Median</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>+1 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>+2 SD</span>
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>+3 SD</span>
+            <span class="kms-legend-item" style="color:#2563eb"><i class="kms-legend-line child"></i>BB anak</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="kms-chart-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
+        <header class="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-300">
+              <span class="material-symbols-outlined text-[20px]">straighten</span>
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-sm font-extrabold leading-5 text-slate-900 dark:text-white sm:text-base">Panjang/Tinggi menurut Umur (PB/U atau TB/U)</h2>
+              <p class="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">PB/U digunakan hingga usia 24 bulan, kemudian TB/U setelah usia 24 bulan.</p>
+            </div>
+          </div>
+        </header>
+        <div class="kms-chart-body p-2.5 sm:p-4">
+          <div class="kms-chart-stage">
+            <canvas id="chartTBU" aria-label="Grafik Panjang atau Tinggi Badan menurut Umur"></canvas>
+          </div>
+          <div class="kms-chart-legend" aria-hidden="true">
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>-3 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>-2 SD</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>-1 SD</span>
+            <span class="kms-legend-item" style="color:#15803d"><i class="kms-legend-line median"></i>Median</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>+1 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>+2 SD</span>
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>+3 SD</span>
+            <span class="kms-legend-item" style="color:#2563eb"><i class="kms-legend-line child"></i>PB/TB anak</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="kms-chart-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary xl:col-span-2">
+        <header class="border-b border-slate-100 p-4 dark:border-white/10 sm:p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300">
+              <span class="material-symbols-outlined text-[20px]">show_chart</span>
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-sm font-extrabold leading-5 text-slate-900 dark:text-white sm:text-base">Indeks Massa Tubuh menurut Umur (IMT/U)</h2>
+              <p class="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">IMT dihitung dari berat badan ÷ tinggi badan² dan dibandingkan dengan standar IMT/U.</p>
+            </div>
+          </div>
+        </header>
+        <div class="kms-chart-body p-2.5 sm:p-4">
+          <div class="kms-chart-stage">
+            <canvas id="chartIMTU" aria-label="Grafik Indeks Massa Tubuh menurut Umur"></canvas>
+          </div>
+          <div class="kms-chart-legend" aria-hidden="true">
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>-3 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>-2 SD</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>-1 SD</span>
+            <span class="kms-legend-item" style="color:#15803d"><i class="kms-legend-line median"></i>Median</span>
+            <span class="kms-legend-item" style="color:#64748b"><i class="kms-legend-line"></i>+1 SD</span>
+            <span class="kms-legend-item" style="color:#d97706"><i class="kms-legend-line"></i>+2 SD</span>
+            <span class="kms-legend-item" style="color:#b91c1c"><i class="kms-legend-line"></i>+3 SD</span>
+            <span class="kms-legend-item" style="color:#2563eb"><i class="kms-legend-line child"></i>IMT anak</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Riwayat -->
+    <section class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary sm:mt-6">
+      <header class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 dark:border-white/10 sm:px-5">
         <div>
-          <p class="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Pemantauan Pertumbuhan</p>
-          <h1 class="mt-1 text-2xl font-extrabold sm:text-3xl">Kartu Menuju Sehat (KMS)</h1>
-          <p class="mt-2 text-sm text-white/70">
-            {{ peserta.nama_peserta }} · {{ peserta.jenis_kelamin|default:'-' }} · {{ peserta.usia }}
-          </p>
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white sm:text-base">Riwayat Pemeriksaan</h2>
+          <p class="mt-0.5 text-[11px] text-slate-400">Perkembangan antropometri dari setiap kunjungan.</p>
         </div>
-        <div class="rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-xs leading-5 text-white/75">
-          Acuan: Permenkes RI No. 2 Tahun 2020, standar antropometri anak 0–60 bulan.
-        </div>
-      </div>
-    </div>
+        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-white/10 dark:text-slate-300">{{ riwayat|length }} data</span>
+      </header>
 
-    <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
-      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
-        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Jumlah Pemeriksaan</p>
-        <p class="mt-2 text-2xl font-black">{{ riwayat|length }}</p>
-      </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
-        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Berat Terakhir</p>
-        <p class="mt-2 text-2xl font-black">{% if pemeriksaan_terakhir.berat_badan %}{{ pemeriksaan_terakhir.berat_badan }} kg{% else %}-{% endif %}</p>
-      </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
-        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">Panjang/Tinggi Terakhir</p>
-        <p class="mt-2 text-2xl font-black">{% if pemeriksaan_terakhir.tinggi_badan %}{{ pemeriksaan_terakhir.tinggi_badan }} cm{% else %}-{% endif %}</p>
-      </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary">
-        <p class="text-xs font-bold uppercase tracking-wide text-slate-400">IMT Terakhir</p>
-        <p id="imtTerakhir" class="mt-2 text-2xl font-black">-</p>
-      </div>
-    </div>
+      <!-- Mobile cards -->
+      <div class="space-y-3 bg-slate-50/60 p-3 dark:bg-background-dark/30 md:hidden" id="riwayatMobile">
+        {% for r in riwayat %}
+        <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-primary" data-mobile-bulan="{{ r.usia_bulan|default:'' }}" data-mobile-tanggal="{{ r.tgl_pemeriksaan|date:'d-m-Y' }}">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tanggal Pemeriksaan</p>
+              <p class="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{{ r.tgl_pemeriksaan|date:'d M Y' }}</p>
+            </div>
+            <span class="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold {% if r.status_gizi == 'normal' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400{% elif r.status_gizi == 'tinggi' %}bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300{% else %}bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400{% endif %}">
+              <span class="material-symbols-outlined text-[13px]">clinical_notes</span>
+              {{ r.get_status_gizi_display|default:'-' }}
+            </span>
+          </div>
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
-        <div class="mb-4">
-          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Berat Badan menurut Umur (BB/U)</h2>
-          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            Berat badan anak dibandingkan dengan kurva standar -3 SD sampai +3 SD sesuai jenis kelamin.
-          </p>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-background-dark/45">
+              <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Usia</p>
+              <p class="mt-1 text-xs font-extrabold text-slate-800 dark:text-white">{{ r.usia_bulan|default:'-' }} bulan</p>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-background-dark/45">
+              <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Z-Score TB/U</p>
+              <p class="mt-1 text-xs font-extrabold text-slate-800 dark:text-white">{% if r.z_score != None %}{{ r.z_score|floatformat:2 }}{% else %}-{% endif %}</p>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-background-dark/45">
+              <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">Berat Badan</p>
+              <p class="mt-1 text-xs font-extrabold text-slate-800 dark:text-white">{{ r.berat_badan|default:'-' }} kg</p>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-background-dark/45">
+              <p class="text-[9px] font-bold uppercase tracking-wide text-slate-400">PB/TB</p>
+              <p class="mt-1 text-xs font-extrabold text-slate-800 dark:text-white">{{ r.tinggi_badan|default:'-' }} cm</p>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2.5 dark:border-white/10">
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">IMT</span>
+            <span class="imt-mobile text-xs font-black text-primary-dark dark:text-blue-300">-</span>
+          </div>
+        </article>
+        {% empty %}
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center dark:border-white/10 dark:bg-primary">
+          <span class="material-symbols-outlined text-3xl text-slate-300">history</span>
+          <p class="mt-2 text-sm font-bold text-slate-500 dark:text-slate-300">Belum ada riwayat pemeriksaan</p>
         </div>
-        <div class="relative h-[430px] w-full">
-          <canvas id="chartBBU" class="h-full w-full" aria-label="Grafik Berat Badan menurut Umur"></canvas>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary">
-        <div class="mb-4">
-          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Panjang/Tinggi Badan menurut Umur (PB/U atau TB/U)</h2>
-          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            PB/U digunakan sampai usia 24 bulan; setelah 24 bulan menggunakan TB/U.
-          </p>
-        </div>
-        <div class="relative h-[430px] w-full">
-          <canvas id="chartTBU" class="h-full w-full" aria-label="Grafik Panjang atau Tinggi Badan menurut Umur"></canvas>
-        </div>
+        {% endfor %}
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-primary xl:col-span-2">
-        <div class="mb-4">
-          <h2 class="font-extrabold text-slate-900 dark:text-white">Grafik Indeks Massa Tubuh menurut Umur (IMT/U)</h2>
-          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            IMT dihitung dari berat badan ÷ tinggi badan² dan dibandingkan dengan standar IMT/U 0–60 bulan.
-          </p>
-        </div>
-        <div class="relative h-[430px] w-full">
-          <canvas id="chartIMTU" class="h-full w-full" aria-label="Grafik Indeks Massa Tubuh menurut Umur"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-primary">
-      <div class="border-b border-slate-200 px-5 py-4 dark:border-white/10">
-        <h2 class="font-extrabold">Riwayat Pemeriksaan</h2>
-      </div>
-      <div class="overflow-x-auto">
+      <!-- Desktop table -->
+      <div class="hidden overflow-x-auto md:block">
         <table class="min-w-full text-sm">
           <thead class="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-background-dark/40 dark:text-slate-400">
             <tr>
@@ -112,10 +334,11 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
-      Grafik digunakan untuk memantau tren pertumbuhan. Penentuan status gizi tetap perlu memperhatikan seluruh indeks antropometri secara bersama-sama dan hasil pemeriksaan petugas kesehatan.
+    <div class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[11px] leading-5 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200 sm:text-xs">
+      <span class="material-symbols-outlined mt-0.5 shrink-0 text-[18px]">warning</span>
+      <p>Grafik digunakan untuk memantau tren pertumbuhan. Penentuan status gizi tetap perlu memperhatikan seluruh indeks antropometri secara bersama-sama dan hasil pemeriksaan petugas kesehatan.</p>
     </div>
   </div>
 </div>
@@ -203,8 +426,8 @@
 
     const parent = canvas.parentElement;
     const rect = parent.getBoundingClientRect();
-    const cssWidth = Math.max(320, Math.floor(rect.width));
-    const cssHeight = Math.max(360, Math.floor(rect.height));
+    const cssWidth = Math.max(220, Math.floor(parent.clientWidth || rect.width));
+    const cssHeight = Math.max(240, Math.floor(parent.clientHeight || rect.height));
     const dpr = Math.max(1, window.devicePixelRatio || 1);
 
     canvas.width = Math.round(cssWidth * dpr);
@@ -217,9 +440,12 @@
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
     const theme = getThemeColors();
-    const margin = { left: 68, right: 22, top: 18, bottom: 82 };
-    const plotW = cssWidth - margin.left - margin.right;
-    const plotH = cssHeight - margin.top - margin.bottom;
+    const isMobile = cssWidth < 520;
+    const margin = isMobile
+      ? { left: 44, right: 8, top: 10, bottom: 48 }
+      : { left: 62, right: 18, top: 14, bottom: 54 };
+    const plotW = Math.max(120, cssWidth - margin.left - margin.right);
+    const plotH = Math.max(120, cssHeight - margin.top - margin.bottom);
 
     const allY = [];
     curveKeys.forEach(([key]) => standardSeries(standard, key).forEach((p) => allY.push(p.y)));
@@ -249,13 +475,13 @@
 
     // Grid + sumbu X
     ctx.lineWidth = 1;
-    ctx.font = "11px sans-serif";
+    ctx.font = (isMobile ? "9px sans-serif" : "11px sans-serif");
     ctx.fillStyle = theme.text;
     ctx.strokeStyle = theme.grid;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
-    for (let month = 0; month <= 60; month += 6) {
+    for (let month = 0; month <= 60; month += (isMobile ? 12 : 6)) {
       const x = xToPx(month);
       ctx.beginPath();
       ctx.moveTo(x, margin.top);
@@ -291,8 +517,8 @@
     ctx.fillStyle = theme.text;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
-    ctx.font = "12px sans-serif";
-    ctx.fillText("Umur (bulan penuh)", margin.left + plotW / 2, cssHeight - 36);
+    ctx.font = (isMobile ? "10px sans-serif" : "12px sans-serif");
+    ctx.fillText("Umur (bulan penuh)", margin.left + plotW / 2, margin.top + plotH + 31);
 
     // Label sumbu Y
     ctx.save();
@@ -347,33 +573,7 @@
       });
     }
 
-    // Legend ringkas
-    const legendItems = [
-      ["-3 SD", "#b91c1c"], ["-2 SD", "#d97706"], ["-1 SD", "#64748b"],
-      ["Median", "#15803d"], ["+1 SD", "#64748b"], ["+2 SD", "#d97706"],
-      ["+3 SD", "#b91c1c"], [childLabel, childColor]
-    ];
-
-    const legendY = cssHeight - 15;
-    ctx.font = "10px sans-serif";
-    ctx.textBaseline = "middle";
-    let cursorX = margin.left;
-    legendItems.forEach(([label, color]) => {
-      const textW = ctx.measureText(label).width;
-      const itemW = 18 + textW + 14;
-      if (cursorX + itemW > cssWidth - margin.right) return;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = label === childLabel ? 3 : 1.5;
-      ctx.setLineDash(label === childLabel || label === "Median" ? [] : [4, 3]);
-      ctx.beginPath();
-      ctx.moveTo(cursorX, legendY);
-      ctx.lineTo(cursorX + 14, legendY);
-      ctx.stroke();
-      ctx.fillStyle = theme.text;
-      ctx.textAlign = "left";
-      ctx.fillText(label, cursorX + 18, legendY);
-      cursorX += itemW;
-    });
+    // Legend dipindahkan ke HTML di bawah canvas agar tidak pernah menimpa kartu berikutnya.
     ctx.setLineDash([]);
   }
 
@@ -405,6 +605,17 @@
     const found = points.find((p) => Number(p.bulan) === age && String(p.tanggal || "") === dateText);
     if (found && found.imt !== null && found.imt !== undefined) {
       cells[4].textContent = Number(found.imt).toFixed(2) + " kg/m²";
+    }
+  });
+
+  document.querySelectorAll("#riwayatMobile [data-mobile-bulan]").forEach((card) => {
+    const age = parseInt(card.dataset.mobileBulan || "", 10);
+    const dateText = String(card.dataset.mobileTanggal || "").trim();
+    const target = card.querySelector(".imt-mobile");
+    if (!target || !Number.isFinite(age)) return;
+    const found = points.find((p) => Number(p.bulan) === age && String(p.tanggal || "") === dateText);
+    if (found && found.imt !== null && found.imt !== undefined) {
+      target.textContent = Number(found.imt).toFixed(2) + " kg/m²";
     }
   });
 

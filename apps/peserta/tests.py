@@ -157,3 +157,57 @@ class KaderScopeRegressionTests(TestCase):
         self.client.force_login(user)
         response = self.client.get(reverse("peserta:list", args=["balita"]))
         self.assertContains(response, "Pos Tanpa Peserta")
+
+
+class PesertaExportRegressionTests(TestCase):
+    def setUp(self):
+        self.pos = make_posyandu("Pos Export Peserta")
+        self.user, _ = make_petugas(
+            username="kader-export-peserta",
+            level="kader",
+            posyandu=self.pos,
+        )
+        self.peserta = Peserta.objects.create(
+            posko=self.pos,
+            nama_peserta="Balita Export",
+            no_nik="3201010101010001",
+            nik_ibu="3201010101010002",
+            tgl_lahir=date.today() - relativedelta(years=2, months=4),
+            alamat="Alamat panjang untuk memastikan PDF tetap rapi dan dapat membungkus teks.",
+            no_hp="081234567890",
+            status_peserta="balita",
+            jenis_kelamin="Perempuan",
+            nama_ibu="Ibu Export",
+            nama_ayah="Ayah Export",
+        )
+        self.client.force_login(self.user)
+
+    def test_excel_peserta_dapat_diunduh_dan_valid(self):
+        from io import BytesIO
+        from openpyxl import load_workbook
+
+        response = self.client.get(reverse("peserta:export_excel", args=["balita"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("spreadsheetml", response["Content-Type"])
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertIn(".xlsx", response["Content-Disposition"])
+
+        workbook = load_workbook(BytesIO(response.content))
+        sheet = workbook.active
+        self.assertEqual(sheet["A1"].value, "LAPORAN DATA BALITA")
+        self.assertEqual(sheet["B5"].value, "Balita Export")
+        self.assertEqual(sheet["C5"].value, "3201010101010001")
+
+    def test_pdf_peserta_dapat_diunduh(self):
+        response = self.client.get(reverse("peserta:cetak_pdf", args=["balita"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertTrue(response.content.startswith(b"%PDF"))
+
+    def test_toolbar_mobile_memiliki_tombol_unduh_excel_dan_pdf(self):
+        response = self.client.get(reverse("peserta:list", args=["balita"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Unduh Excel")
+        self.assertContains(response, "Unduh PDF")
+        self.assertContains(response, "download")

@@ -184,12 +184,13 @@ Pemeriksaan {{ status_peserta }}
 
 
                         <!-- EXPORT -->
-                        <div class="grid grid-cols-2 gap-2 sm:inline-flex sm:flex-nowrap sm:items-center">
+                        <div class="export-inline-group grid grid-cols-2 gap-2 sm:inline-flex sm:flex-nowrap sm:items-center">
 
                             <!-- PDF -->
-                            <button
-                                type="button"
-                                title="Export PDF"
+                            <a
+                                href="{% url 'pemeriksaan:export_jadwal_pdf' status_peserta %}?status={{ status_filter }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}"
+                                download
+                                title="Unduh PDF"
                                 class="
                                     flex h-11 items-center justify-center gap-2
                                     rounded-lg
@@ -221,16 +222,17 @@ Pemeriksaan {{ status_peserta }}
                                 </span>
 
                                 <span class="sm:hidden">
-                                    PDF
+                                    Unduh PDF
                                 </span>
 
-                            </button>
+                            </a>
 
 
                             <!-- EXCEL -->
-                            <button
-                                type="button"
-                                title="Export Excel"
+                            <a
+                                href="{% url 'pemeriksaan:export_jadwal_excel' status_peserta %}?status={{ status_filter }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}"
+                                download
+                                title="Unduh Excel"
                                 class="
                                     flex h-11 items-center justify-center gap-2
                                     rounded-lg
@@ -262,10 +264,10 @@ Pemeriksaan {{ status_peserta }}
                                 </span>
 
                                 <span class="sm:hidden">
-                                    Excel
+                                    Unduh Excel
                                 </span>
 
-                            </button>
+                            </a>
 
                         </div>
 

@@ -26,7 +26,7 @@ def master_excel_response(*, title: str, headers: list[str], rows: list[list], f
     """Buat file XLSX rapi untuk master data."""
     wb = Workbook()
     ws = wb.active
-    ws.title = "Master Data"
+    ws.title = "Data Ekspor"
 
     total_columns = max(len(headers), 1)
     end_column = get_column_letter(total_columns)

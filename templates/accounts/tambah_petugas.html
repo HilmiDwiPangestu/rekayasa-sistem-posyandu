@@ -39,14 +39,6 @@
             <form method="POST" class="p-6">
                 {% csrf_token %}
 
-                {% if form.errors %}
-                <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/30">
-                    <p class="text-xs font-semibold text-red-600 dark:text-red-400">
-                        Terdapat kesalahan pada data yang diinput. Silakan periksa kembali form berikut.
-                    </p>
-                </div>
-                {% endif %}
-
                 <!-- Section -->
                 <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800 rounded-2xl p-5">
 
@@ -57,7 +49,7 @@
                     <!-- Nama -->
                     <div class="mb-5">
                         <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                            Nama Lengkap
+                            Nama Lengkap <span class="text-rose-500">*</span>
                         </label>
 
                         {{ form.nama }}
@@ -94,7 +86,7 @@
                                 {% endif %}
                             {% else %}
                                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                                    Penempatan Posyandu
+                                    Penempatan Posyandu <span class="text-rose-500">*</span>
                                 </label>
                                 {{ form.posyandu }}
                                 {% if form.posyandu.errors %}
@@ -106,7 +98,7 @@
                         <!-- Telepon -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                                Nomor Telepon
+                                Nomor Telepon <span class="font-medium text-slate-400">(Opsional)</span>
                             </label>
 
                             {{ form.no_telp }}
@@ -123,7 +115,7 @@
                     <!-- Alamat -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                            Alamat Lengkap
+                            Alamat Lengkap <span class="font-medium text-slate-400">(Opsional)</span>
                         </label>
 
                         {{ form.alamat }}

@@ -66,3 +66,43 @@ class WHODailyReferenceCalculationTests(TestCase):
         self.assertEqual(hasil["kode"], "stunting")
         self.assertEqual(hasil["kategori"], "Pendek")
         self.assertTrue(hasil["stunting"])
+
+    def test_berdiri_di_bawah_24_bulan_dikoreksi_tambah_07_cm(self):
+        from apps.deteksi.services.who_services import hitung_status_antropometri
+
+        WHOStandardPBU.objects.create(
+            gender="L", day=575, month=None, l_value=1.0, m_value=83.136,
+            s_value=0.03306, sd=83.136 * 0.03306,
+            sd4neg=72.142, sd3neg=74.891, sd2neg=77.639, sd1neg=80.388,
+            sd0=83.136, sd1=85.884, sd2=88.633, sd3=91.381, sd4=94.130,
+            source="WHO LFA expanded daily",
+        )
+
+        hasil = hitung_status_antropometri(
+            umur_hari=575,
+            jk="Laki-Laki",
+            tinggi_badan=100.0,
+            jenis_pengukuran="tinggi",
+        )
+        self.assertAlmostEqual(hasil["z_score"], 6.3905, places=4)
+
+    def test_terlentang_mulai_24_bulan_dikoreksi_kurang_07_cm(self):
+        from apps.deteksi.services.who_services import hitung_status_antropometri
+
+        WHOStandardPBU.objects.create(
+            gender="L", day=731, month=None, l_value=1.0, m_value=87.1303,
+            s_value=0.03508, sd=87.1303 * 0.03508,
+            sd4neg=74.904, sd3neg=77.961, sd2neg=81.017, sd1neg=84.074,
+            sd0=87.130, sd1=90.187, sd2=93.243, sd3=96.300, sd4=99.356,
+            source="WHO LFA expanded daily",
+        )
+
+        hasil = hitung_status_antropometri(
+            umur_hari=731,
+            jk="Laki-Laki",
+            tinggi_badan=88.0,
+            jenis_pengukuran="panjang",
+        )
+        # 88.0 cm terlentang -> 87.3 cm tinggi untuk referensi >=24 bulan.
+        expected = ((87.3 / 87.1303) - 1.0) / 0.03508
+        self.assertAlmostEqual(hasil["z_score"], expected, places=4)

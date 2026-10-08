@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from common.decorators import admin_required
+from common.validation import add_validation_error
 
 from .models import Petugas
 from apps.posyandu.models import (Posyandu, PenugasanPetugas)
@@ -176,6 +178,12 @@ def update_settings(request):
     if User.objects.exclude(pk=user.pk).filter(username=username).exists():
         messages.error(request, "Username sudah digunakan oleh akun lain.")
         return redirect("accounts:setting")
+    if no_telp:
+        normalized_phone = no_telp.replace(" ", "").replace("-", "")
+        if not re.fullmatch(r"\+?\d{8,15}", normalized_phone):
+            messages.error(request, "Nomor telepon harus berupa 8–15 digit dan boleh diawali tanda +.")
+            return redirect("accounts:setting")
+        no_telp = normalized_phone
 
     if password_baru:
         if password_baru != konfirmasi_password:
@@ -244,7 +252,11 @@ def tambah_petugas(request, level_petugas):
                         else:
                             ensure_single_assignment(petugas, petugas.posyandu)
                 except BidanCoverageError as error:
-                    form.add_error("cakupan_posyandu", str(error))
+                    target = "cakupan_posyandu" if "cakupan_posyandu" in form.fields else "posyandu"
+                    form.add_error(target, str(error))
+                except ValidationError as error:
+                    fallback = "cakupan_posyandu" if level_petugas == "bidan" else "posyandu"
+                    add_validation_error(form, error, fallback_field=fallback)
                 else:
                     messages.success(
                         request,

@@ -24,10 +24,10 @@ from common.access import report_posyandu_ids
 from apps.posyandu.models import JadwalKegiatan, Posyandu
 from apps.peserta.models import Peserta
 from apps.pemeriksaan.models import Imunisasi, PemeriksaanBalita, PemeriksaanBumil
+from apps.pemeriksaan.services import build_kms_payload
 from apps.pemeriksaan.helper.constant import JADWAL_VAKSIN_BALITA
 
 from .helper.utils import build_context_laporan_triwulan, _ambil_parameter
-from .helper.kms_standards import bbu_series, pbu_tbu_series, imtu_series
 
 
 # =============================================
@@ -538,43 +538,9 @@ def laporan_kms(request, id_peserta):
         .order_by("usia_bulan", "tgl_pemeriksaan")
     )
 
-    gender_text = str(peserta.jenis_kelamin or "").strip().lower()
-    gender_code = "P" if gender_text.startswith("p") else "L"
-
-    # Data pemeriksaan dipertahankan berdasarkan usia bulan penuh yang sudah
-    # disimpan pada PemeriksaanBalita. Titik di luar 0-60 bulan tidak diplot
-    # karena KMS balita mengacu pada standar antropometri 0-60 bulan.
-    titik = []
-    for row in riwayat:
-        if row.usia_bulan is None or not (0 <= row.usia_bulan <= 60):
-            continue
-        imt = None
-        if (
-            row.berat_badan is not None
-            and row.tinggi_badan is not None
-            and float(row.berat_badan) > 0
-            and float(row.tinggi_badan) > 0
-        ):
-            tinggi_meter = float(row.tinggi_badan) / 100.0
-            imt = round(float(row.berat_badan) / (tinggi_meter ** 2), 2)
-
-        titik.append({
-            "bulan": int(row.usia_bulan),
-            "berat": row.berat_badan,
-            "tinggi": row.tinggi_badan,
-            "imt": imt,
-            "tanggal": row.tgl_pemeriksaan.strftime("%d-%m-%Y"),
-            "z_score": row.z_score,
-            "status": row.get_status_gizi_display() if row.status_gizi else "-",
-        })
-
-    chart_data = {
-        "gender": gender_code,
-        "points": titik,
-        "bbu": bbu_series(gender_code),
-        "pbu_tbu": pbu_tbu_series(gender_code),
-        "imtu": imtu_series(gender_code),
-    }
+    # Gunakan satu service KMS untuk halaman pemeriksaan dan laporan agar
+    # titik PB/TB serta IMT selalu konsisten dengan koreksi antropometri WHO.
+    chart_data = build_kms_payload(peserta)
 
     pemeriksaan_terakhir = riwayat[-1] if riwayat else None
 

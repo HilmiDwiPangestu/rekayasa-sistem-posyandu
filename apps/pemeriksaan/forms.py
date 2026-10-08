@@ -1,5 +1,6 @@
 from django import forms
 
+from common.forms import IndonesianValidationMixin
 from .models import (
     PemeriksaanBalita,
     PemeriksaanBumil,
@@ -9,7 +10,7 @@ from .models import (
 # =========================================================
 # PEMERIKSAAN IBU HAMIL
 # =========================================================
-class PemeriksaanBumilForm(forms.ModelForm):
+class PemeriksaanBumilForm(IndonesianValidationMixin, forms.ModelForm):
 
     def __init__(self, *args, jadwal=None, **kwargs):
         # ``jadwal`` tetap diterima agar kompatibel dengan view, tetapi Bidan
@@ -111,7 +112,7 @@ class PemeriksaanBumilForm(forms.ModelForm):
 # =========================================================
 # PEMERIKSAAN BALITA
 # =========================================================
-class PemeriksaanBalitaForm(forms.ModelForm):
+class PemeriksaanBalitaForm(IndonesianValidationMixin, forms.ModelForm):
 
     # =====================================================
     # VITAMIN A
@@ -223,6 +224,13 @@ class PemeriksaanBalitaForm(forms.ModelForm):
                     }
                 ),
 
+            "jenis_pengukuran":
+                forms.Select(
+                    attrs={
+                        "class": "form-select",
+                    }
+                ),
+
             "lila_balita":
                 forms.NumberInput(
                     attrs={
@@ -277,20 +285,43 @@ class PemeriksaanBalitaForm(forms.ModelForm):
         self.peserta = peserta
         self.jadwal = jadwal
 
-        # Label pengukuran mengikuti referensi WHO daily: sebelum Day 731
-        # menggunakan panjang badan terlentang, mulai Day 731 menggunakan
-        # tinggi badan berdiri. Nilai ini hanya memandu Kader; lookup WHO
-        # tetap ditentukan backend dari tanggal lahir dan tanggal pelayanan.
+        # WHO membedakan panjang badan terlentang dan tinggi badan berdiri.
+        # Posisi pengukuran harus disimpan karena WHO melakukan koreksi 0,7 cm
+        # bila metode yang digunakan tidak sesuai kelompok usia (<731 / >=731 hari).
+        if "jenis_pengukuran" in self.fields:
+            self.fields["jenis_pengukuran"].label = "Posisi Pengukuran"
+            self.fields["jenis_pengukuran"].help_text = (
+                "Pilih sesuai posisi saat anak benar-benar diukur agar perhitungan "
+                "Z-score WHO tidak berbeda karena koreksi panjang/tinggi 0,7 cm."
+            )
+
         if peserta is not None and jadwal is not None and getattr(peserta, "tgl_lahir", None):
             umur_hari = (jadwal.tgl_kegiatan - peserta.tgl_lahir).days
+            rekomendasi_jenis = "panjang" if umur_hari < 731 else "tinggi"
+
+            # Pada input baru, pilih otomatis metode standar sesuai umur. Saat edit,
+            # nilai yang sudah tersimpan tetap dipertahankan. Pada POST, pilihan
+            # pengguna tidak ditimpa.
+            if (
+                not self.is_bound
+                and not (self.instance.pk and getattr(self.instance, "jenis_pengukuran", None))
+            ):
+                self.fields["jenis_pengukuran"].initial = rekomendasi_jenis
+
             if umur_hari < 731:
-                self.fields["tinggi_badan"].label = "Panjang Badan (terlentang)"
-                self.fields["tinggi_badan"].widget.attrs["placeholder"] = "Panjang badan terlentang"
-                self.fields["tinggi_badan"].help_text = "Ukur panjang badan dalam posisi terlentang."
+                self.fields["tinggi_badan"].label = "Panjang / Tinggi Badan"
+                self.fields["tinggi_badan"].widget.attrs["placeholder"] = "Panjang atau tinggi badan"
+                self.fields["tinggi_badan"].help_text = (
+                    "Standar WHO usia <24 bulan menggunakan panjang badan terlentang. "
+                    "Jika anak diukur berdiri, sistem otomatis menambahkan 0,7 cm untuk perhitungan Z-score."
+                )
             else:
-                self.fields["tinggi_badan"].label = "Tinggi Badan (berdiri)"
-                self.fields["tinggi_badan"].widget.attrs["placeholder"] = "Tinggi badan berdiri"
-                self.fields["tinggi_badan"].help_text = "Ukur tinggi badan dalam posisi berdiri."
+                self.fields["tinggi_badan"].label = "Panjang / Tinggi Badan"
+                self.fields["tinggi_badan"].widget.attrs["placeholder"] = "Tinggi atau panjang badan"
+                self.fields["tinggi_badan"].help_text = (
+                    "Standar WHO usia >=24 bulan menggunakan tinggi badan berdiri. "
+                    "Jika anak diukur terlentang, sistem otomatis mengurangi 0,7 cm untuk perhitungan Z-score."
+                )
 
         self.pelayanan_status = None
 

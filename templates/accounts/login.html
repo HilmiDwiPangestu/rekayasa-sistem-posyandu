@@ -2,16 +2,17 @@
 {% load tailwind_tags %}
 
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="id">
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <title>Login - Rekayasa Integrasi Sistem Posyandu</title>
 
         {% tailwind_css %}
-        <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}">
+        <link rel="stylesheet" href="{% static 'css/responsive-overrides.css' %}?v=20261008-validation-2">
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script defer src="{% static 'js/form-ux.js' %}?v=20261008-validation-2"></script>
         <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
         
@@ -56,7 +57,7 @@
                         <div class="relative">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg select-none">person</span>
                             <input class="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-slate-900 dark:text-white" 
-                                   id="username" name="username" placeholder="Masukkan Nomor HP / Username" required type="text" />
+                                   id="username" name="username" placeholder="Masukkan username" required type="text" />
                         </div>
                     </div>
 

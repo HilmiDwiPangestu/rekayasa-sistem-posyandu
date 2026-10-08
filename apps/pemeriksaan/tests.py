@@ -200,6 +200,7 @@ class PemeriksaanServiceTests(TestCase):
             jadwal=self.jadwal,
             berat_badan=8.5,
             tinggi_badan=72.0,
+            jenis_pengukuran="panjang",
             z_score=-2.5,
             status_gizi="stunting",
             hsl_prediksi="Stunting",
@@ -279,11 +280,30 @@ class PemeriksaanModelValidationTests(TestCase):
             jadwal=self.jadwal,
             berat_badan=8.0,
             tinggi_badan=70.0,
+            jenis_pengukuran="panjang",
         )
         self.assertIsNotNone(obj.usia_bulan)
         self.assertGreaterEqual(obj.usia_bulan, 0)
         self.assertIsNotNone(obj.usia_hari)
         self.assertGreaterEqual(obj.usia_hari, 0)
+
+    def test_kms_memakai_koreksi_posisi_yang_sama_dengan_who(self):
+        from apps.pemeriksaan.models import PemeriksaanBalita
+        from apps.pemeriksaan.services import build_kms_payload
+
+        PemeriksaanBalita.objects.create(
+            peserta=self.balita,
+            petugas=self.petugas,
+            jadwal=self.jadwal,
+            berat_badan=8.0,
+            tinggi_badan=70.0,
+            jenis_pengukuran="tinggi",
+        )
+
+        payload = build_kms_payload(self.balita)
+        self.assertEqual(len(payload["points"]), 1)
+        self.assertAlmostEqual(payload["points"][0]["tinggi_input"], 70.0, places=2)
+        self.assertAlmostEqual(payload["points"][0]["tinggi"], 70.7, places=2)
 
     def test_pemeriksaan_bumil_menolak_peserta_balita(self):
         from apps.pemeriksaan.models import PemeriksaanBumil
@@ -354,6 +374,16 @@ class PemeriksaanJadwalUiRegressionTests(TestCase):
         self.assertNotIn("openActionModal", template)
         self.assertIn("Cek Peserta", template)
 
+    def test_mobile_pemeriksaan_memiliki_url_edit(self):
+        from pathlib import Path
+        from django.conf import settings
+
+        template = (
+            Path(settings.BASE_DIR) / "templates" / "pemeriksaan" / "list_peserta.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("data-action-edit-url=", template)
+        self.assertIn("pemeriksaan:edit_pemeriksaan", template)
+
 
 class KaderOnlyOperationalRegressionTests(TestCase):
     def setUp(self):
@@ -389,3 +419,46 @@ class KaderOnlyOperationalRegressionTests(TestCase):
             args=["balita", self.jadwal.pk, self.peserta.pk],
         ))
         self.assertEqual(response.status_code, 200)
+
+
+class PemeriksaanJadwalExportRegressionTests(TestCase):
+    def setUp(self):
+        self.pos = Posyandu.objects.create(nama="Pos Export Jadwal", desa="Desa Uji")
+        self.user = User.objects.create_user("kader-export-jadwal", password="aman-12345")
+        Petugas.objects.create(
+            user=self.user,
+            nama="Kader Export Jadwal",
+            level="kader",
+            posyandu=self.pos,
+        )
+        self.jadwal = JadwalKegiatan.objects.create(
+            tgl_kegiatan=date.today() + timedelta(days=2),
+            jam_mulai=time(8),
+            jam_selesai=time(10),
+            jns_kegiatan="Pemeriksaan Rutin",
+            posyandu=self.pos,
+        )
+        self.client.force_login(self.user)
+
+    def test_tombol_export_jadwal_bukan_tombol_mati(self):
+        response = self.client.get(reverse("pemeriksaan:list", args=["balita"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("pemeriksaan:export_jadwal_excel", args=["balita"]))
+        self.assertContains(response, reverse("pemeriksaan:export_jadwal_pdf", args=["balita"]))
+
+    def test_export_jadwal_excel_dan_pdf(self):
+        excel = self.client.get(
+            reverse("pemeriksaan:export_jadwal_excel", args=["balita"]),
+            {"status": "mendatang"},
+        )
+        self.assertEqual(excel.status_code, 200)
+        self.assertIn("spreadsheetml", excel["Content-Type"])
+        self.assertIn("attachment", excel["Content-Disposition"])
+
+        pdf = self.client.get(
+            reverse("pemeriksaan:export_jadwal_pdf", args=["balita"]),
+            {"status": "mendatang"},
+        )
+        self.assertEqual(pdf.status_code, 200)
+        self.assertEqual(pdf["Content-Type"], "application/pdf")
+        self.assertTrue(pdf.content.startswith(b"%PDF"))
